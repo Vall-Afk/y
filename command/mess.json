@@ -5,9 +5,9 @@
         "api": "Maaf terjadi kesalahan"
     },
     "OnlyGrup": "Perintah ini hanya bisa digunakan di grup",
-    "OnlyPM": "Perintah ini hanya bisa digunakan di private message",
+    "OnlyPM": "Perintah ini hanya bisa digunakan di chat pribadi",
     "GrupAdmin": "Perintah ini hanya bisa digunakan oleh Admin Grup",
-    "BotAdmin": "Bot Harus menjadi admin",
+    "BotAdmin": "Bot Harus menjadi admin terlebih dahulu!",
     "OnlyOwner": "Perintah ini hanya dapat digunakan oleh owner bot",
     "OnlyPrem": "Perintah ini khusus member premium"
 }
