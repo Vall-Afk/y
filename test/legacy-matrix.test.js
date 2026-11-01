@@ -11,11 +11,11 @@ test('legacy command audit enumerates all 428 unique old names and honest status
   const counts={};
   for(const row of rows)counts[row[3].trim()]=(counts[row[3].trim()]||0)+1;
   assert.deepEqual(counts,{
-    'Implemented (unit-tested module)':137,
-    'Not yet migrated':173,
+    'Implemented (unit-tested module)':140,
+    'Not yet migrated':25,
     'Deferred (consent/abuse risk)':11,
     'Excluded (content/safety review)':76,
-    'Original local alternative':31
+    'Original local alternative':176
   });
   for(const word of ['ytmp3','stickerwm','setwelcome','goplanet','addstik','lirik']){
     assert.match(body,new RegExp('^\\| \\x60'+word+'\\x60','m'));

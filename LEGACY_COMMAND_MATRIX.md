@@ -6,11 +6,11 @@ This is an audit of **428 distinct advertised legacy keywords**, not proof that 
 
 | Status | Count |
 |---|---:|
-| Implemented (unit-tested module) | 137 |
-| Not yet migrated | 173 |
+| Implemented (unit-tested module) | 140 |
+| Not yet migrated | 25 |
 | Deferred (consent/abuse risk) | 11 |
 | Excluded (content/safety review) | 76 |
-| Original local alternative | 31 |
+| Original local alternative | 176 |
 
 Commands with remote-provider behavior, fake/spoofing, adult material or unavailable secrets remain deliberately pending or disabled. **Do not claim 428/428 feature parity.**
 
@@ -138,8 +138,8 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `revoke` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `hidetag` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `checksewa` | GROUP MENU | Implemented (unit-tested module) | src/features/rental.js |
-| `tictactoe` | GAME MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `delttt` | GAME MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `tictactoe` | GAME MENU | Implemented (unit-tested module) | src/features/games.js |
+| `delttt` | GAME MENU | Implemented (unit-tested module) | src/features/games.js |
 | `casino` | GAME MENU | Deferred (consent/abuse risk) | Not enabled |
 | `delcasino` | GAME MENU | Deferred (consent/abuse risk) | Not enabled |
 | `lirik` | SEARCH MENU | Implemented (unit-tested module) | src/features/network.js |
@@ -169,7 +169,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `nowa` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
 | `getquoted` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
 | `fakehidetag` | BAILEYS | Deferred (consent/abuse risk) | Not enabled |
-| `react` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
+| `react` | BAILEYS | Implemented (unit-tested module) | src/commands.js (quoted-message reaction) |
 | `setcmd` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
 | `delcmd` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
 | `autoread` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
@@ -270,180 +270,180 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `zettai` | NSFW MENU | Excluded (content/safety review) | Not enabled |
 | `halloween2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `horror` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `game8bit` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `layered` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `game8bit` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `layered` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `glitch2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `coolg` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `coolwg` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `realistic` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `coolg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `coolwg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `realistic` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `space3d` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `gtiktok` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `stone` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `marvel` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `marvel2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `pornhub` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `avengers` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `gtiktok` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `stone` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `marvel` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `marvel2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `pornhub` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `avengers` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `metalr` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `metalg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `metalg2` | TEXTPRO MENU | Not yet migrated | Not among implemented local SVG effect aliases |
-| `lion` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `wolf_bw` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `wolf_g` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `ninja` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `metalg2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `lion` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `wolf_bw` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `wolf_g` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `ninja` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `3dsteel` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `horror2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `lava` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `bagel` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `blackpink` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `bagel` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `blackpink` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `rainbow2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `water_pipe` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `water_pipe` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `halloween` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `sketch` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `sircuit` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `discovery` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metallic2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `fiction` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `demon` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `transformer` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `berry` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `sircuit` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `discovery` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metallic2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `fiction` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `demon` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `transformer` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `berry` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `thunder` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `magma` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `3dstone` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `neon` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `glitch` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `harry_potter` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `embossed` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `broken` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `papercut` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `gradient` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glossy` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `harry_potter` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `embossed` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `broken` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `papercut` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `gradient` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glossy` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `watercolor` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `multicolor` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `neon_devil` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `underwater` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `bear` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `wonderfulg` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `multicolor` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `neon_devil` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `underwater` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `bear` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `wonderfulg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `christmas` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `neon_light` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `snow` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `cloudsky` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `luxury2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `gradient2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `summer` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `luxury2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `gradient2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `summer` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `writing` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `engraved` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `summery` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `3dglue` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metaldark` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `neonlight` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `oscar` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `minion` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `holographic` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `engraved` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `summery` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `3dglue` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metaldark` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `neonlight` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `oscar` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `minion` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `holographic` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `purple` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `glossyb` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `deluxe2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glossyc` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `fabric` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `neonc` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `newyear` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `newyear2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `glossyb` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `deluxe2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glossyc` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `fabric` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `neonc` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `newyear` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `newyear2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `metals` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `xmas` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `blood` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `darkg` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `joker` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `wicker` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `blood` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `darkg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `joker` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `wicker` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `natural` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `firework` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `skeleton` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon3` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon4` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon5` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon6` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `balloon7` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `steel` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `gloss` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `denim` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `decorate` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `decorate2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `peridot` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `rock` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass3` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass4` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass5` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass6` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass7` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glass8` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `captain_as2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `robot` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `equalizer` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `toxic` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling3` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling4` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling5` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling6` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `sparkling7` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `decorative` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `chocolate` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `strawberry` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `koifish` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `bread` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `firework` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `skeleton` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon3` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon4` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon5` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon6` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `balloon7` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `steel` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `gloss` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `denim` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `decorate` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `decorate2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `peridot` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `rock` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass3` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass4` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass5` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass6` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass7` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glass8` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `captain_as2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `robot` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `equalizer` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `toxic` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling3` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling4` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling5` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling6` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `sparkling7` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `decorative` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `chocolate` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `strawberry` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `koifish` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `bread` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `matrix` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `blood2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `neonligth2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `thunder2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `3dbox` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `neon2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `roadw` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `bokeh` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `blood2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `neonligth2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `thunder2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `3dbox` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `neon2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `roadw` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `bokeh` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `gneon` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `advanced` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `dropwater` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `wall` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `chrismast` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `honey` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `drug` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `marble` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `marble2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `advanced` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `dropwater` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `wall` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `chrismast` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `honey` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `drug` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `marble` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `marble2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `ice` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `juice` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `rusty` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `abstra` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `biscuit` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `juice` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `rusty` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `abstra` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `biscuit` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 | `wood` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `scifi` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `purpleg` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `shiny` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry3` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry4` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry5` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry6` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry7` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `jewelry8` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metalh` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `golden` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter3` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter4` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter5` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter6` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `glitter7` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metale` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `carbon` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `candy` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metalb` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `gemb` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `3dchrome` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `metalb2` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `scifi` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `purpleg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `shiny` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry3` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry4` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry5` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry6` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry7` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `jewelry8` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metalh` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `golden` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter3` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter4` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter5` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter6` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `glitter7` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metale` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `carbon` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `candy` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metalb` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `gemb` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `3dchrome` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
+| `metalb2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (procedural original, not TextPro) |
 
 ## Interpretation
 

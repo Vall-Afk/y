@@ -110,4 +110,4 @@ Additional legacy aliases: `changewelcome`, `changeleft`, `dashboard` (main owne
 
 ## Current migration accounting
 
-Audit of the legacy help menu: **137 readable handler keywords, 31 original local visual alternatives, 175 not migrated, 11 privacy/abuse deferred, 76 content/safety excluded**. Total **428 distinct advertised legacy keywords**. This is a phased project, not complete old feature parity. Details and source locations: [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md).
+Audit of the legacy help menu: **140 readable handler keywords, 31 original local visual alternatives, 175 not migrated, 11 privacy/abuse deferred, 76 content/safety excluded**. Total **428 distinct advertised legacy keywords**. This is a phased project, not complete old feature parity. Details and source locations: [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md).
