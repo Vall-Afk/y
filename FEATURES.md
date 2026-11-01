@@ -89,3 +89,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Opt-in anonymous chat
 
 `anonymous`, `start`, `next`, `stop`, `sendprofile`: two-party opt-in text-only pairing, input cap and rate limit, no saved chat messages, 30-minute idle expiry, mutual consent before sharing contact details. Legacy `menfess` (unsolicited direct messages) remains excluded pending anti-abuse review.
+
+## Original text effects, locally generated
+
+`textfx`, `neon`, `rainbow`, `glitch`, `halloween`, `horror`, `ice`, `fire`, `matrix`, `snow`, `wood`, `metallic`, `space`, `watercolor`, `christmas`, and selected legacy style aliases use original SVG+Sharp templates. They are not identical to proprietary TextPro renders.

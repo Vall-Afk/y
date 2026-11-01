@@ -39,6 +39,13 @@ const SECTIONS = Object.freeze([
     commands: ['anonymous', 'start', 'next', 'stop', 'sendprofile (both consent)']
   },
   {
+    id: 'textfx', icon: '✧', idTitle: 'EFEK TEKS', enTitle: 'TEXT EFFECTS',
+    commands: ['textfx neon Beauté', 'neon <teks>', 'glitch <teks>', 'rainbow <teks>',
+      'halloween <teks>', 'ice <teks>', 'fire <teks>', 'matrix <teks>',
+      'snow <teks>', 'wood <teks>', 'metallic <teks>', 'space <teks>',
+      'watercolor <teks>', 'christmas <teks>']
+  },
+  {
     id: 'game', icon: '♜', idTitle: 'GAME', enTitle: 'GAMES',
     commands: ['tictactoe @user', 'tttmove 1-9', 'delttt', 'tebakangka', 'jawab <angka>', 'nyerah']
   },
@@ -70,6 +77,7 @@ const ALIASES = Object.freeze({
   menugroup: 'group', menugrup: 'group',
   menustore: 'store', menutoko: 'store', menumedia: 'media',
   menuchat: 'anonymous', menuanonymous: 'anonymous',
+  menutextpro: 'textfx', menutextfx: 'textfx',
   menutools: 'tools', menugame: 'game', menurpg: 'rpg',
   menuekonomi: 'economy', menudownload: 'search',
   menupremium: 'premium', menuowner: 'owner',

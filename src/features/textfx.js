@@ -43,7 +43,8 @@ function effectSvg(theme,text){
   if(typeof text!=='string'||!text.trim()||[...text].length>85)
     throw new Error('Text must be 1–85 characters.');
   const lines=splitText(text.trim(),85);
-  const size=Math.max(56,Math.min(115,650/Math.max(1,...lines.map(s=>[...s].length))));
+  const widest=Math.max(1,...lines.map(s=>[...s].length));
+  const size=Math.max(30,Math.min(108,850/(widest*0.65),345/lines.length));
   const start=256-(lines.length-1)*size*0.54;
   const tspan=lines.map((line,i)=>'<text x="512" y="'+(start+i*size*1.13)+
     '" font-size="'+size+'" font-weight="900" text-anchor="middle" '+

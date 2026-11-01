@@ -259,3 +259,7 @@ New keyword commands: `translate en Halo dunia` / `translate id Hello` (MyMemory
 ### Anonymous text-only chats (opt-in, privacy-first)
 
 Send `anonymous` to read privacy rules, then `start` in the **private chat** to join a partner queue. When another consenting user joins, text messages (maximum 1,000 characters) are relayed without revealing a contact number. Use `next` to change partners or `stop` to end a session; there is a rate limit and a 30-minute inactivity expiry. **Only text** is forwarded, never media or hidden message metadata. `sendprofile` exchanges WhatsApp links **only after both partners explicitly approve**; do not use it if you do not want to disclose your number. The pairing queue is in memory only and is cleared on restart. Anonymous chats are isolated between main bot and Jadibot. Bullying and unsolicited messages are not permitted; partners can immediately end a chat.
+
+### Local TextPro-style visual effects
+
+`textfx neon Beauté`, `neon Beauté`, `glitch Beauté`, `rainbow Beauté`, `halloween Beauté`, `ice`, `fire`, `matrix`, `snow`, `wood`, `metallic`, `space`, `watercolor`, `christmas` and several legacy aliases now render distinctive original PNG designs locally with Sharp. `menutextpro` lists the main effects. The effects are **original local alternatives**, **not pixel-identical copies** of remote TextPro services or their copyrighted templates. Text is escaped and limited to 85 characters.
