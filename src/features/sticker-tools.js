@@ -76,4 +76,4 @@ async function memeSticker(sock, message, args, logger, download = downloadMedia
   if (result.length > 800 * 1024) throw new Error('Stiker terlalu besar.');
   return result;
 }
-module.exports = { textSticker, memeSticker, xmlSafe, splitText };
+module.exports = { textSticker, memeSticker, xmlSafe, splitText, svgTtp };

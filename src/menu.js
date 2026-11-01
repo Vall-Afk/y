@@ -8,7 +8,7 @@ const SECTIONS = Object.freeze([
   {
     id: 'tools', icon: '⚙', idTitle: 'TOOLS', enTitle: 'TOOLS',
     commands: ['calc 10+5*2', 'tambah 10 5', 'kurang 10 5', 'kali 10 5', 'bagi 10 5',
-      'say <teks>', 'reverse <teks>', 'count <teks>', 'pilih a | b', 'roll [max]',
+      'jeda 2', 'nowa 628xxx', 'getquoted', 'say <teks>', 'reverse <teks>', 'count <teks>', 'pilih a | b', 'roll [max]',
       'coin', 'password [8-64]', 'waktu', 'runtime']
   },
   {
@@ -74,6 +74,7 @@ const SECTIONS = Object.freeze([
     id: 'search', icon: '⌕', idTitle: 'INTERNET', enTitle: 'INTERNET',
     commands: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>',
       'translate en <teks>', 'lirik <judul>', 'ytsearch <judul>', 'play <judul>',
+      'pinterest <keyword>', 'grupwa <keyword>', 'mediafire <URL>', 'searchbyimage (reply image)',
       'ytmp3 <YouTube URL>', 'ytmp4 <YouTube URL>',
       'tiktok <TikTok URL>', 'tiktokaudio <TikTok URL>',
       'instagram <Instagram URL>']
