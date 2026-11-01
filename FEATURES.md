@@ -81,3 +81,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Owner-only backup
 
 `backup` / `backupbot` sends a bounded JSON export of known settings, economy, catalog, moderation and rental data in a private chat with the main owner. It excludes every authentication folder, QR/pairing codes, .env, and all tokens. This is **an export only**, not an in-chat restore feature. Handle the exported user data privately.
+
+## Search / translation
+
+`translate`, `terjemah` (MyMemory ID↔EN; opted-in text submitted to an external service), `lirik`, `lyrics` (LRCLIB source links only), `ytsearch`, `play` (official YouTube Data API metadata; requires YOUTUBE_API_KEY) are added. These are not TikTok/Instagram/YouTube downloaders.

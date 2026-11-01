@@ -53,7 +53,8 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'search', icon: '⌕', idTitle: 'INTERNET', enTitle: 'INTERNET',
-    commands: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>']
+    commands: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>',
+      'translate en <teks>', 'lirik <judul>', 'ytsearch <judul>', 'play <judul>']
   }
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);

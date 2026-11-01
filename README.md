@@ -251,3 +251,7 @@ Manual rental registry: `addsewa <group-id@g.us> 30`, `delsewa <group-id@g.us>`,
 ### Backup data via main owner DM
 
 From the **main owner account**, send `backup` in a **private chat** to Beauté. The bot sends a JSON document containing active settings, economy/RPG, group catalog, group moderation, and rental settings (also isolated non-auth Jadibot config). **Excluded:** every WhatsApp auth/session folder, `.env`, API keys and tokens. This document can contain private account numbers and group data: keep it securely and do not share. The command does **not** provide an automatic remote restore; restoration must be reviewed and performed offline with the bot stopped. Use a separate filesystem backup for your own WhatsApp auth and .env (never upload these to GitHub).
+
+### Safe search/translation integrations
+
+New keyword commands: `translate en Halo dunia` / `translate id Hello` (MyMemory public translation API), `lirik <title>` (LRCLIB song **source links**, not complete copyrighted lyrics), and `ytsearch <query>` / `play <query>` (official YouTube metadata **only**). The latter require your own `YOUTUBE_API_KEY` in .env (enable YouTube Data API v3 in your own Google Cloud project). They do **not** download YouTube audio/video. Text entered in translate is sent explicitly to a third-party service, so do not submit sensitive information. All endpoints are allowlisted, limited in output size and timed out.

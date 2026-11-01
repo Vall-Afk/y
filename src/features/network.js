@@ -1,12 +1,15 @@
 'use strict';
-const NET_COMMANDS = new Set(['github', 'gitclone', 'wiki', 'cuaca']);
+const NET_COMMANDS = new Set(['github', 'gitclone', 'wiki', 'cuaca', 'translate', 'terjemah', 'lirik', 'lyrics', 'ytsearch', 'play']);
 const ORIGINS = new Set([
   'https://api.github.com',
   'https://codeload.github.com',
   'https://id.wikipedia.org',
   'https://en.wikipedia.org',
   'https://geocoding-api.open-meteo.com',
-  'https://api.open-meteo.com'
+  'https://api.open-meteo.com',
+  'https://api.mymemory.translated.net',
+  'https://lrclib.net',
+  'https://www.googleapis.com'
 ]);
 async function boundedFetch(url, options = {}) {
   const u = new URL(url);
@@ -47,11 +50,62 @@ async function handleNetwork(ctx) {
   if (!NET_COMMANDS.has(cmd.name)) return false;
   const text = cmd.args.join(' ').trim();
   if (!text || text.length > 120) { await reply(lang === 'en' ? 'Enter a topic or repository name (max 120 characters).' : 'Masukkan kata kunci / nama repo (maksimal 120 karakter).'); return true; }
+  if (['ytsearch','play'].includes(cmd.name) && !config.youtubeApiKey) {
+    await reply(lang === 'en'
+      ? 'YouTube search needs your own YOUTUBE_API_KEY in .env (official YouTube Data API).'
+      : 'YouTube search memerlukan YOUTUBE_API_KEY milikmu di .env (YouTube Data API resmi).');
+    return true;
+  }
   if (economy && !owner) {
     const can = await economy.consume(accountSender || sender);
     if (!can) { await reply(lang === 'en' ? 'Your daily API quota is used up. Use daily and buylimit, or ask the owner about premium.' : 'Limit harian habis. Gunakan daily lalu buylimit, atau hubungi owner untuk premium.'); return true; }
   }
   try {
+    if (['translate','terjemah'].includes(cmd.name)) {
+      const target=cmd.args[0]?.toLowerCase();
+      const body=cmd.args.slice(1).join(' ').trim();
+      if (!['id','en'].includes(target) || !body || body.length>200) {
+        await reply(lang==='en' ? 'Use: translate id|en <text> (max 200 characters)' :
+          'Contoh: translate en Halo dunia (maksimal 200 karakter)');
+        return true;
+      }
+      const source=target==='en'?'id':'en';
+      const data=await jsonFetch('https://api.mymemory.translated.net/get?q='+
+        encodeURIComponent(body)+'&langpair='+source+'%7C'+target,
+        {fetcher,maxBytes:40*1024});
+      const output=simpleText(data.responseData?.translatedText,600);
+      if(!output)throw new Error('Translation service did not return text.');
+      await reply('🌐 '+source.toUpperCase()+' → '+target.toUpperCase()+'\n'+output);
+      return true;
+    }
+    if (['lirik','lyrics'].includes(cmd.name)) {
+      const entries=await jsonFetch('https://lrclib.net/api/search?q='+
+        encodeURIComponent(text),{fetcher,maxBytes:128*1024});
+      if(!Array.isArray(entries)||!entries.length){
+        await reply(lang==='en'?'No matching songs.':'Lagu tidak ditemukan.');return true;
+      }
+      const matches=entries.slice(0,5).filter(x=>Number.isSafeInteger(x.id)&&x.id>0)
+        .map(x=>'• '+simpleText(x.trackName,90)+' — '+simpleText(x.artistName,90)+
+          '\nhttps://lrclib.net/api/get/'+x.id);
+      await reply((lang==='en'?'Song/lyrics sources:':'Sumber lagu/lirik:')+
+        '\n'+(matches.join('\n')||'-'));
+      return true;
+    }
+    if (['ytsearch','play'].includes(cmd.name)) {
+      const data=await jsonFetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q='+
+        encodeURIComponent(text)+'&key='+encodeURIComponent(config.youtubeApiKey),
+        {fetcher,maxBytes:128*1024});
+      const videos=(Array.isArray(data.items)?data.items:[]).filter(v=>
+        /^[a-zA-Z0-9_-]{11}$/.test(v.id?.videoId||'')).slice(0,5);
+      if(!videos.length){await reply(lang==='en'?'No videos found.':'Video tidak ditemukan.');return true;}
+      await reply('*YouTube*\n'+videos.map((v,i)=>(i+1)+'. '+
+        simpleText(v.snippet?.title,160)+' — '+simpleText(v.snippet?.channelTitle,80)+
+        '\nhttps://youtu.be/'+v.id.videoId).join('\n\n')+
+        (cmd.name==='play'
+          ? '\n'+(lang==='en'?'Use the official link to play; no media is downloaded.':
+            'Putar melalui tautan resmi; bot tidak mengunduh media.'): ''));
+      return true;
+    }
     if (cmd.name === 'github' || cmd.name === 'gitclone') {
       const [user, repo] = repoInput(text);
       const data = await jsonFetch('https://api.github.com/repos/' + user + '/' + repo, { fetcher });
