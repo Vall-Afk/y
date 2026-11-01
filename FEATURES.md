@@ -97,3 +97,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Legacy group media storage
 
 `addstik/liststik/getstik/delstik`, `addvn/listvn/getvn/delvn`, `addimg/listimg/getimg/delimg`, `addvid/listvid/getvid/delvid` are group scoped. Members can read, admins can add/delete. No implicit logging/saving of incoming media; 15/type/group and 30MB/group hard limits. The user must have rights to retain quoted media.
+
+## Optional public-media downloaders
+
+`ytmp3`, `ytmp4`, `tiktok`, `tiktoknowm`, `tiktokaudio`, `instagram`, `igphoto`, `igvideo`, `igreels` use an optional user-installed `yt-dlp` executable for bounded, individual public media URLs. They are not part of the automated unit network tests: extractor behavior and availability require live user verification. No account cookies/private media/paywall bypass. `tiktoknowm` does not guarantee watermark removal.

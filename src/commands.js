@@ -20,6 +20,7 @@ const { BACKUP_COMMANDS, handleBackup } = require('./features/backup');
 const { ANON_COMMANDS, AnonymousHub, handleAnonymous, relayAnonymous } = require('./features/anonymous');
 const { TEXTFX_COMMANDS, handleTextFx } = require('./features/textfx');
 const { LIB_COMMANDS, handleLibrary } = require('./features/media-library');
+const { DOWNLOAD_COMMANDS, handleDownload } = require('./features/downloaders');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -34,7 +35,7 @@ const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
-  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS
+  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
@@ -156,6 +157,7 @@ function createRouter(config, store, logger, {
       if (ANON_COMMANDS.has(cmd.name) && await handleAnonymous(ctx)) return;
       if (TEXTFX_COMMANDS.has(cmd.name) && await handleTextFx(ctx)) return;
       if (LIB_COMMANDS.has(cmd.name) && await handleLibrary(ctx)) return;
+      if (DOWNLOAD_COMMANDS.has(cmd.name) && await handleDownload(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;

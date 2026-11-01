@@ -72,7 +72,10 @@ const SECTIONS = Object.freeze([
   {
     id: 'search', icon: '⌕', idTitle: 'INTERNET', enTitle: 'INTERNET',
     commands: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>',
-      'translate en <teks>', 'lirik <judul>', 'ytsearch <judul>', 'play <judul>']
+      'translate en <teks>', 'lirik <judul>', 'ytsearch <judul>', 'play <judul>',
+      'ytmp3 <YouTube URL>', 'ytmp4 <YouTube URL>',
+      'tiktok <TikTok URL>', 'tiktokaudio <TikTok URL>',
+      'instagram <Instagram URL>']
   }
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);

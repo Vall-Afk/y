@@ -61,6 +61,7 @@ function downloadArgs(command, url) {
   const base = [
     '--ignore-config','--no-playlist','--playlist-items','1',
     '--no-cache-dir','--no-warnings','--no-progress',
+    '--match-filters','!is_live & duration <=? 180',
     '--no-write-subs','--no-write-thumbnail','--no-write-info-json',
     '--no-mtime','--no-exec','--no-overwrites',
     '--max-filesize','12M','--socket-timeout','10','--retries','1',
@@ -72,7 +73,7 @@ function downloadArgs(command, url) {
   base.push('--',url);
   return base;
 }
-function runDownloader(binary,args,{spawnProcess=spawn,timeoutMs=MAX_RUNTIME}={}) {
+function runDownloader(binary,args,{spawnProcess=spawn,timeoutMs=MAX_RUNTIME,cwd}={}) {
   return new Promise((resolve,reject)=>{
     let child,done=false,errbuf='';
     const complete=err=>{
@@ -81,7 +82,7 @@ function runDownloader(binary,args,{spawnProcess=spawn,timeoutMs=MAX_RUNTIME}={}
     };
     try {
       child=spawnProcess(binary,args,{
-        shell:false,windowsHide:true,
+        shell:false,windowsHide:true,cwd,
         stdio:['ignore','ignore','pipe']
       });
     }catch(err){reject(err);return;}
