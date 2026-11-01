@@ -17,7 +17,7 @@ test('owner automation is OFF by default and persisted fail-closed on corruption
   await prefs.set('autoread',true);
   const again=new OwnerPreferences(file);await again.init();
   assert.equal(again.get().autoread,true);
-  await assert.rejects(prefs.set('autoblok212',true),/Invalid/);
+  assert.throws(()=>prefs.set('autoblok212',true),/Invalid/);
   await fs.writeFile(file,'{bad');
   await assert.rejects(new OwnerPreferences(file).init(),/refusing overwrite/);
 });
