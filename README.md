@@ -255,3 +255,7 @@ From the **main owner account**, send `backup` in a **private chat** to Beauté.
 ### Safe search/translation integrations
 
 New keyword commands: `translate en Halo dunia` / `translate id Hello` (MyMemory public translation API), `lirik <title>` (LRCLIB song **source links**, not complete copyrighted lyrics), and `ytsearch <query>` / `play <query>` (official YouTube metadata **only**). The latter require your own `YOUTUBE_API_KEY` in .env (enable YouTube Data API v3 in your own Google Cloud project). They do **not** download YouTube audio/video. Text entered in translate is sent explicitly to a third-party service, so do not submit sensitive information. All endpoints are allowlisted, limited in output size and timed out.
+
+### Anonymous text-only chats (opt-in, privacy-first)
+
+Send `anonymous` to read privacy rules, then `start` in the **private chat** to join a partner queue. When another consenting user joins, text messages (maximum 1,000 characters) are relayed without revealing a contact number. Use `next` to change partners or `stop` to end a session; there is a rate limit and a 30-minute inactivity expiry. **Only text** is forwarded, never media or hidden message metadata. `sendprofile` exchanges WhatsApp links **only after both partners explicitly approve**; do not use it if you do not want to disclose your number. The pairing queue is in memory only and is cleared on restart. Anonymous chats are isolated between main bot and Jadibot. Bullying and unsolicited messages are not permitted; partners can immediately end a chat.

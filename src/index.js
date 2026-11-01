@@ -18,6 +18,7 @@ const { GroupCatalog } = require('./features/catalog');
 const { ModerationStore, runGroupSchedules } = require('./features/moderation');
 const { RentalRegistry } = require('./features/rental');
 const { BackupService } = require('./features/backup');
+const { AnonymousHub } = require('./features/anonymous');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -48,7 +49,7 @@ async function main() {
   await childRentals.init();
   const childRouter = createRouter(config, childStore, logger, {
     economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog,
-    moderation: childModeration, rentals: childRentals
+    moderation: childModeration, rentals: childRentals, anonymous: new AnonymousHub()
   });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
 
@@ -94,7 +95,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub() });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

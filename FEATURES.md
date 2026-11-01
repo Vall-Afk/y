@@ -85,3 +85,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Search / translation
 
 `translate`, `terjemah` (MyMemory ID↔EN; opted-in text submitted to an external service), `lirik`, `lyrics` (LRCLIB source links only), `ytsearch`, `play` (official YouTube Data API metadata; requires YOUTUBE_API_KEY) are added. These are not TikTok/Instagram/YouTube downloaders.
+
+## Opt-in anonymous chat
+
+`anonymous`, `start`, `next`, `stop`, `sendprofile`: two-party opt-in text-only pairing, input cap and rate limit, no saved chat messages, 30-minute idle expiry, mutual consent before sharing contact details. Legacy `menfess` (unsolicited direct messages) remains excluded pending anti-abuse review.

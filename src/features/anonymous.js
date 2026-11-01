@@ -66,8 +66,8 @@ class AnonymousHub {
   }
   allowMessage(chat){
     const now=this.now();
-    const prior=this.rate.get(chat)||0;
-    if(now-prior<1500)return false;
+    const prior=this.rate.get(chat);
+    if(prior!==undefined&&now-prior<1500)return false;
     this.rate.set(chat,now);
     const peer=this.peers.get(chat);
     if(peer){

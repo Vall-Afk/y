@@ -35,6 +35,10 @@ const SECTIONS = Object.freeze([
       'tosticker (reply video)', 'togif (reply image)']
   },
   {
+    id: 'anonymous', icon: '♧', idTitle: 'CHAT ANONIM', enTitle: 'ANONYMOUS CHAT',
+    commands: ['anonymous', 'start', 'next', 'stop', 'sendprofile (both consent)']
+  },
+  {
     id: 'game', icon: '♜', idTitle: 'GAME', enTitle: 'GAMES',
     commands: ['tictactoe @user', 'tttmove 1-9', 'delttt', 'tebakangka', 'jawab <angka>', 'nyerah']
   },
@@ -65,6 +69,7 @@ const ALIASES = Object.freeze({
   menu: 'all', help: 'all', allmenu: 'all',
   menugroup: 'group', menugrup: 'group',
   menustore: 'store', menutoko: 'store', menumedia: 'media',
+  menuchat: 'anonymous', menuanonymous: 'anonymous',
   menutools: 'tools', menugame: 'game', menurpg: 'rpg',
   menuekonomi: 'economy', menudownload: 'search',
   menupremium: 'premium', menuowner: 'owner',
