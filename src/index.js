@@ -19,6 +19,7 @@ const { ModerationStore, runGroupSchedules } = require('./features/moderation');
 const { RentalRegistry } = require('./features/rental');
 const { BackupService } = require('./features/backup');
 const { AnonymousHub } = require('./features/anonymous');
+const { MediaLibrary } = require('./features/media-library');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -37,19 +38,23 @@ async function main() {
   const moderation = new ModerationStore(path.join(config.dataDir, 'moderation.json'));
   await moderation.init();
   const backup = new BackupService(config.dataDir);
+  const library = new MediaLibrary(path.join(config.dataDir, 'saved-media'));
+  await library.init();
   const rentals = new RentalRegistry(path.join(config.dataDir, 'rentals.json'));
   await rentals.init();
   const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
   await childStore.init();
   const childCatalog = new GroupCatalog(path.join(config.dataDir, 'jadibot', 'group-catalog.json'));
   await childCatalog.init();
+  const childLibrary = new MediaLibrary(path.join(config.dataDir, 'jadibot', 'saved-media'));
+  await childLibrary.init();
   const childModeration = new ModerationStore(path.join(config.dataDir, 'jadibot', 'moderation.json'));
   await childModeration.init();
   const childRentals = new RentalRegistry(path.join(config.dataDir, 'jadibot', 'rentals.json'));
   await childRentals.init();
   const childRouter = createRouter(config, childStore, logger, {
     economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog,
-    moderation: childModeration, rentals: childRentals, anonymous: new AnonymousHub()
+    moderation: childModeration, rentals: childRentals, anonymous: new AnonymousHub(), library: childLibrary
   });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
 
@@ -95,7 +100,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub() });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub(), library });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

@@ -263,3 +263,7 @@ Send `anonymous` to read privacy rules, then `start` in the **private chat** to 
 ### Local TextPro-style visual effects
 
 `textfx neon Beauté`, `neon Beauté`, `glitch Beauté`, `rainbow Beauté`, `halloween Beauté`, `ice`, `fire`, `matrix`, `snow`, `wood`, `metallic`, `space`, `watercolor`, `christmas` and several legacy aliases now render distinctive original PNG designs locally with Sharp. `menutextpro` lists the main effects. The effects are **original local alternatives**, **not pixel-identical copies** of remote TextPro services or their copyrighted templates. Text is escaped and limited to 85 characters.
+
+### Group-scoped media storage / Legacy Storage
+
+Group administrators can **explicitly** save selected quoted media using `addstik name`, `addimg name`, `addvn name`, and `addvid name`. Everyone in the same group can use `liststik`, `listimg`, `listvn`, `listvid` and fetch via `getstik name`, `getimg name`, `getvn name`, or `getvid name`. Only group admins can delete using `delstik`, `delimg`, `delvn`, `delvid`. **Do not store media without the creator's consent.** Limits: max 15 items of each type/group, max 30MB/group, per file up to 1MB stickers, 3MB audio/images, 8MB videos. Saved files remain on your computer under data/saved-media or data/jadibot/saved-media, excluded from chat backups and from Git. Backup or delete these files separately as needed.

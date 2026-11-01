@@ -93,3 +93,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Original text effects, locally generated
 
 `textfx`, `neon`, `rainbow`, `glitch`, `halloween`, `horror`, `ice`, `fire`, `matrix`, `snow`, `wood`, `metallic`, `space`, `watercolor`, `christmas`, and selected legacy style aliases use original SVG+Sharp templates. They are not identical to proprietary TextPro renders.
+
+## Legacy group media storage
+
+`addstik/liststik/getstik/delstik`, `addvn/listvn/getvn/delvn`, `addimg/listimg/getimg/delimg`, `addvid/listvid/getvid/delvid` are group scoped. Members can read, admins can add/delete. No implicit logging/saving of incoming media; 15/type/group and 30MB/group hard limits. The user must have rights to retain quoted media.

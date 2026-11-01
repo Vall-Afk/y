@@ -19,6 +19,7 @@ const { RENTAL_COMMANDS, handleRental } = require('./features/rental');
 const { BACKUP_COMMANDS, handleBackup } = require('./features/backup');
 const { ANON_COMMANDS, AnonymousHub, handleAnonymous, relayAnonymous } = require('./features/anonymous');
 const { TEXTFX_COMMANDS, handleTextFx } = require('./features/textfx');
+const { LIB_COMMANDS, handleLibrary } = require('./features/media-library');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -33,12 +34,12 @@ const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
-  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS
+  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), library = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   async function handle(sock, message) {
@@ -76,7 +77,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, fetcher, lang, t };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, library, fetcher, lang, t };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -154,6 +155,7 @@ function createRouter(config, store, logger, {
       if (BACKUP_COMMANDS.has(cmd.name) && await handleBackup(ctx)) return;
       if (ANON_COMMANDS.has(cmd.name) && await handleAnonymous(ctx)) return;
       if (TEXTFX_COMMANDS.has(cmd.name) && await handleTextFx(ctx)) return;
+      if (LIB_COMMANDS.has(cmd.name) && await handleLibrary(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
