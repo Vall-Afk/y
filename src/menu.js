@@ -3,7 +3,7 @@
 const SECTIONS = Object.freeze([
   {
     id: 'main', icon: '✦', idTitle: 'UMUM', enTitle: 'GENERAL',
-    commands: ['menu', 'ping', 'status', 'owner', 'bahasa id|en', 'listbahasa', 'afk [alasan]']
+    commands: ['menu', 'ping', 'status', 'owner', 'credits', 'script', 'bahasa id|en', 'listbahasa', 'afk [alasan]']
   },
   {
     id: 'tools', icon: '⚙', idTitle: 'TOOLS', enTitle: 'TOOLS',
@@ -25,7 +25,7 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'media', icon: '✎', idTitle: 'STIKER / MEDIA', enTitle: 'STICKERS / MEDIA',
-    commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH']
+    commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)']
   },
   {
     id: 'game', icon: '♜', idTitle: 'GAME', enTitle: 'GAMES',

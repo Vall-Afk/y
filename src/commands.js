@@ -20,7 +20,7 @@ const MENU_COMMANDS = new Set([
   'menustore','menutoko','menubahasa'
 ]);
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
-  'sticker','s','toimg','ttp','smeme','bahasa','language','lang','listbahasa','languages','listlanguages']);
+  'sticker','s','toimg','ttp','smeme','react','source','script','sc','credits','thanks','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
@@ -98,6 +98,12 @@ function createRouter(config, store, logger, {
         return reply(t('status', { name: config.name, mode: store.mode,
           uptime: Math.floor(process.uptime()), owner: config.ownerName }));
       }
+      if (['source','script','sc'].includes(cmd.name)) {
+        return reply(t('scriptLink'));
+      }
+      if (['credits','thanks'].includes(cmd.name)) {
+        return reply(t('credits', {name: config.ownerName, instagram: config.ownerInstagram}));
+      }
       if (cmd.name === 'owner') return reply('Owner: ' + config.ownerName +
         '\nWhatsApp: https://wa.me/' + config.ownerNumber +
         '\nInstagram: https://instagram.com/' + config.ownerInstagram);
@@ -125,6 +131,24 @@ function createRouter(config, store, logger, {
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
       if (RPG_COMMANDS.has(cmd.name) && await handleRpg(ctx)) return;
       if (NET_COMMANDS.has(cmd.name) && await handleNetwork(ctx)) return;
+      if (cmd.name === 'react') {
+        const emoji = cmd.args[0] || '';
+        if (!emoji || [...emoji].length > 12 ||
+            !/^[\p{Extended_Pictographic}\p{Emoji_Modifier}\u200d\ufe0f]+$/u.test(emoji)) {
+          return reply(lang === 'en' ? 'Reply to a message with: react ❤️' : 'Balas pesan dengan: react ❤️');
+        }
+        const context = message.message?.extendedTextMessage?.contextInfo ||
+          message.message?.imageMessage?.contextInfo || {};
+        if (!context.stanzaId || typeof context.stanzaId !== 'string' ||
+            context.stanzaId.length > 100) {
+          return reply(lang === 'en' ? 'Reply to a message first.' : 'Balas pesan terlebih dahulu.');
+        }
+        const key = {remoteJid:chat, id:context.stanzaId,
+          fromMe: jid(context.participant || '') === jid(sock.user?.id)};
+        if (group && context.participant) key.participant = context.participant;
+        await sock.sendMessage(chat, {react:{text:emoji,key}});
+        return;
+      }
       if (cmd.name === 'ttp') {
         const sticker = await textSticker(cmd.args.join(' '));
         await sock.sendMessage(chat, { sticker }, { quoted: message });

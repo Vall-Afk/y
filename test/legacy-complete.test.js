@@ -161,3 +161,21 @@ test('English wiki requests English Wikipedia and returns original summary', asy
   assert.match(urls[0],/^https:\/\/en\.wikipedia\.org\//);
   assert.match(h.calls.at(-1).payload.text,/Earth is the third planet/);
 });
+
+test('script and credits show the correct identity; react only targets quoted messages', async t => {
+  const h=await fixture(t);
+  await h.router.handle(h.socket,message(member,'script'));
+  assert.match(h.calls.at(-1).payload.text,/github.com\/Vall-Afk\/y\/tree/);
+  await h.router.handle(h.socket,message(member,'credits'));
+  assert.match(h.calls.at(-1).payload.text,/Tritunggal Mahakudus/);
+  await h.router.handle(h.socket,message(member,'react ❤️'));
+  assert.match(h.calls.at(-1).payload.text,/Balas pesan/);
+  const quoted={stanzaId:'react123',participant:admin,quotedMessage:{conversation:'hello'}};
+  await h.router.handle(h.socket,message(member,'react ❤️',true,quoted));
+  const reaction=h.calls.at(-1).payload.react;
+  assert.equal(reaction.key.id,'react123');
+  assert.equal(reaction.text,'❤️');
+  assert.equal(reaction.key.remoteJid,group);
+  await h.router.handle(h.socket,message(member,'react hello',true,quoted));
+  assert.equal(h.calls.at(-1).payload.react,undefined);
+});
