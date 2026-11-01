@@ -20,6 +20,7 @@ const { RentalRegistry } = require('./features/rental');
 const { BackupService } = require('./features/backup');
 const { AnonymousHub } = require('./features/anonymous');
 const { MediaLibrary } = require('./features/media-library');
+const { OwnerPreferences, rejectIncomingCalls, bioText } = require('./features/owner-automation');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -28,6 +29,8 @@ async function main() {
   await fs.chmod(config.authDir, 0o700);
   const store = new Store(path.join(config.dataDir, 'settings.json'));
   await store.init();
+  const ownerPreferences = new OwnerPreferences(path.join(config.dataDir, 'owner-automation.json'));
+  await ownerPreferences.init();
   const economy = new Economy(path.join(config.dataDir, 'economy.json'));
   await economy.init();
   const games = new GameHub();
@@ -100,7 +103,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub(), library });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub(), library, ownerPreferences });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -124,7 +127,12 @@ async function main() {
           console.log('\n' + config.name + ' | WhatsApp > Perangkat tertaut > Tautkan perangkat > Scan QR:\n');
           qrcode.generate(qr, { small: true });
         }
-        if (connection === 'open') { attempts = 0; connected = true; logger.info('WhatsApp connected. Bot is ready.'); }
+        if (connection === 'open') {
+          attempts = 0; connected = true; logger.info('WhatsApp connected. Bot is ready.');
+          if(ownerPreferences.get().autobio && typeof sock.updateProfileStatus==='function')
+            void sock.updateProfileStatus(bioText(config)).catch(err=>
+              logger.warn({error:err.message},'Auto-bio update failed'));
+        }
         if (connection === 'close') {
           connected = false;
           socket = null;
@@ -137,6 +145,9 @@ async function main() {
           logger.warn({ status, delay }, 'Disconnected; reconnect scheduled');
           timer = setTimeout(() => { timer = null; connect().catch(err => logger.error({ error: err.message }, 'Reconnect failed')); }, delay);
         }
+      });
+      sock.ev.on('call', calls => {
+        if(socket===sock)void rejectIncomingCalls(sock,calls,ownerPreferences,logger);
       });
       sock.ev.on('messages.upsert', async event => {
         if (event.type !== 'notify') return;

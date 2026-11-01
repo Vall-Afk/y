@@ -23,6 +23,7 @@ const { LIB_COMMANDS, handleLibrary } = require('./features/media-library');
 const { DOWNLOAD_COMMANDS, handleDownload } = require('./features/downloaders');
 const { PROFILE_COMMANDS, handleProfile } = require('./features/profile');
 const { LEGACY_UTILITY_COMMANDS, handleLegacyUtilities } = require('./features/legacy-utilities');
+const { OWNER_AUTOMATION_COMMANDS, handleOwnerAutomation, autoRespondText } = require('./features/owner-automation');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -32,19 +33,20 @@ const MENU_COMMANDS = new Set([
   'menustore','menutoko','menubahasa'
 ]);
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
-  'sticker','s','toimg','ttp','smeme','react','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
+  'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
-  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS
+  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), library = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), library = null, ownerPreferences = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
+  const autoReplyRecent = new Map();
   async function handle(sock, message) {
     const chat = message?.key?.remoteJid;
     if (!chat || message.key.fromMe || chat === 'status@broadcast' || !message.message) return;
@@ -55,6 +57,10 @@ function createRouter(config, store, logger, {
     const lang = store.language?.(accountSender) || 'id';
     const t = (key, vars) => tr(lang, key, vars);
     const owner = [sender, message.key.participantPn, message.key.remoteJidAlt].some(p => jid(p) === config.ownerJid);
+    if (ownerPreferences?.get().autoread && typeof sock.readMessages === 'function') {
+      await sock.readMessages([message.key]).catch(err =>
+        logger.warn?.({error:err.message},'Auto-read failed'));
+    }
     const text = getText(message);
     if (!text || (store.mode === 'private' && !owner)) return;
     const group = isGroup(chat);
@@ -70,6 +76,16 @@ function createRouter(config, store, logger, {
       await relayAnonymous({anonymous,chat,text,sock,lang,reply:anonymousReply});
       return;
     }
+    if (!group && !owner && !cmd && chat.endsWith('@s.whatsapp.net') &&
+        ownerPreferences?.get().autorespond) {
+      const time=now();
+      if(time-(autoReplyRecent.get(chat)||0)>=6*60*60*1000) {
+        autoReplyRecent.set(chat,time);
+        if(autoReplyRecent.size>3000)autoReplyRecent.clear();
+        await sock.sendMessage(chat,{text:autoRespondText(lang,config.name)}).catch(err=>
+          logger.warn?.({error:err.message},'Auto-response failed'));
+      }
+    }
     if (!cmd && !linkViolation && (!group || !moderation ||
       !(moderation.get(chat).antispam || Object.keys(moderation.get(chat).responses).length))) return;
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
@@ -80,7 +96,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, library, fetcher, lang, t };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, library, ownerPreferences, fetcher, lang, t };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -179,6 +195,14 @@ function createRouter(config, store, logger, {
       if (LIB_COMMANDS.has(cmd.name) && await handleLibrary(ctx)) return;
       if (DOWNLOAD_COMMANDS.has(cmd.name) && await handleDownload(ctx)) return;
       if (PROFILE_COMMANDS.has(cmd.name) && await handleProfile(ctx)) return;
+      if (OWNER_AUTOMATION_COMMANDS.has(cmd.name) && await handleOwnerAutomation(ctx)) return;
+      if (['setcmd','delcmd'].includes(cmd.name)) {
+        const key=(cmd.args[0]||'').toLowerCase();
+        if (ALL_COMMANDS.has(key)) return reply(lang==='en'?
+          'Cannot override a built-in command.':'Tidak bisa mengganti command bawaan.');
+        const alias=cmd.name==='setcmd'?'addresponse':'delresponse';
+        return handleModeration({...ctx,cmd:{...cmd,name:alias}});
+      }
       if (LEGACY_UTILITY_COMMANDS.has(cmd.name) && await handleLegacyUtilities(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
