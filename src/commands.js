@@ -79,7 +79,7 @@ function createRouter(config, store, logger, {
     if (!group && !owner && !cmd && chat.endsWith('@s.whatsapp.net') &&
         ownerPreferences?.get().autorespond) {
       const time=now();
-      if(time-(autoReplyRecent.get(chat)||0)>=6*60*60*1000) {
+      if(!autoReplyRecent.has(chat)||time-autoReplyRecent.get(chat)>=6*60*60*1000) {
         autoReplyRecent.set(chat,time);
         if(autoReplyRecent.size>3000)autoReplyRecent.clear();
         await sock.sendMessage(chat,{text:autoRespondText(lang,config.name)}).catch(err=>
