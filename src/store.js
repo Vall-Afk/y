@@ -6,7 +6,7 @@ const FLAGS = new Set(['welcome','goodbye','antilink','antiwame']);
 class Store {
   constructor(file) {
     this.file = file;
-    this.state = { mode: 'public', groups: {} };
+    this.state = { mode: 'public', groups: {}, languages: {} };
     this.pending = Promise.resolve();
   }
   async init() {
@@ -18,7 +18,13 @@ class Store {
       if (!parsed || !['public','private'].includes(parsed.mode) ||
           !parsed.groups || typeof parsed.groups !== 'object' ||
           Array.isArray(parsed.groups)) throw new Error('Invalid store schema');
-      this.state = { mode: parsed.mode, groups: parsed.groups };
+      const languages = parsed.languages === undefined ? {} : parsed.languages;
+      if (!languages || typeof languages !== 'object' || Array.isArray(languages) ||
+          Object.keys(languages).length > 10000 ||
+          Object.entries(languages).some(([id, value]) =>
+            !/^[1-9]\d{4,19}@(s\.whatsapp\.net|lid)$/.test(id) || !['id','en'].includes(value)))
+        throw new Error('Invalid language preferences');
+      this.state = { mode: parsed.mode, groups: parsed.groups, languages };
     } catch (err) {
       if (err.code !== 'ENOENT') throw new Error('Cannot read store without risking data loss: ' + err.message);
       await this.save();
@@ -31,6 +37,17 @@ class Store {
       antilink: g.antilink === true, antiwame: g.antiwame === true,
       welcomeText: typeof g.welcomeText === 'string' ? g.welcomeText.slice(0, 300) : '',
       goodbyeText: typeof g.goodbyeText === 'string' ? g.goodbyeText.slice(0, 300) : '' };
+  }
+  language(sender) {
+    return Object.hasOwn(this.state.languages, sender) && this.state.languages[sender] === 'en' ? 'en' : 'id';
+  }
+  async setLanguage(sender, language) {
+    if (typeof sender !== 'string' || !/^[1-9]\d{4,19}@(s\.whatsapp\.net|lid)$/.test(sender) ||
+        !['id', 'en'].includes(language)) throw new Error('Invalid language preferences');
+    if (!Object.hasOwn(this.state.languages, sender) && Object.keys(this.state.languages).length >= 10000)
+      throw new Error('Language preferences full');
+    this.state.languages[sender] = language;
+    return this.save();
   }
   async setMode(mode) {
     if (!['public','private'].includes(mode)) throw new Error('Invalid mode');
