@@ -40,7 +40,7 @@ menu, menugroup, menugrup, menustore, menutoko, menumedia, menutools, menugame, 
 
 ## English language
 
-Send **language en** or **bahasa en**, then **menu**. Supported replies include main interface, group moderation, store and workflow, economy, tools, AFK, core game and RPG feedback, Wikipedia language selection and weather labels. The preference is stored across restarts. Legacy commands keep their established keyword names; some low-level errors, remote responses and missing translations may be in Indonesian.
+Send **language en** or **bahasa en**, then **menu**. Supported replies include main interface, premium Jadibot operations, group moderation, store and workflow, economy, tools, AFK, core game and RPG feedback, Wikipedia language selection and weather labels. The preference is stored across restarts. Legacy commands keep their established keyword names; some low-level errors, remote responses and missing translations may be in Indonesian.
 
 ## Not yet implemented
 

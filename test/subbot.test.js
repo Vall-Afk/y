@@ -195,3 +195,17 @@ test('QR jadibot sends QR privately without requesting phone pairing code', asyn
   assert.equal(h.sent.length,2);
   await h.manager.stop(user);
 });
+
+test('premium member can manage Jadibot in English without changing default Indonesian', async t => {
+  const h=await fixture(t);
+  h.manager.languageFor = who => who === user ? 'en' : 'id';
+  assert.match(h.manager.describe(user), /no active session/);
+  const response=await h.manager.start(user,phone);
+  assert.match(response,/being prepared/);
+  const sock=h.sockets[0];
+  sock.ev.emit('connection.update',{connection:'connecting'});
+  await tick();
+  assert.match(h.sent.at(-1)[1].text,/Pairing code/);
+  assert.match(h.manager.describe(user),/Method:/);
+  assert.match(await h.manager.stop(user),/slot is available/);
+});

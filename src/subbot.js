@@ -14,7 +14,7 @@ function validRequester(value) {
 class SubBotManager {
   constructor({
     config, economy, logger, makeSocket, authState, browsers, disconnectReason,
-    onMessage, onParticipants, notify, notifyQr = null, qrEncoder = QRCode.toBuffer, getPrimaryId = () => '',
+    onMessage, onParticipants, notify, notifyQr = null, qrEncoder = QRCode.toBuffer, languageFor = () => 'id', getPrimaryId = () => '',
     now = () => Date.now(), schedule = setTimeout, cancel = clearTimeout, logoutTimeoutMs = 5000
   }) {
     this.config = config;
@@ -28,6 +28,7 @@ class SubBotManager {
     this.onParticipants = onParticipants;
     this.notify = notify;
     this.notifyQr = notifyQr;
+    this.languageFor = languageFor;
     this.qrEncoder = qrEncoder;
     this.getPrimaryId = getPrimaryId;
     this.now = now;
@@ -100,15 +101,31 @@ class SubBotManager {
       retries: 0, pairingAttempts: 0, pairingInFlight: false, lastQr: '', qrInFlight: false
     };
   }
+  language(owner) {
+    try { return this.languageFor(jid(owner)) === 'en' ? 'en' : 'id'; }
+    catch { return 'id'; }
+  }
   describe(requester, isMainOwner = false) {
     const s = this.slot;
-    if (!s) return 'Jadibot: belum ada sesi. Slot tersedia (maksimal 1).';
-    if (jid(requester) !== s.owner && !isMainOwner) return 'Jadibot: slot sedang dipakai oleh pengguna premium lain.';
-    return 'Jadibot: ' + s.status + '\nNomor: ' + s.phone +
-      '\nPengguna: ' + s.owner.split('@')[0] +
-      '\nMetode: ' + (s.method === 'qr' ? 'QR' : 'pairing') +
-      '\nBuat/lanjut: ' + (s.method === 'qr' ? 'jadibot qr' : 'jadibot ' + s.phone) +
-      '\nHentikan: stopjadibot';
+    const en = this.language(requester) === 'en';
+    if (!s) return en ? 'Jadibot: no active session. One slot available.' :
+      'Jadibot: belum ada sesi. Slot tersedia (maksimal 1).';
+    if (jid(requester) !== s.owner && !isMainOwner)
+      return en ? 'Jadibot: the only slot is occupied by another premium member.' :
+        'Jadibot: slot sedang dipakai oleh pengguna premium lain.';
+    const status = en ? ({
+      menyiapkan:'connecting', pairing:'pairing', qr:'awaiting QR scan',
+      online:'online', reconnecting:'reconnecting', terputus:'disconnected',
+      'premium-habis':'premium expired', error:'error', menghentikan:'stopping',
+      'menunggu-pairing':'awaiting pairing'
+    }[s.status] || s.status) : s.status;
+    return 'Jadibot: ' + status +
+      '\n' + (en ? 'Number: ' : 'Nomor: ') + (s.method === 'qr' && s.phone === '10000000' ? 'QR' : s.phone) +
+      '\n' + (en ? 'Renter: ' : 'Pengguna: ') + s.owner.split('@')[0] +
+      '\n' + (en ? 'Method: ' : 'Metode: ') + (s.method === 'qr' ? 'QR' : 'pairing') +
+      '\n' + (en ? 'Create/resume: ' : 'Buat/lanjut: ') +
+      (s.method === 'qr' ? 'jadibot qr' : 'jadibot ' + s.phone) +
+      '\n' + (en ? 'Stop: ' : 'Hentikan: ') + 'stopjadibot';
   }
   async inform(slot, message) {
     if (this.slot !== slot || this.shuttingDown) return;
@@ -147,7 +164,7 @@ class SubBotManager {
     slot.socket = null;
     try { socket?.end?.(new Error('Premium jadibot expired')); }
     catch {}
-    await this.inform(slot, 'Sesi jadibot dihentikan sementara karena premium habis. Perpanjang premium lalu gunakan jadibot ' + slot.phone + ' untuk melanjutkan.');
+    await this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot paused: premium expired. Renew premium and send jadibot again to resume.' : 'Sesi jadibot dihentikan sementara karena premium habis. Perpanjang premium lalu gunakan jadibot ' + slot.phone + ' untuk melanjutkan.');
   }
   async ensureCleanAuth() {
     try {
@@ -161,20 +178,20 @@ class SubBotManager {
     return this.serial(async () => {
       owner = jid(owner);
       if (!validRequester(owner)) throw new Error('Identitas pengirim tidak valid.');
-      if (!this.eligible(owner)) throw new Error('Jadibot khusus premium aktif.');
+      if (!this.eligible(owner)) throw new Error(this.language(owner) === 'en' ? 'Jadibot requires an active premium membership.' : 'Jadibot khusus premium aktif.');
       if (!['pairing','qr'].includes(method)) throw new Error('Metode jadibot tidak dikenal.');
       if (method === 'qr' && !this.notifyQr) throw new Error('Pengiriman QR tidak tersedia.');
       if (method === 'qr' && !phone) phone = this.slot?.owner === owner ? this.slot.phone : '10000000';
-      if (!validPhone(phone)) throw new Error('Gunakan: jadibot 628xxxxxxxxxx atau jadibot qr.');
+      if (!validPhone(phone)) throw new Error(this.language(owner) === 'en' ? 'Use: jadibot 628xxxxxxxxxx or jadibot qr.' : 'Gunakan: jadibot 628xxxxxxxxxx atau jadibot qr.');
       const main = jid(primaryId || this.getPrimaryId());
       if (method === 'pairing' && (phone === this.config.ownerNumber || jid(phone + '@s.whatsapp.net') === main)) {
         throw new Error('Jangan tautkan akun bot utama sebagai jadibot.');
       }
       if (this.slot) {
         if (this.slot.owner !== owner || (method === 'pairing' && this.slot.phone !== phone))
-          throw new Error('Slot jadibot sedang digunakan. Maksimal satu sesi tambahan.');
+          throw new Error(this.language(owner) === 'en' ? 'Jadibot slot is occupied. Only one additional session is allowed.' : 'Slot jadibot sedang digunakan. Maksimal satu sesi tambahan.');
         if (['online', 'menyiapkan', 'pairing', 'qr', 'reconnecting'].includes(this.slot.status))
-          return 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
+          return this.language(owner) === 'en' ? 'Jadibot is already running. Use cekjadibot.' : 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
         if (!this.eligible(owner)) throw new Error('Perpanjang premium terlebih dahulu.');
         if (this.slot.method !== method) {
           this.slot.method = method;
@@ -189,7 +206,7 @@ class SubBotManager {
         this.slot.retries = 0;
         this.slot.pairingAttempts = 0;
         await this.launch(this.slot);
-        return 'Mencoba menyambungkan kembali sesi jadibot. Periksa chat pribadi untuk kode baru jika diperlukan.';
+        return this.language(owner) === 'en' ? 'Trying to reconnect Jadibot. Check your private chat for a fresh code if necessary.' : 'Mencoba menyambungkan kembali sesi jadibot. Periksa chat pribadi untuk kode baru jika diperlukan.';
       }
       await this.ensureCleanAuth();
       const slot = this.newSlot({ owner, phone, createdAt: this.now(), linked: false, method });
@@ -205,6 +222,9 @@ class SubBotManager {
         // Keep metadata and auth for explicit owner-controlled cleanup.
         throw err;
       }
+      if (this.language(owner) === 'en') return 'Jadibot is being prepared (' + method + '). ' +
+        (method === 'qr' ? 'A QR image will arrive in your private chat.' : 'A pairing code will arrive in your private chat.') +
+        ' One additional session maximum.';
       return 'Sesi jadibot disiapkan (' + method + '). ' +
         (method === 'qr' ? 'QR akan dikirim melalui chat pribadi; pindai menggunakan WhatsApp akun kedua.' : 'Kode pairing akan dikirim melalui chat pribadi.') +
         ' Maksimal 1 sesi tambahan.';
@@ -244,7 +264,9 @@ class SubBotManager {
         if (this.slot !== slot || slot.socket !== socket) return;
         if (!code || !/^[a-z0-9-]{6,24}$/i.test(code)) throw new Error('Kode pairing tidak valid.');
         slot.status = 'pairing';
-        await this.inform(slot,
+        if (this.language(slot.owner) === 'en') {
+          await this.inform(slot, '*Beauté. Jadibot*\nPairing code: *' + code + '*\nOpen WhatsApp on the secondary number → Linked devices → Link a device → Link with phone number. Keep this code private.');
+        } else await this.inform(slot,
           '*Beauté. Jadibot*\nKode pairing: *' + code +
           '*\nBuka WhatsApp nomor ' + slot.phone +
           ' → Perangkat tertaut → Tautkan perangkat → Tautkan dengan nomor telepon.\n' +
@@ -269,6 +291,7 @@ class SubBotManager {
         if (!Buffer.isBuffer(png) || png.length > 1024 * 1024) throw new Error('QR image invalid.');
         if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
         await this.notifyQr(slot.owner, png,
+          this.language(slot.owner) === 'en' ? 'Beauté. Jadibot QR. On your second WhatsApp account open Linked devices → Link a device and scan this QR. Do not share it.' :
           'Beauté. Jadibot QR. Pindai dari WhatsApp akun kedua → Perangkat tertaut → Tautkan perangkat. QR dapat kedaluwarsa; jangan bagikan.');
         slot.status = 'qr';
       } catch (err) {
@@ -297,7 +320,7 @@ class SubBotManager {
         void this.serial(async () => {
           if (this.slot === slot) await this.writeMetadata(slot);
         }).catch(err => this.logger.error({ error: err.message }, 'Failed to persist jadibot metadata'));
-        void this.inform(slot, 'Jadibot tersambung! Nomor: ' + slot.phone + '. Gunakan cekjadibot untuk melihat status.');
+        void this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot connected! Use cekjadibot to check the status.' : 'Jadibot tersambung! Nomor: ' + slot.phone + '. Gunakan cekjadibot untuk melihat status.');
       }
       if (update.connection === 'close') {
         slot.socket = null;
@@ -305,7 +328,7 @@ class SubBotManager {
         if ([this.disconnectReason.loggedOut, this.disconnectReason.badSession].includes(reason)) {
           this.clearTimers(slot);
           slot.status = 'terputus';
-          void this.inform(slot, 'Jadibot terputus dari WhatsApp. Gunakan stopjadibot kemudian jadibot ' + slot.phone + '.');
+          void this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot disconnected from WhatsApp. Use stopjadibot, then start Jadibot again.' : 'Jadibot terputus dari WhatsApp. Gunakan stopjadibot kemudian jadibot ' + slot.phone + '.');
           return;
         }
         if (!this.eligible(slot.owner)) { void this.suspend(slot); return; }
@@ -347,9 +370,9 @@ class SubBotManager {
   stop(requester, force = false) {
     return this.serial(async () => {
       const slot = this.slot;
-      if (!slot) return 'Tidak ada sesi jadibot aktif.';
+      if (!slot) return this.language(requester) === 'en' ? 'There is no active Jadibot session.' : 'Tidak ada sesi jadibot aktif.';
       if (!force && jid(requester) !== slot.owner && jid(requester) !== this.config.ownerJid)
-        throw new Error('Hanya pemilik sesi atau owner utama yang dapat menghentikan jadibot.');
+        throw new Error(this.language(requester) === 'en' ? 'Only the renter or main owner can stop this Jadibot.' : 'Hanya pemilik sesi atau owner utama yang dapat menghentikan jadibot.');
       slot.status = 'menghentikan';
       this.clearTimers(slot);
       const socket = slot.socket;
@@ -372,7 +395,7 @@ class SubBotManager {
       await fs.rm(this.authDir, { recursive: true, force: true });
       await fs.rm(this.metadataFile, { force: true });
       this.slot = null;
-      return 'Jadibot dihentikan dan sesi lokalnya dihapus. Slot kini tersedia.';
+      return this.language(requester) === 'en' ? 'Jadibot stopped, local session removed and the slot is available.' : 'Jadibot dihentikan dan sesi lokalnya dihapus. Slot kini tersedia.';
     });
   }
   async shutdown() {

@@ -222,3 +222,5 @@ Fitur downloader TikTok/YouTube/Instagram/MediaFire, fitur search tertentu, anim
 *Terima kasih — Tritunggal Mahakudus, Orang Tua, Keluarga, dan Saya sendiri.*
 
 </div>
+
+**Jadibot + English:** if you send language en before starting Jadibot, connection status, pairing instructions and QR captions are also presented in English.

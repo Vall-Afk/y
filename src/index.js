@@ -69,6 +69,7 @@ async function main() {
     authState: useMultiFileAuthState, browsers: Browsers, disconnectReason: DisconnectReason,
     onMessage: (client, message) => childRouter.handle(client, message),
     onParticipants: (client, event) => handleParticipants(client, event, childStore),
+    languageFor: account => store.language(account),
     notifyQr: async (to, png, caption) => {
       if (!socket || !connected) throw new Error('Main bot is not connected');
       await socket.sendMessage(to, { image: png, caption });
