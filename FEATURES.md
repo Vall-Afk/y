@@ -77,3 +77,7 @@ brat <text>, qc (reply), blur [1-30], grayscale, greyscale, invert, negative, ro
 ## Manual group rental (sewa)
 
 Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. Optional `REQUIRE_SEWA=true` gates group commands if expired; default is false and preserves existing groups.
+
+## Owner-only backup
+
+`backup` / `backupbot` sends a bounded JSON export of known settings, economy, catalog, moderation and rental data in a private chat with the main owner. It excludes every authentication folder, QR/pairing codes, .env, and all tokens. This is **an export only**, not an in-chat restore feature. Handle the exported user data privately.

@@ -17,6 +17,7 @@ const { SubBotManager } = require('./subbot');
 const { GroupCatalog } = require('./features/catalog');
 const { ModerationStore, runGroupSchedules } = require('./features/moderation');
 const { RentalRegistry } = require('./features/rental');
+const { BackupService } = require('./features/backup');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -34,6 +35,7 @@ async function main() {
   await catalog.init();
   const moderation = new ModerationStore(path.join(config.dataDir, 'moderation.json'));
   await moderation.init();
+  const backup = new BackupService(config.dataDir);
   const rentals = new RentalRegistry(path.join(config.dataDir, 'rentals.json'));
   await rentals.init();
   const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
@@ -92,7 +94,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

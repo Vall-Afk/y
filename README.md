@@ -247,3 +247,7 @@ The virtual RPG now includes `lebur` (3 ore + 1 coal → ingot), `craft sword`, 
 ### Group rental / Sewa (owner only)
 
 Manual rental registry: `addsewa <group-id@g.us> 30`, `delsewa <group-id@g.us>`, `listsewa`. Group members can use `checksewa` to see expiry. Rental status is only metadata; it does **not** process money or send mass messages. **Default `REQUIRE_SEWA=false`**, so existing groups keep working. Only if you explicitly set `REQUIRE_SEWA=true` in .env does the bot restrict non-owner group commands when no active rental exists. The bot does not kick members or leave groups automatically. Main and Jadibot store rental ledgers separately.
+
+### Backup data via main owner DM
+
+From the **main owner account**, send `backup` in a **private chat** to Beauté. The bot sends a JSON document containing active settings, economy/RPG, group catalog, group moderation, and rental settings (also isolated non-auth Jadibot config). **Excluded:** every WhatsApp auth/session folder, `.env`, API keys and tokens. This document can contain private account numbers and group data: keep it securely and do not share. The command does **not** provide an automatic remote restore; restoration must be reviewed and performed offline with the bot stopped. Use a separate filesystem backup for your own WhatsApp auth and .env (never upload these to GitHub).
