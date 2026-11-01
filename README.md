@@ -307,7 +307,7 @@ Owner-only: `join https://chat.whatsapp.com/<invite-code>` from a private chat (
 
 ## ✦ Migration dashboard — current branch
 
-This version audits **428 unique advertised legacy keywords**. Based on the current [full matrix](LEGACY_COMMAND_MATRIX.md), **140** have readable module handlers (module-level unit tests), **176** have local alternative visual effects, **25** remain unimplemented, **11** deferred for opt-in/privacy and abuse safeguards, and **76** excluded from automatic migration pending content/safety review. Counts are for old advertised keywords, not complete feature parity or guarantees of live WhatsApp compatibility. The active menu deliberately avoids listing unsupported legacy commands as if they were operational.
+This version audits **428 unique advertised legacy keywords**. Based on the current [full matrix](LEGACY_COMMAND_MATRIX.md), **151** have readable module handlers (module-level unit tests), **184** have original local visual alternatives, **5** have limited link/fingerprint alternatives, **0** remain without an audit disposition, **11** are deferred for opt-in/privacy and abuse safeguards, and **77** are excluded from automatic migration pending content/safety review. Counts are for old advertised keywords, not complete feature parity or guarantees of live WhatsApp compatibility. The active menu deliberately avoids listing unsupported legacy commands as if they were operational.
 
 ### Legacy local utility migration (privacy-preserving alternatives)
 

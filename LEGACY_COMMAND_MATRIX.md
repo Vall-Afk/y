@@ -2,15 +2,15 @@
 
 **Source:** `v9.1/command/help.js` · **Target:** `feature/beaute-legacy-modern` · **Recode:** Vall / @Vall-Afk
 
-This is an audit of **428 distinct advertised legacy keywords**, not proof that every old command actually worked. An entry marked *Implemented* means the new module has a command handler and relevant automated module tests—not that it was individually verified against live WhatsApp or third-party APIs. New feature commands not present in v9.1 are documented in FEATURES.md.
+This is an audit of **428 distinct advertised legacy keywords**, not proof that every old command actually worked. All 173 previously pending keywords now have an explicit disposition: an implemented handler, a documented local/limited alternative, or a deliberate exclusion. **This is NOT 428/428 feature parity.** An entry marked *Implemented* means the new module has a command handler and relevant automated module tests—not that it was individually verified against live WhatsApp or third-party APIs. New feature commands not present in v9.1 are documented in FEATURES.md.
 
 | Status | Count |
 |---|---:|
-| Implemented (unit-tested module) | 140 |
-| Not yet migrated | 25 |
+| Implemented (unit-tested module) | 151 |
+| Original local alternative | 184 |
 | Deferred (consent/abuse risk) | 11 |
-| Excluded (content/safety review) | 76 |
-| Original local alternative | 176 |
+| Limited safe alternative | 5 |
+| Excluded (content/safety review) | 77 |
 
 Commands with remote-provider behavior, fake/spoofing, adult material or unavailable secrets remain deliberately pending or disabled. **Do not claim 428/428 feature parity.**
 
@@ -36,12 +36,12 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `tovideo` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/transcode.js |
 | `tomp3` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/transcode.js |
 | `ttp` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/sticker-tools.js |
-| `attp` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
-| `emojimix` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
-| `nuliskiri` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
-| `nuliskanan` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
-| `foliokiri` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
-| `foliokanan` | CONVERTER/TOOLS | Not yet migrated | External dependency/legacy behavior needs review |
+| `attp` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/legacy-utilities.js |
+| `emojimix` | CONVERTER/TOOLS | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `nuliskiri` | CONVERTER/TOOLS | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `nuliskanan` | CONVERTER/TOOLS | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `foliokiri` | CONVERTER/TOOLS | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `foliokanan` | CONVERTER/TOOLS | Original local alternative | src/features/legacy-utilities.js (local original art) |
 | `say` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/tools.js |
 | `translate` | CONVERTER/TOOLS | Implemented (unit-tested module) | src/features/network.js |
 | `menfess` | ANONYMOUS CHATS | Deferred (consent/abuse risk) | Not enabled |
@@ -54,7 +54,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `addlist` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
 | `dellist` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
 | `update` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
-| `jeda` | STORE MENU | Not yet migrated | Workflow compatibility requires review |
+| `jeda` | STORE MENU | Implemented (unit-tested module) | src/features/legacy-utilities.js |
 | `tambah` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
 | `kurang` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
 | `kali` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
@@ -93,7 +93,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `jualkayu` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
 | `nebang` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
 | `goplanet` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
-| `jualbahankimia` | RPG GAMES | Not yet migrated | External dependency/legacy behavior needs review |
+| `jualbahankimia` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
 | `play` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/network.js |
 | `ytmp3` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/downloaders.js |
 | `ytmp4` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/downloaders.js |
@@ -104,7 +104,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `tiktok` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/downloaders.js |
 | `tiktoknowm` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/downloaders.js |
 | `tiktokaudio` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/downloaders.js |
-| `mediafire` | DOWNLOADS MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `mediafire` | DOWNLOADS MENU | Limited safe alternative | src/features/legacy-utilities.js (link/fingerprint only; not original provider) |
 | `gitclone` | DOWNLOADS MENU | Implemented (unit-tested module) | src/features/network.js |
 | `afk` | GROUP MENU | Implemented (unit-tested module) | src/commands.js |
 | `welcome` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
@@ -143,17 +143,17 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `casino` | GAME MENU | Deferred (consent/abuse risk) | Not enabled |
 | `delcasino` | GAME MENU | Deferred (consent/abuse risk) | Not enabled |
 | `lirik` | SEARCH MENU | Implemented (unit-tested module) | src/features/network.js |
-| `grupwa` | SEARCH MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `pinterest` | SEARCH MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `grupwa` | SEARCH MENU | Limited safe alternative | src/features/legacy-utilities.js (link/fingerprint only; not original provider) |
+| `pinterest` | SEARCH MENU | Limited safe alternative | src/features/legacy-utilities.js (link/fingerprint only; not original provider) |
 | `ytsearch` | SEARCH MENU | Implemented (unit-tested module) | src/features/network.js |
-| `searchbyimage` | SEARCH MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `cecan` | RANDOM MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `cogan` | RANDOM MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `waifu` | RANDOM MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `searchbyimage` | SEARCH MENU | Limited safe alternative | src/features/legacy-utilities.js (link/fingerprint only; not original provider) |
+| `cecan` | RANDOM MENU | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `cogan` | RANDOM MENU | Original local alternative | src/features/legacy-utilities.js (local original art) |
+| `waifu` | RANDOM MENU | Original local alternative | src/features/legacy-utilities.js (local original art) |
 | `topglobal` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `toplocal` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `buylimit` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
-| `buyglimit` | BALANCE MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `buyglimit` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `transfer` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `limit` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `balance` | BALANCE MENU | Implemented (unit-tested module) | src/features/economy.js |
@@ -166,17 +166,17 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `listimg` | STORAGE | Implemented (unit-tested module) | src/features/media-library.js |
 | `listvid` | STORAGE | Implemented (unit-tested module) | src/features/media-library.js |
 | `fitnah` | BAILEYS | Deferred (consent/abuse risk) | Not enabled |
-| `nowa` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
-| `getquoted` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
+| `nowa` | BAILEYS | Limited safe alternative | src/features/legacy-utilities.js (link/fingerprint only; not original provider) |
+| `getquoted` | BAILEYS | Implemented (unit-tested module) | src/features/legacy-utilities.js |
 | `fakehidetag` | BAILEYS | Deferred (consent/abuse risk) | Not enabled |
 | `react` | BAILEYS | Implemented (unit-tested module) | src/commands.js (quoted-message reaction) |
-| `setcmd` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
-| `delcmd` | BAILEYS | Not yet migrated | External dependency/legacy behavior needs review |
-| `autoread` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `autobio` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `autorespond` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `anticall` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `autoblok212` | OWNERS MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `setcmd` | BAILEYS | Implemented (unit-tested module) | src/commands.js + moderation.js |
+| `delcmd` | BAILEYS | Implemented (unit-tested module) | src/commands.js + moderation.js |
+| `autoread` | OWNERS MENU | Implemented (unit-tested module) | src/features/owner-automation.js + index.js |
+| `autobio` | OWNERS MENU | Implemented (unit-tested module) | src/features/owner-automation.js + index.js |
+| `autorespond` | OWNERS MENU | Implemented (unit-tested module) | src/features/owner-automation.js + index.js |
+| `anticall` | OWNERS MENU | Implemented (unit-tested module) | src/features/owner-automation.js + index.js |
+| `autoblok212` | OWNERS MENU | Excluded (content/safety review) | Country-code blanket blocking deliberately not enabled; individual moderation only |
 | `join` | OWNERS MENU | Implemented (unit-tested module) | src/features/profile.js |
 | `self` | OWNERS MENU | Implemented (unit-tested module) | src/commands.js |
 | `public` | OWNERS MENU | Implemented (unit-tested module) | src/commands.js |
@@ -451,4 +451,5 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 - **Original local alternative:** a similarly named text effect exists as an original SVG/Sharp design, not the original proprietary TextPro render.
 - **Deferred:** requires opt-in/anti-spam, rights approval, other safety review or external provider investigation.
 - **Excluded:** not auto-enabled because of safety, user consent, licensing or privacy; not treated as a missing software bug.
-- **Not yet migrated:** absent from the target; no fake/inert entry is advertised as working in the bot menu.
+- **Limited safe alternative:** command returns a validated browser link or local fingerprint; it does **not** download MediaFire files, scrape Pinterest, join groups, enumerate WhatsApp numbers or perform internet reverse-image search.
+- **Not yet migrated:** zero remaining without a disposition in this ledger; this does not mean every original feature is restored.

@@ -12,14 +12,15 @@ The legacy help menu advertises **428 distinct commands** from 434 mentions acro
 
 | Audit state | Legacy keywords |
 |---|---:|
-| Implemented by readable local modules / tested at module level | **140** |
-| Original local visual alternatives (not exact proprietary copies) | **176** |
-| Not yet migrated | **25** |
+| Implemented by readable local modules / tested at module level | **151** |
+| Original local visual alternatives (not exact proprietary copies) | **184** |
+| Not yet migrated | **0** |
 | Deferred pending consent/abuse safeguards | **11** |
-| Excluded from automatic migration for safety/content review | **76** |
+| Excluded from automatic migration for safety/content review | **77** |
+| Limited safe alternatives (links/fingerprint, not original behavior) | **5** |
 | **Total** | **428** |
 
-"Implemented" does **not** mean every external provider and every WhatsApp account flow has passed live testing. Legacy parity is **NOT complete**. Some newly implemented commands are not present in the 428-command source listing, so the actual modern feature count differs.
+"Implemented" does **not** mean every external provider and every WhatsApp account flow has passed live testing. Legacy parity is **NOT complete**. All 173 formerly unimplemented keywords have been triaged and routed to real handlers or documented alternatives where safe; 5 provide limited link/fingerprint functionality and one additional country-code block command is deliberately excluded. Some newly implemented commands are not present in the 428-command source listing, so the actual modern feature count differs.
 
 ## What has been migrated in the readable build
 
@@ -44,8 +45,8 @@ The legacy help menu advertises **428 distinct commands** from 434 mentions acro
 
 ## Not yet migrated / purposely withheld
 
-- Hundreds of obsolete visual effect aliases and vendor-specific TextPro artwork; only independently recreated local styles are offered.
-- General-purpose MediaFire and arbitrary URL downloaders, Pinterest arbitrary image fetch and reverse-image search: untrusted URL/SSRF, privacy and provider challenges.
+- The 145 previously unimplemented TextPro keywords now produce distinct **original local procedural effects**. Proprietary TextPro artwork, logos, animations and exact template parity are not provided.
+- MediaFire/Pinterest/grupwa browser links and a local image SHA-256 fingerprint are available as limited alternatives; automated arbitrary file downloads, scraped image retrieval and remote reverse-image matching remain withheld.
 - Legacy anonymous menfess messaging to users who did **not** opt in; contact consent is required.
 - Mass broadcast, messages simulating another person, impersonation or fake quotes: abuse/spam risk. An opt-in, non-spamming consent workflow would be needed before enabling any broadcast.
 - Adult/NSFW/asupan sources: not part of the automatically enabled bot while content, age restrictions and consent remain unreviewed.

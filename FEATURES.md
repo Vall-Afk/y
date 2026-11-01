@@ -110,10 +110,14 @@ Additional legacy aliases: `changewelcome`, `changeleft`, `dashboard` (main owne
 
 ## Current migration accounting
 
-Audit of the legacy help menu: **140 readable handler keywords, 31 original local visual alternatives, 175 not migrated, 11 privacy/abuse deferred, 76 content/safety excluded**. Total **428 distinct advertised legacy keywords**. This is a phased project, not complete old feature parity. Details and source locations: [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md).
+Audit of the legacy help menu: **151 readable handler keywords, 31 original local visual alternatives, 175 not migrated, 11 privacy/abuse deferred, 76 content/safety excluded**. Total **428 distinct advertised legacy keywords**. This is a phased project, not complete old feature parity. Details and source locations: [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md).
 
 Legacy local utilities: `attp` (FFmpeg animated sticker), `emojimix` (original WebP composition), `nuliskiri`, `nuliskanan`, `foliokiri`, `foliokanan` (notebook PNG), `cecan`, `cogan`, `waifu` (original illustrated avatars), `jeda` (bounded delay), `getquoted` (quoted text only), `nowa` (wa.me link only). Limited link/fingerprint alternatives: `mediafire` (file-page link only), `pinterest`/`grupwa` (browser search links only), `searchbyimage` (local SHA-256 only, not reverse-image search).
 
 Owner automation: persisted opt-in `autoread`, `autobio`, `autorespond`, `anticall` (OFF by default), requiring owner DM and live WhatsApp tests. `autoblok212` refuses blanket country-code blocking. `setcmd`/`delcmd` are safe group-admin exact-keyword response aliases, not executable plugins or built-in overrides.
 
 `buyglimit`: transactional 250-coin purchase of 10 shared daily API requests/group, consumed after personal quotas. `jualbahankimia`: virtual chemical RPG item with bounded sale and inventory normalization.
+
+## Legacy 173-keyword closure (not full original parity)
+
+The 173 names formerly marked *Not yet migrated* have now been triaged: 145 receive unique original TextPro-style renderings, 8 more receive original emoji/notebook/avatar images, 11 have executable handlers (owner controls, group quota, RPG chemistry, aliases and local utilities), 5 are explicitly limited browser-link/fingerprint substitutes, 3 were already implemented but misclassified in the old ledger, and `autoblok212` is deliberately excluded from country-code-wide blocking. No provider scraping, arbitrary network downloads, account enumeration or automatic discriminatory blocking is claimed. See LEGACY_COMMAND_MATRIX.md for each keyword.
