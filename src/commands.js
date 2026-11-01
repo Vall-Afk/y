@@ -8,15 +8,17 @@ const { GAME_COMMANDS, handleGames, GameHub } = require('./features/games');
 const { NET_COMMANDS, handleNetwork } = require('./features/network');
 const { RPG_COMMANDS, handleRpg, RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
+const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
 const MENU_COMMANDS = new Set([
   'menu','help','allmenu','menugroup','menugrup','menumedia','menutools',
-  'menugame','menurpg','menuekonomi','menudownload','menuowner'
+  'menugame','menurpg','menuekonomi','menudownload','menupremium','menuowner'
 ]);
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk','sticker','s','toimg']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
-  ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS
+  ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
+  ...JADIBOT_COMMANDS
 ]);
 
 function menu(config, section = 'menu') {
@@ -34,17 +36,18 @@ function menu(config, section = 'menu') {
     ekonomi: ['daily', 'balance', 'limit', 'buylimit', 'transfer 62xxx <koin>',
       'topglobal', 'toplocal', 'cekpremium', 'listpremium'],
     internet: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>'],
+    premium: ['jadibot 628xxxx (1 sesi)', 'cekjadibot', 'stopjadibot'],
     owner: ['mode public|private', 'self', 'public', 'addpremium 62xxx <hari>', 'delpremium 62xxx']
   };
   const names = {
     umum: 'UMUM', grup: 'GRUP', media: 'MEDIA', tools: 'TOOLS',
-    game: 'GAME', rpg: 'RPG', ekonomi: 'EKONOMI', internet: 'INTERNET', owner: 'OWNER'
+    game: 'GAME', rpg: 'RPG', ekonomi: 'EKONOMI', internet: 'INTERNET', premium: 'PREMIUM JADIBOT', owner: 'OWNER'
   };
   const aliases = {
     menu: 'all', help: 'all', allmenu: 'all',
     menugroup: 'grup', menugrup: 'grup', menumedia: 'media',
     menutools: 'tools', menugame: 'game', menurpg: 'rpg', menuekonomi: 'ekonomi',
-    menudownload: 'internet', menuowner: 'owner'
+    menudownload: 'internet', menupremium: 'premium', menuowner: 'owner'
   };
   const target = aliases[section] || section;
   const keys = target === 'all' ? Object.keys(parts) : [target];
@@ -56,7 +59,7 @@ function menu(config, section = 'menu') {
 }
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   async function handle(sock, message) {
@@ -116,6 +119,14 @@ function createRouter(config, store, logger, {
         if (!['public', 'private'].includes(choice)) return reply('Contoh: mode private');
         await store.setMode(choice);
         return reply('Mode berhasil diatur: ' + choice);
+      }
+      if (JADIBOT_COMMANDS.has(cmd.name)) {
+        if (!subbot) return reply('Jadibot hanya bisa diakses lewat bot utama.');
+        if (group) return reply('Gunakan jadibot melalui chat pribadi bot utama, bukan grup.');
+        if (['cekjadibot','statusjadibot','listjadibot'].includes(cmd.name))
+          return reply(subbot.describe(sender, owner));
+        if (cmd.name === 'stopjadibot') return reply(await subbot.stop(sender, owner));
+        return reply(await subbot.start(sender, cmd.args[0], sock.user?.id));
       }
       if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' ')));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;

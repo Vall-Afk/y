@@ -13,6 +13,7 @@ const { Economy } = require('./features/economy');
 const { GameHub } = require('./features/games');
 const { RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
+const { SubBotManager } = require('./subbot');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -26,8 +27,39 @@ async function main() {
   const games = new GameHub();
   const rpg = new RpgService(economy);
   const afk = new Away();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk });
+  const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
+  await childStore.init();
+  const childRouter = createRouter(config, childStore, logger, { economy, games: new GameHub(), rpg, afk: new Away() });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
+
+  async function handleParticipants(client, event, groupStore) {
+    if (!isGroup(event?.id) || !['add', 'remove'].includes(event.action)) return;
+    const flags = groupStore.group(event.id);
+    if ((event.action === 'add' && !flags.welcome) ||
+        (event.action === 'remove' && !flags.goodbye)) return;
+    try {
+      for (const person of (event.participants || []).slice(0, 8)) {
+        const who = typeof person === 'string' ? person : person.id;
+        if (!who) continue;
+        const action = event.action === 'add' ? 'Selamat datang' : 'Sampai jumpa';
+        await client.sendMessage(event.id, { text: action + ', @' + who.split('@')[0] + '!', mentions: [who] });
+      }
+    } catch (err) { logger.warn({ error: err.message }, 'Group participant event failed'); }
+  }
+
+  const subbot = new SubBotManager({
+    config, economy, logger, makeSocket: makeWASocket,
+    authState: useMultiFileAuthState, browsers: Browsers, disconnectReason: DisconnectReason,
+    onMessage: (client, message) => childRouter.handle(client, message),
+    onParticipants: (client, event) => handleParticipants(client, event, childStore),
+    notify: async (to, body) => {
+      if (!socket || !connected) throw new Error('Main bot is not connected');
+      await socket.sendMessage(to, { text: body });
+    },
+    getPrimaryId: () => socket?.user?.id || ''
+  });
+  await subbot.init();
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -72,19 +104,8 @@ async function main() {
           await router.handle(sock, message);
         }
       });
-      sock.ev.on('group-participants.update', async event => {
-        if (socket !== sock || !isGroup(event?.id) || !['add', 'remove'].includes(event.action)) return;
-        const flags = store.group(event.id);
-        if (event.action === 'add' && !flags.welcome || event.action === 'remove' && !flags.goodbye) return;
-        try {
-          const participants = (event.participants || []).slice(0, 8);
-          for (const person of participants) {
-            const who = typeof person === 'string' ? person : person.id;
-            if (!who) continue;
-            const action = event.action === 'add' ? 'Selamat datang' : 'Sampai jumpa';
-            await sock.sendMessage(event.id, { text: action + ', @' + who.split('@')[0] + '!', mentions: [who] });
-          }
-        } catch (err) { logger.warn({ error: err.message }, 'Group participant event failed'); }
+      sock.ev.on('group-participants.update', event => {
+        if (socket === sock) void handleParticipants(sock, event, store);
       });
     } catch (err) {
       logger.error({ error: err.message }, 'Connection initialization failed');
@@ -98,6 +119,7 @@ async function main() {
     if (stopping) return;
     stopping = true;
     if (timer) clearTimeout(timer);
+    await subbot.shutdown();
     try { socket?.end(new Error('Shutdown')); } catch {}
     await new Promise(resolve => health.close(resolve));
     process.exitCode = 0;
