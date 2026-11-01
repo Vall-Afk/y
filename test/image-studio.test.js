@@ -20,9 +20,9 @@ test('local image effects generate valid JPEG or transparent PNG, keep bounded d
     assert.ok(out.length<5*1024*1024,command);
     assert.equal(meta.format,command==='circle'?'png':'jpeg',command);
   }
-  await assert.rejects(imageTransform(src,'blur',['999']),/Blur/);
-  await assert.rejects(imageTransform(src,'rotate',['45']),/rotate/);
-  await assert.rejects(imageTransform(src,'resize',['900000']),/resize/);
+  assert.throws(()=>imageTransform(src,'blur',['999']),/Blur/);
+  assert.throws(()=>imageTransform(src,'rotate',['45']),/rotate/);
+  assert.throws(()=>imageTransform(src,'resize',['900000']),/resize/);
 });
 test('Brat and quoted-chat stickers are WebP and reject unsafe text',async()=>{
   const brat=await textImageSticker('HELLO BEAUTÉ');
