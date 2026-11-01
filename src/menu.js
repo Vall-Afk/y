@@ -15,6 +15,9 @@ const SECTIONS = Object.freeze([
     id: 'group', icon: '♧', idTitle: 'MANAJEMEN GRUP', enTitle: 'GROUP MANAGEMENT',
     commands: ['groupinfo', 'welcome on|off', 'left on|off', 'antilink on|off', 'antiwame on|off',
       'setwelcome <teks>', 'setleft <teks>', 'delsetwelcome', 'delsetleft',
+      'antispam on|off', 'warn @user', 'unwarn @user', 'listwarn',
+      'rules', 'setrules <teks>', 'addresponse key | reply',
+      'listresponse', 'setopen 08:00', 'setclose 22:00', 'listschedule',
       'tagall [teks]', 'hidetag [teks]', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <teks>']
   },

@@ -15,6 +15,7 @@ const { RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
 const { SubBotManager } = require('./subbot');
 const { GroupCatalog } = require('./features/catalog');
+const { ModerationStore, runGroupSchedules } = require('./features/moderation');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -30,12 +31,17 @@ async function main() {
   const afk = new Away();
   const catalog = new GroupCatalog(path.join(config.dataDir, 'group-catalog.json'));
   await catalog.init();
+  const moderation = new ModerationStore(path.join(config.dataDir, 'moderation.json'));
+  await moderation.init();
   const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
   await childStore.init();
   const childCatalog = new GroupCatalog(path.join(config.dataDir, 'jadibot', 'group-catalog.json'));
   await childCatalog.init();
+  const childModeration = new ModerationStore(path.join(config.dataDir, 'jadibot', 'moderation.json'));
+  await childModeration.init();
   const childRouter = createRouter(config, childStore, logger, {
-    economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog
+    economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog,
+    moderation: childModeration
   });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
 
@@ -81,7 +87,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -137,10 +143,28 @@ async function main() {
       }
     } finally { connecting = false; }
   }
+  let scheduleRunning = false;
+  const mainScheduleInProgress = new Set(), childScheduleInProgress = new Set();
+  const scheduleTimer = setInterval(() => {
+    if (stopping || scheduleRunning) return;
+    scheduleRunning = true;
+    (async () => {
+      if (connected && socket) await runGroupSchedules({
+        moderation, socket, logger, inProgress:mainScheduleInProgress
+      });
+      const child = subbot.slot?.socket;
+      if (child && subbot.slot?.status === 'online')
+        await runGroupSchedules({ moderation:childModeration, socket:child, logger,
+          inProgress:childScheduleInProgress });
+    })().catch(err => logger.warn({error:err.message},'Schedule tick failed'))
+      .finally(() => {scheduleRunning = false;});
+  }, 30000);
+  scheduleTimer.unref?.();
   async function shutdown() {
     if (stopping) return;
     stopping = true;
     if (timer) clearTimeout(timer);
+    clearInterval(scheduleTimer);
     await subbot.shutdown();
     try { socket?.end(new Error('Shutdown')); } catch {}
     await new Promise(resolve => health.close(resolve));

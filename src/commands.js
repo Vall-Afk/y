@@ -12,6 +12,7 @@ const { Away } = require('./features/afk');
 const { CATALOG_COMMANDS, handleCatalog } = require('./features/catalog');
 const { menu } = require('./menu');
 const { tr } = require('./i18n');
+const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
 const MENU_COMMANDS = new Set([
@@ -24,12 +25,12 @@ const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
-  ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS
+  ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   async function handle(sock, message) {
@@ -52,7 +53,8 @@ function createRouter(config, store, logger, {
       const notice = afk.activity(sender, message, lang);
       if (notice) await sock.sendMessage(chat, { text: notice }).catch(() => {});
     }
-    if (!cmd && !linkViolation) return;
+    if (!cmd && !linkViolation && (!group || !moderation ||
+      !(moderation.get(chat).antispam || Object.keys(moderation.get(chat).responses).length))) return;
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
     let rolePromise;
     const roles = async () => {
@@ -61,7 +63,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, fetcher, lang, t };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, fetcher, lang, t };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -70,6 +72,7 @@ function createRouter(config, store, logger, {
           if (!cmd) return;
         }
       }
+      if (await inspectModeration(ctx, spamDetector)) return;
       if (!cmd) return;
       const prev = recent.get(sender) || 0;
       const current = now();
@@ -126,6 +129,7 @@ function createRouter(config, store, logger, {
       if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' '), lang));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;
       if (CATALOG_COMMANDS.has(cmd.name) && await handleCatalog(ctx)) return;
+      if (MOD_COMMANDS.has(cmd.name) && await handleModeration(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
