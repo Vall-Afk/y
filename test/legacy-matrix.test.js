@@ -3,6 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
+const {ALL_COMMANDS}=require('../src/commands');
 test('legacy command audit enumerates all 428 unique old names and honest statuses',()=>{
   const body=fs.readFileSync(path.join(root,'LEGACY_COMMAND_MATRIX.md'),'utf8');
   const rows=[...body.matchAll(/^\| \x60([a-zA-Z0-9_]+)\x60 \| ([^|]+) \| ([^|]+) \| ([^|]+) \|$/gm)];
@@ -17,6 +18,10 @@ test('legacy command audit enumerates all 428 unique old names and honest status
     'Original local alternative':184,
     'Limited safe alternative':5
   });
+  for(const row of rows){
+    if(['Implemented (unit-tested module)','Original local alternative','Limited safe alternative'].includes(row[3].trim()))
+      assert.ok(ALL_COMMANDS.has(row[1]),'Audited keyword has no registered handler: '+row[1]);
+  }
   for(const word of ['ytmp3','stickerwm','setwelcome','goplanet','addstik','lirik']){
     assert.match(body,new RegExp('^\\| \\x60'+word+'\\x60','m'));
   }

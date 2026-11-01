@@ -26,3 +26,20 @@ test('procedural aliases are distinct valid local PNG and escape markup',async()
   assert.match(svg.toString(),/&lt;script&gt;/);
   assert.doesNotMatch(svg.toString(),/<script>/);
 });
+
+test('paginated TextFX listing is available without a prefix',async()=>{
+  const {createRouter}=require('../src/commands');
+  const {loadConfig}=require('../src/config');
+  const sent=[],sock={user:{id:'6289999999999@s.whatsapp.net'},
+    sendMessage:async(_to,body)=>sent.push(body)};
+  const router=createRouter(loadConfig({OWNER_NUMBER:'6287721373781'}),
+    {mode:'public',group:()=>({})},{warn(){}},
+    {now:(()=>{let n=1;return()=>n+=2000;})()});
+  const msg=text=>({key:{remoteJid:'6281111111111@s.whatsapp.net'},message:{conversation:text}});
+  await router.handle(sock,msg('menutextpro'));
+  assert.match(sent.at(-1).text,/TEXT EFFECTS|EFEK TEKS/);
+  await router.handle(sock,msg('textfx list 5'));
+  assert.match(sent.at(-1).text,/TextFX original alternatives \(5\/5\)/);
+  await router.handle(sock,msg('textfx list 6'));
+  assert.match(sent.at(-1).text,/1-5/);
+});
