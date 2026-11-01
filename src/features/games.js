@@ -1,6 +1,7 @@
 'use strict';
 const { randomInt } = require('node:crypto');
 const { jid } = require('../util');
+const { englishGame } = require('./english-output');
 const GAME_COMMANDS = new Set(['tictactoe','ttt','tttmove','delttt','tebakangka','jawab','nyerah']);
 const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 class GameHub {
@@ -82,24 +83,25 @@ class GameHub {
   }
 }
 async function handleGames(ctx) {
-  const { cmd, games, chat, sender, reply, message, roles, owner, config, sock } = ctx;
+  const { cmd, games, chat, sender, reply, message, roles, owner, config, sock, lang } = ctx;
+  const en = text => englishGame(text, lang);
   if (!GAME_COMMANDS.has(cmd.name)) return false;
-  if (!games) { await reply('Game belum tersedia.'); return true; }
+  if (!games) { await reply(lang === 'en' ? 'Games are unavailable.' : 'Game belum tersedia.'); return true; }
   const ctxInfo = message.message?.extendedTextMessage?.contextInfo || {};
   const participant = jid((ctxInfo.mentionedJid || [])[0] || '');
   if (cmd.name === 'tictactoe' || cmd.name === 'ttt') {
-    if (!participant) { await reply('Tandai lawan: !ttt @anggota'); return true; }
-    const text = games.beginTTT(chat, sender, participant);
+    if (!participant) { await reply(lang === 'en' ? 'Mention an opponent: ttt @member' : 'Tandai lawan: ttt @anggota'); return true; }
+    const text = en(games.beginTTT(chat, sender, participant));
     await sock.sendMessage(chat, { text, mentions: [sender, participant] });
   } else if (cmd.name === 'tttmove') {
-    await reply(games.moveTTT(chat, sender, Number(cmd.args[0])));
+    await reply(en(games.moveTTT(chat, sender, Number(cmd.args[0]))));
   } else if (cmd.name === 'delttt') {
     let isAdmin = owner;
     if (chat.endsWith('@g.us') && !isAdmin) isAdmin = (await roles()).senderAdmin;
-    await reply(games.cancel(chat, sender, isAdmin));
-  } else if (cmd.name === 'tebakangka') await reply(games.guessStart(chat));
-  else if (cmd.name === 'jawab') await reply(games.guess(chat, Number(cmd.args[0])));
-  else if (cmd.name === 'nyerah') await reply(games.surrender(chat));
+    await reply(en(games.cancel(chat, sender, isAdmin)));
+  } else if (cmd.name === 'tebakangka') await reply(en(games.guessStart(chat)));
+  else if (cmd.name === 'jawab') await reply(en(games.guess(chat, Number(cmd.args[0]))));
+  else if (cmd.name === 'nyerah') await reply(en(games.surrender(chat)));
   return true;
 }
 module.exports = { GameHub, GAME_COMMANDS, handleGames };

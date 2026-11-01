@@ -1,6 +1,7 @@
 'use strict';
 const { randomInt } = require('node:crypto');
 const { userFrom, validUser } = require('./economy');
+const { englishRpg } = require('./english-output');
 
 const RPG_COMMANDS = new Set([
   'joinrpg','inventory','rpgshop','level','mining','mine','nebang','mancing',
@@ -101,35 +102,36 @@ class RpgService {
   }
 }
 async function handleRpg(ctx) {
-  const { cmd, rpg, sender, accountSender, reply } = ctx;
+  const { cmd, rpg, sender, accountSender, reply, lang } = ctx;
+  const en = text => englishRpg(text, lang);
   const account = accountSender || sender;
   if (!RPG_COMMANDS.has(cmd.name)) return false;
-  if (!rpg) { await reply('RPG belum aktif.'); return true; }
-  if (cmd.name === 'joinrpg') { await reply(await rpg.join(account)); return true; }
+  if (!rpg) { await reply(lang === 'en' ? 'RPG is unavailable.' : 'RPG belum aktif.'); return true; }
+  if (cmd.name === 'joinrpg') { await reply(en(await rpg.join(account))); return true; }
   if (cmd.name === 'inventory' || cmd.name === 'level') {
     const current = rpg.snapshot(account);
-    await reply(current ? status(current) : 'Daftar dulu: !joinrpg');
+    await reply(en(current ? status(current) : 'Daftar dulu: !joinrpg'));
     return true;
   }
   if (cmd.name === 'rpgshop') {
-    await reply('*RPG Shop*\n' + Object.entries(ITEMS).map(([k, p]) => k + ' beli ' + p.buy + ', jual ' + p.sell).join('\n') +
-      '\n!buy <item> <jumlah> / !sell <item> <jumlah>');
+    await reply('*RPG Shop*\n' + Object.entries(ITEMS).map(([k, p]) => k + (lang === 'en' ? ' buy ' : ' beli ') + p.buy + (lang === 'en' ? ', sell ' : ', jual ') + p.sell).join('\n') +
+      '\nbuy <item> <qty> / sell <item> <qty>');
     return true;
   }
   if (['mining','mine','nebang','mancing','hunt','adventure'].includes(cmd.name)) {
-    await reply(await rpg.action(account, cmd.name === 'mine' ? 'mining' : cmd.name));
+    await reply(en(await rpg.action(account, cmd.name === 'mine' ? 'mining' : cmd.name)));
     return true;
   }
-  if (cmd.name === 'heal') { await reply(await rpg.heal(account)); return true; }
+  if (cmd.name === 'heal') { await reply(en(await rpg.heal(account))); return true; }
   const named = { jualikan: 'fish', jualkayu: 'wood', jualcoal: 'coal', jualstone: 'stone' };
   if (Object.hasOwn(named, cmd.name)) {
     const qty = cmd.args.length ? Number(cmd.args[0]) : 1;
-    await reply(await rpg.trade(account, 'sell', named[cmd.name], qty));
+    await reply(en(await rpg.trade(account, 'sell', named[cmd.name], qty)));
     return true;
   }
   if (['buy','sell'].includes(cmd.name)) {
     const qty = Number(cmd.args[1]);
-    await reply(await rpg.trade(account, cmd.name, cmd.args[0] || '', qty));
+    await reply(en(await rpg.trade(account, cmd.name, cmd.args[0] || '', qty)));
   }
   return true;
 }

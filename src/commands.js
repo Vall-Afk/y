@@ -49,7 +49,7 @@ function createRouter(config, store, logger, {
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
     if (cmd?.name !== 'afk') {
-      const notice = afk.activity(sender, message);
+      const notice = afk.activity(sender, message, lang);
       if (notice) await sock.sendMessage(chat, { text: notice }).catch(() => {});
     }
     if (!cmd && !linkViolation) return;
@@ -117,7 +117,7 @@ function createRouter(config, store, logger, {
         const method = cmd.args[0]?.toLowerCase() === 'qr' ? 'qr' : 'pairing';
         return reply(await subbot.start(accountSender, method === 'qr' ? undefined : cmd.args[0], sock.user?.id, method));
       }
-      if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' ')));
+      if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' '), lang));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;
       if (CATALOG_COMMANDS.has(cmd.name) && await handleCatalog(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;

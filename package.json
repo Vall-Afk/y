@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node --env-file=.env src/index.js",
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/commands.js && node --check src/media.js && node --check src/config.js && node --check src/store.js && node --check src/util.js && node --check src/features/groups.js && node --check src/features/tools.js && node --check src/features/economy.js && node --check src/features/games.js && node --check src/features/network.js && node --check src/features/rpg.js && node --check src/features/afk.js && node --check src/subbot.js && node --check src/features/sticker-tools.js && node --check src/i18n.js && node --check src/menu.js && node --check src/features/catalog.js",
+    "check": "node --check src/index.js && node --check src/commands.js && node --check src/media.js && node --check src/config.js && node --check src/store.js && node --check src/util.js && node --check src/features/groups.js && node --check src/features/tools.js && node --check src/features/economy.js && node --check src/features/games.js && node --check src/features/network.js && node --check src/features/rpg.js && node --check src/features/afk.js && node --check src/subbot.js && node --check src/features/sticker-tools.js && node --check src/i18n.js && node --check src/menu.js && node --check src/features/catalog.js && node --check src/features/english-output.js",
     "audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
