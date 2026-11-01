@@ -225,6 +225,29 @@ Fitur downloader TikTok/YouTube/Instagram/MediaFire, fitur search tertentu, anim
 
 **Jadibot + English:** if you send language en before starting Jadibot, connection status, pairing instructions and QR captions are also presented in English.
 
+### Troubleshooting: `spawn EPERM` saat `npm.cmd test` di Windows
+
+Jika Node.js menampilkan `Error: spawn EPERM` pada beberapa **nama file test** (misalnya `test\\migration.test.js`) dan stack trace berasal dari `node:internal/test_runner/runner`, berarti proses pengujian Node tidak berhasil membuat **worker child process**. Ini **bukan** bukti bahwa assertion/fitur di dalam file tersebut gagal; test file tersebut mungkin belum sempat dijalankan. Biasanya masalah berkaitan dengan pembatasan proses Windows, software keamanan, atau tekanan sumber daya saat banyak worker dimulai serentak.
+
+Mulai versi ini `npm.cmd test` menjalankan file test **satu per satu** dengan `node --test --test-concurrency=1`. Tes tetap terisolasi antarfile dan semua assertion tetap dijalankan. Mode paralel opsional hanya untuk lingkungan yang mendukung: `npm.cmd run test:parallel`.
+
+Jika masih terjadi `spawn EPERM`, tutup instance bot lain/terminal Node yang tidak diperlukan, buka terminal PowerShell biasa (tidak harus Administrator), lalu jalankan:
+
+~~~powershell
+Set-Location D:\y
+node --version
+npm.cmd test
+node --test --test-concurrency=1 .\test\migration.test.js
+node --test --test-concurrency=1 .\test\image-studio.test.js
+node --test --test-concurrency=1 .\test\rental.test.js
+node --test --test-concurrency=1 .\test\syntax-check.test.js
+npm.cmd run check
+~~~
+
+Jika hanya satu test gagal, kirim **error assertion atau stack trace** yang baru. Jika bahkan satu file menghasilkan `spawn EPERM`, periksa kebijakan endpoint/security atau proteksi folder Windows dan apakah `node.exe` diizinkan membuat child process; jangan mematikan antivirus atau mengubah kebijakan PowerShell secara global. `npm.cmd run check` menjalankan pemeriksaan sintaks secara terpisah dan bukan pengganti semua tes.
+
+**Peringatan `npm warn install-scripts` bukan error test:** npm dapat menahan skrip instalasi dari `ffmpeg-static`, `protobufjs`, atau `@whiskeysockets/baileys` sampai pengguna meninjau dan menyetujuinya. Jalankan `npm.cmd install-scripts ls` untuk memeriksa daftar dan hanya setujui skrip paket yang sudah diverifikasi dan dipercaya. Bila `ffmpeg-static` belum memasang binary, fitur konversi video/audio memerlukan FFmpeg terpasang terpisah; pengujian unit saja tidak membuktikan binary FFmpeg tersedia.
+
 ### Troubleshooting: npm.cmd run check seems stuck on Windows
 
 Versions before the syntax-check progress utility chained many node --check calls without printing individual progress. The new npm.cmd run check checks all JavaScript files under src/, prints each filename and the result, and stops with a clear error if one check exceeds **20 seconds**. This is a diagnostic timeout, not a promise that every computer can check every file in under 20 seconds. If it fails, send the last filename/error; try node --version and node --check .\src\index.js to isolate the problem. Do not disable antivirus or change PowerShell execution policy. Remember that node --check only checks syntax; it does not connect to WhatsApp or launch the bot.

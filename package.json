@@ -9,9 +9,10 @@
   },
   "scripts": {
     "start": "node --env-file=.env src/index.js",
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "check": "node scripts/check-syntax.js",
-    "audit": "npm audit --omit=dev --audit-level=high"
+    "audit": "npm audit --omit=dev --audit-level=high",
+    "test:parallel": "node --test"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "6.7.24",
