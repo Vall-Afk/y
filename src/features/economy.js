@@ -146,61 +146,61 @@ function numberFrom(args, message) {
   return '';
 }
 async function handleEconomy(ctx) {
-  const { cmd, economy, reply, message, sender, accountSender, owner, config, roles, chat, subbot } = ctx;
+  const { cmd, economy, reply, message, sender, accountSender, owner, config, roles, chat, subbot, t, lang } = ctx;
   const account = accountSender || sender;
   if (!ECONOMY_COMMANDS.has(cmd.name)) return false;
-  if (!economy) { await reply('Database ekonomi belum tersedia.'); return true; }
+  if (!economy) { await reply(t('economyMissing')); return true; }
   const value = economy.get(account);
   if (cmd.name === 'balance' || cmd.name === 'limit' || cmd.name === 'cekpremium') {
-    if (cmd.name === 'balance') await reply('Saldo: ' + value.balance + ' koin.');
-    else if (cmd.name === 'limit') await reply('Limit: ' + (owner || value.premium ? 'Unlimited' : value.quota) + '\nPremium: ' + (value.premium ? 'Aktif' : 'Tidak'));
-    else await reply('Premium: ' + (owner || value.premium ? 'Aktif' : 'Tidak aktif') + (value.premium ? '\nSampai: ' + new Date(value.premiumUntil).toLocaleDateString('id-ID') : ''));
+    if (cmd.name === 'balance') await reply(t('balance',{amount:value.balance}));
+    else if (cmd.name === 'limit') await reply(t('quota',{quota:owner || value.premium ? 'Unlimited' : value.quota, premium:t(value.premium ? 'premActive' : 'premInactive')}));
+    else await reply('Premium: ' + (owner || value.premium ? t('premActive') : t('premInactive')) + (value.premium ? '\n' + t('premUntil',{date:new Date(value.premiumUntil).toLocaleDateString(lang === 'en' ? 'en-US' : 'id-ID')}) : ''));
     return true;
   }
   if (cmd.name === 'daily') {
     const result = await economy.daily(account);
-    await reply(result.claimed ? 'Daily +120 koin! Saldo: ' + result.balance : 'Daily belum tersedia. Coba lagi dalam ' + Math.ceil(result.wait / 3600000) + ' jam.');
+    await reply(result.claimed ? t('dailyClaimed',{amount:result.balance}) : t('dailyCooldown',{hours:Math.ceil(result.wait / 3600000)}));
     return true;
   }
   if (cmd.name === 'buylimit') {
-    await reply(await economy.buyLimit(account) ? 'Berhasil membeli +10 limit untuk 100 koin.' : 'Saldo kurang dari 100 koin.');
+    await reply(await economy.buyLimit(account) ? t('buyLimitDone') : t('buyLimitInsufficient'));
     return true;
   }
   if (cmd.name === 'transfer') {
     const to = numberFrom(cmd.args[0], message);
     const amount = Number(cmd.args.at(-1));
-    if (!to || !Number.isSafeInteger(amount)) { await reply('Contoh: !transfer 62812xxxx 100'); return true; }
-    await reply(await economy.transfer(account, to, amount) ? 'Transfer ' + amount + ' koin berhasil.' : 'Saldo tidak mencukupi / penerima melebihi batas.');
+    if (!to || !Number.isSafeInteger(amount)) { await reply(t('transferUsage')); return true; }
+    await reply(await economy.transfer(account, to, amount) ? t('transferDone',{amount}) : t('transferFailed'));
     return true;
   }
   if (cmd.name === 'topglobal' || cmd.name === 'toplocal') {
     let ids = null;
     if (cmd.name === 'toplocal') {
-      if (!chat.endsWith('@g.us')) { await reply('Toplocal hanya di grup.'); return true; }
+      if (!chat.endsWith('@g.us')) { await reply(t('toplocalOnly')); return true; }
       const role = await roles();
       ids = (role.metadata?.participants || []).flatMap(p => [jid(p.id), jid(p.phoneNumber)].filter(validUser));
     }
     const top = economy.leaderboard(ids);
-    await reply('*Top saldo*\n' + (top.map((x, i) => (i + 1) + '. ***' + x.id.split('@')[0].slice(-4) + ': ' + x.balance + ' koin').join('\n') || 'Belum ada data.'));
+    await reply('*' + t('topBalance') + '*\n' + (top.map((x, i) => (i + 1) + '. ***' + x.id.split('@')[0].slice(-4) + ': ' + x.balance + ' koin').join('\n') || t('noData')));
     return true;
   }
   if (cmd.name === 'listpremium') {
-    if (!owner) { await reply('Khusus owner.'); return true; }
+    if (!owner) { await reply(t('ownerOnly')); return true; }
     const all = economy.listPremium();
-    await reply('*Premium*\n' + (all.map(x => x.id.split('@')[0] + ' — ' + new Date(x.until).toLocaleDateString('id-ID')).join('\n') || 'Belum ada.'));
+    await reply('*Premium*\n' + (all.map(x => x.id.split('@')[0] + ' — ' + new Date(x.until).toLocaleDateString('id-ID')).join('\n') || t('premiumEmpty')));
     return true;
   }
   if (!owner) { await reply('Khusus owner.'); return true; }
   const to = numberFrom(cmd.args[0], message);
-  if (!to) { await reply('Nomor tidak valid. Contoh: !addpremium 62812xxxx 30'); return true; }
+  if (!to) { await reply(t('premiumTarget')); return true; }
   if (cmd.name === 'addpremium') {
     const days = Number(cmd.args.at(-1));
     const until = await economy.premium(to, days);
-    await reply('Premium aktif hingga ' + new Date(until).toLocaleDateString('id-ID'));
+    await reply(t('premiumGranted',{date:new Date(until).toLocaleDateString(lang === 'en' ? 'en-US' : 'id-ID')}));
   } else if (cmd.name === 'delpremium') {
     await economy.revokePremium(to);
     await subbot?.refreshMembership?.(to);
-    await reply('Premium dicabut.');
+    await reply(t('premiumRevoked'));
   }
   return true;
 }
