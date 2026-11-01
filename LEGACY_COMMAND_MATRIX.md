@@ -6,8 +6,8 @@ This is an audit of **428 distinct advertised legacy keywords**, not proof that 
 
 | Status | Count |
 |---|---:|
-| Implemented (unit-tested module) | 135 |
-| Not yet migrated | 175 |
+| Implemented (unit-tested module) | 137 |
+| Not yet migrated | 173 |
 | Deferred (consent/abuse risk) | 11 |
 | Excluded (content/safety review) | 76 |
 | Original local alternative | 31 |
@@ -21,8 +21,8 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `donate` | MAIN MENU | Implemented (unit-tested module) | src/commands.js |
 | `dashboard` | MAIN MENU | Implemented (unit-tested module) | src/commands.js |
 | `owner` | MAIN MENU | Implemented (unit-tested module) | src/commands.js |
-| `cekdrive` | MAIN MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `cekbandwidth` | MAIN MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `cekdrive` | MAIN MENU | Implemented (unit-tested module) | src/features/tools.js (local filesystem) |
+| `cekbandwidth` | MAIN MENU | Implemented (unit-tested module) | src/features/tools.js (clear unsupported metric notice) |
 | `cekpremium` | MAIN MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `listpremium` | MAIN MENU | Implemented (unit-tested module) | src/features/economy.js |
 | `listsewa` | MAIN MENU | Implemented (unit-tested module) | src/features/rental.js |

@@ -12,9 +12,9 @@ The legacy help menu advertises **428 distinct commands** from 434 mentions acro
 
 | Audit state | Legacy keywords |
 |---|---:|
-| Implemented by readable local modules / tested at module level | **135** |
+| Implemented by readable local modules / tested at module level | **137** |
 | Original local visual alternatives (not exact proprietary copies) | **31** |
-| Not yet migrated | **175** |
+| Not yet migrated | **173** |
 | Deferred pending consent/abuse safeguards | **11** |
 | Excluded from automatic migration for safety/content review | **76** |
 | **Total** | **428** |
