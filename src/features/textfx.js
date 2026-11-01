@@ -244,6 +244,18 @@ async function textEffect(style,text){
 async function handleTextFx(ctx){
   const {cmd,lang,reply,sock,chat,message}=ctx;
   if(!TEXTFX_COMMANDS.has(cmd.name))return false;
+  if(cmd.name==='textfx'&&cmd.args[0]==='list'){
+    const page=cmd.args[1]===undefined?1:Number(cmd.args[1]);
+    const names=Object.keys(LEGACY_STYLES);
+    const pages=Math.ceil(names.length/30);
+    if(!Number.isInteger(page)||page<1||page>pages){
+      await reply('Use textfx list 1-'+pages);return true;
+    }
+    await reply('✦ Beauté. · TextFX original alternatives ('+page+'/'+pages+')\n'+
+      names.slice((page-1)*30,page*30).join(' · ')+
+      '\nExample: '+names[(page-1)*30]+' Beauté.');
+    return true;
+  }
   const style=cmd.name==='textfx'?cmd.args[0]:cmd.name;
   const body=(cmd.name==='textfx'?cmd.args.slice(1):cmd.args).join(' ');
   try{

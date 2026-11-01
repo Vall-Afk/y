@@ -10,7 +10,7 @@ const { NET_COMMANDS, handleNetwork } = require('./features/network');
 const { RPG_COMMANDS, handleRpg, RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
 const { CATALOG_COMMANDS, handleCatalog } = require('./features/catalog');
-const { menu } = require('./menu');
+const { menu, ALIASES } = require('./menu');
 const { tr } = require('./i18n');
 const { IMAGE_COMMANDS, handleImage } = require('./features/image-studio');
 const { MEDIA_COMMANDS, handleTranscode } = require('./features/transcode');
@@ -27,11 +27,7 @@ const { OWNER_AUTOMATION_COMMANDS, handleOwnerAutomation, autoRespondText } = re
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
-const MENU_COMMANDS = new Set([
-  'menu','help','allmenu','menugroup','menugrup','menumedia','menutools',
-  'menugame','menurpg','menuekonomi','menudownload','menupremium','menuowner',
-  'menustore','menutoko','menubahasa'
-]);
+const MENU_COMMANDS = new Set(Object.keys(ALIASES));
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
   'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([

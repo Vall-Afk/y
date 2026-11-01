@@ -29,7 +29,7 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'media', icon: '✎', idTitle: 'STIKER / MEDIA', enTitle: 'STICKERS / MEDIA',
-    commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)',
+    commands: ['sticker', 'toimg', 'attp <teks>', 'emojimix 😀+😎', 'nuliskiri <teks>', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)',
       'brat <teks>', 'qc (reply)', 'stickerwm Pack | Author', 'blur [1-30]', 'grayscale', 'invert',
       'rotate 90', 'flip', 'mirror', 'pixelate', 'circle', 'enhance', 'compress', 'resize 512',
       'tomp3 (reply)', 'toaudio (reply)', 'tovn (reply)', 'tovideo (reply sticker)',
@@ -48,7 +48,7 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'textfx', icon: '✧', idTitle: 'EFEK TEKS', enTitle: 'TEXT EFFECTS',
-    commands: ['textfx neon Beauté', 'neon <teks>', 'glitch <teks>', 'rainbow <teks>',
+    commands: ['textfx list [page]', 'textfx neon Beauté', 'neon <teks>', 'glitch <teks>', 'rainbow <teks>',
       'halloween <teks>', 'ice <teks>', 'fire <teks>', 'matrix <teks>',
       'snow <teks>', 'wood <teks>', 'metallic <teks>', 'space <teks>',
       'watercolor <teks>', 'christmas <teks>']
@@ -63,11 +63,11 @@ const SECTIONS = Object.freeze([
       'hunt', 'adventure', 'heal', 'buy <item> <jumlah>', 'sell <item> <jumlah>',
       'lebur [jumlah]', 'craft sword|pickaxe', 'equip sword|pickaxe',
       'killslime', 'killgoblin', 'killdevil', 'killbehemoth', 'killdemon',
-      'killdemonking', 'luckyday', 'goplanet', 'toprpg']
+      'killdemonking', 'luckyday', 'goplanet', 'jualbahankimia [jumlah]', 'toprpg']
   },
   {
     id: 'economy', icon: '◇', idTitle: 'EKONOMI', enTitle: 'ECONOMY',
-    commands: ['daily', 'balance', 'limit', 'buylimit', 'transfer 62xxx 100', 'topglobal',
+    commands: ['daily', 'balance', 'limit', 'buylimit', 'buyglimit (group)', 'transfer 62xxx 100', 'topglobal',
       'toplocal', 'cekpremium']
   },
   {

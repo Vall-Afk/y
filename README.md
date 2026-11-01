@@ -320,3 +320,7 @@ In a **private owner DM**, use `autoread on|off`, `autobio on|off`, `autorespond
 ### Group shared API quota and RPG chemistry (virtual only)
 
 `buyglimit` in a group spends **250 virtual coins** from the buyer for **10 shared daily API requests** usable after members' own daily quota is exhausted; `limit` displays remaining group bonus. Group purchases persist and are bounded to 10,000 shared daily requests per group. No real payment integration. `jualbahankimia [1–100]` sells the virtual `chemical` RPG item; obtain it by `buy chemical <qty>` or occasionally from `adventure`/`jelajah`. Legacy RPG data is normalized with the new item on access.
+
+### Browse 145 newly migrated TextPro-style aliases
+
+Use `menutextpro` or `textfx list 1` through `textfx list 5` to see all original local style names, then send `<style> <your text>`, e.g. `jewelry8 Beauté.`. The local renderer makes procedural artwork with distinct patterns and palettes per legacy keyword, not copies of the proprietary TextPro images.
