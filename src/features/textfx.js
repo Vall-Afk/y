@@ -19,7 +19,156 @@ const THEMES=Object.freeze({
   watercolor:{back:'#f7eafb',from:'#a341d8',to:'#f384af',stroke:'#9743a4'},
   christmas:{back:'#163628',from:'#ffffff',to:'#e7d86a',stroke:'#c11d35'}
 });
+
+const LEGACY_STYLES=Object.freeze({
+  "game8bit": "neon",
+  "layered": "wood",
+  "coolg": "rainbow",
+  "coolwg": "rainbow",
+  "realistic": "metallic",
+  "gtiktok": "metallic",
+  "stone": "wood",
+  "marvel": "rainbow",
+  "marvel2": "rainbow",
+  "pornhub": "metallic",
+  "avengers": "rainbow",
+  "metalg2": "metallic",
+  "lion": "space",
+  "wolf_bw": "space",
+  "wolf_g": "space",
+  "ninja": "space",
+  "bagel": "wood",
+  "blackpink": "space",
+  "water_pipe": "ice",
+  "sircuit": "metallic",
+  "discovery": "neon",
+  "metallic2": "metallic",
+  "fiction": "space",
+  "demon": "horror",
+  "transformer": "neon",
+  "berry": "rainbow",
+  "harry_potter": "metallic",
+  "embossed": "wood",
+  "broken": "horror",
+  "papercut": "wood",
+  "gradient": "rainbow",
+  "glossy": "rainbow",
+  "multicolor": "rainbow",
+  "neon_devil": "horror",
+  "underwater": "ice",
+  "bear": "space",
+  "wonderfulg": "space",
+  "luxury2": "metallic",
+  "gradient2": "rainbow",
+  "summer": "wood",
+  "engraved": "wood",
+  "summery": "wood",
+  "3dglue": "metallic",
+  "metaldark": "metallic",
+  "neonlight": "neon",
+  "oscar": "space",
+  "minion": "space",
+  "holographic": "rainbow",
+  "glossyb": "rainbow",
+  "deluxe2": "metallic",
+  "glossyc": "rainbow",
+  "fabric": "wood",
+  "neonc": "neon",
+  "newyear": "christmas",
+  "newyear2": "christmas",
+  "blood": "horror",
+  "darkg": "metallic",
+  "joker": "rainbow",
+  "wicker": "wood",
+  "firework": "horror",
+  "skeleton": "metallic",
+  "balloon": "space",
+  "balloon2": "space",
+  "balloon3": "space",
+  "balloon4": "space",
+  "balloon5": "space",
+  "balloon6": "space",
+  "balloon7": "space",
+  "steel": "metallic",
+  "gloss": "rainbow",
+  "denim": "wood",
+  "decorate": "wood",
+  "decorate2": "wood",
+  "peridot": "rainbow",
+  "rock": "wood",
+  "glass": "ice",
+  "glass2": "ice",
+  "glass3": "ice",
+  "glass4": "ice",
+  "glass5": "ice",
+  "glass6": "ice",
+  "glass7": "ice",
+  "glass8": "ice",
+  "captain_as2": "space",
+  "robot": "neon",
+  "equalizer": "neon",
+  "toxic": "horror",
+  "sparkling": "rainbow",
+  "sparkling2": "rainbow",
+  "sparkling3": "rainbow",
+  "sparkling4": "rainbow",
+  "sparkling5": "rainbow",
+  "sparkling6": "rainbow",
+  "sparkling7": "rainbow",
+  "decorative": "metallic",
+  "chocolate": "wood",
+  "strawberry": "rainbow",
+  "koifish": "ice",
+  "bread": "wood",
+  "blood2": "horror",
+  "neonligth2": "neon",
+  "thunder2": "horror",
+  "3dbox": "metallic",
+  "neon2": "neon",
+  "roadw": "metallic",
+  "bokeh": "neon",
+  "advanced": "metallic",
+  "dropwater": "ice",
+  "wall": "wood",
+  "chrismast": "christmas",
+  "honey": "ice",
+  "drug": "horror",
+  "marble": "wood",
+  "marble2": "wood",
+  "juice": "rainbow",
+  "rusty": "horror",
+  "abstra": "metallic",
+  "biscuit": "wood",
+  "scifi": "neon",
+  "purpleg": "space",
+  "shiny": "rainbow",
+  "jewelry": "rainbow",
+  "jewelry2": "rainbow",
+  "jewelry3": "rainbow",
+  "jewelry4": "rainbow",
+  "jewelry5": "rainbow",
+  "jewelry6": "rainbow",
+  "jewelry7": "rainbow",
+  "jewelry8": "rainbow",
+  "metalh": "metallic",
+  "golden": "metallic",
+  "glitter": "rainbow",
+  "glitter2": "rainbow",
+  "glitter3": "rainbow",
+  "glitter4": "rainbow",
+  "glitter5": "rainbow",
+  "glitter6": "rainbow",
+  "glitter7": "rainbow",
+  "metale": "metallic",
+  "carbon": "metallic",
+  "candy": "rainbow",
+  "metalb": "metallic",
+  "gemb": "rainbow",
+  "3dchrome": "metallic",
+  "metalb2": "metallic"
+});
 const ALIAS=Object.freeze({
+  ...LEGACY_STYLES,
   neon2:'neon',gneon:'neon',neonlight:'neon',neon_light:'neon',
   glitch2:'glitch',rainbow2:'rainbow',halloween2:'halloween',
   horror2:'horror',lava:'fire',magma:'fire',thunder:'fire',
@@ -39,7 +188,20 @@ function nameFor(input){
   return key;
 }
 function effectSvg(theme,text){
-  const selected=THEMES[nameFor(theme)];
+  const style=String(theme||'').toLowerCase();
+  const canonical=nameFor(style);
+  const selected=THEMES[canonical];
+  // Stable local procedural variations for each advertised legacy name.
+  // They are original artwork, not proprietary TextPro templates.
+  let seed=2166136261;
+  for(const char of style){seed=Math.imul(seed^char.codePointAt(0),16777619)>>>0;}
+  const variant=Object.hasOwn(LEGACY_STYLES,style);
+  const hue=seed%360;
+  const palette=variant?{...selected,
+    back:'hsl('+hue+',36%,13%)',
+    from:'hsl('+((hue+30)%360)+',93%,76%)',
+    to:'hsl('+((hue+168)%360)+',85%,57%)',
+    stroke:'hsl('+((hue+232)%360)+',70%,25%)'}:selected;
   if(typeof text!=='string'||!text.trim()||[...text].length>85)
     throw new Error('Text must be 1–85 characters.');
   const lines=splitText(text.trim(),85);
@@ -48,25 +210,33 @@ function effectSvg(theme,text){
   const start=256-(lines.length-1)*size*0.54;
   const tspan=lines.map((line,i)=>'<text x="512" y="'+(start+i*size*1.13)+
     '" font-size="'+size+'" font-weight="900" text-anchor="middle" '+
-    'font-family="Arial,Helvetica,sans-serif" stroke="'+selected.stroke+
+    'font-family="Arial,Helvetica,sans-serif" stroke="'+palette.stroke+
     '" stroke-width="3" paint-order="stroke" fill="url(#txt)">'+xmlSafe(line)+'</text>').join('');
-  const backdrop='<rect width="1024" height="512" rx="24" fill="'+selected.back+'"/>';
-  const stars=theme==='space'||theme==='snow'?
+  const backdrop='<rect width="1024" height="512" rx="24" fill="'+palette.back+'"/>';
+  const decor=variant?Array.from({length:20},(_,i)=>{
+    const x=(seed+i*173)%1024,y=((seed>>>8)+i*97)%512;
+    const r=4+((seed>>>4)+i*13)%34;
+    return i%3===0?'<circle cx="'+x+'" cy="'+y+'" r="'+r+
+      '" fill="hsl('+((hue+i*19)%360)+',90%,75%)" opacity=".18"/>':
+      '<path d="M'+x+' '+y+' l'+(r*2)+' '+(i%2?-r:r)+'" stroke="hsl('+((hue+i*17)%360)+
+      ',90%,75%)" stroke-width="'+(1+i%4)+'" opacity=".2"/>';
+  }).join(''):'';
+  const stars=canonical==='space'||canonical==='snow'?
     Array.from({length:16},(_,i)=>'<circle cx="'+(40+i*61)+'" cy="'+(20+(i*41)%390)+
       '" r="'+(2+i%4)+'" fill="#ffffff" opacity=".6"/>').join(''):'';
-  const matrix=theme==='matrix'?Array.from({length:12},(_,i)=>
+  const matrix=canonical==='matrix'?Array.from({length:12},(_,i)=>
     '<text x="'+(10+i*84)+'" y="'+(60+i%3*120)+'" fill="#227d47" opacity=".35" font-size="31">10101</text>').join(''):'';
-  const blur=selected.glow?'<g opacity=".72" filter="url(#blur)">'+tspan+'</g>':'';
-  const glitch=theme==='glitch'?'<g transform="translate(8,-4)" opacity=".5" fill="#f52b6c">'+tspan+'</g>':'';
+  const blur=palette.glow?'<g opacity=".72" filter="url(#blur)">'+tspan+'</g>':'';
+  const glitch=canonical==='glitch'?'<g transform="translate(8,-4)" opacity=".5" fill="#f52b6c">'+tspan+'</g>':'';
   return Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512">'+
     '<defs><linearGradient id="txt" x1="0" x2="1" y1="0" y2="1">'+
-    '<stop offset="0%" stop-color="'+selected.from+'"/><stop offset="100%" stop-color="'+
-    selected.to+'"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="9"/></filter></defs>'+
-    backdrop+stars+matrix+glitch+blur+tspan+'</svg>');
+    '<stop offset="0%" stop-color="'+palette.from+'"/><stop offset="100%" stop-color="'+
+    palette.to+'"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="9"/></filter></defs>'+
+    backdrop+decor+stars+matrix+glitch+blur+tspan+'</svg>');
 }
 async function textEffect(style,text){
-  const theme=nameFor(style);
-  const image=await sharp(effectSvg(theme,text),{limitInputPixels:1024*512})
+  nameFor(style);
+  const image=await sharp(effectSvg(style,text),{limitInputPixels:1024*512})
     .png({compressionLevel:8}).toBuffer();
   if(image.length>2*1024*1024)throw new Error('Effect output too large.');
   return image;
@@ -85,4 +255,4 @@ async function handleTextFx(ctx){
   }
   return true;
 }
-module.exports={THEMES,ALIAS,TEXTFX_COMMANDS,nameFor,effectSvg,textEffect,handleTextFx};
+module.exports={THEMES,ALIAS,LEGACY_STYLES,TEXTFX_COMMANDS,nameFor,effectSvg,textEffect,handleTextFx};
