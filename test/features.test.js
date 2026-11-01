@@ -22,6 +22,7 @@ function msg(sender, text, mentionedJid) {
 function harness(storeOverrides = {}) {
   const flags = { welcome: false, goodbye: false, antilink: false, antiwame: false };
   const calls = [];
+  let clock = 9999999999;
   const store = {
     mode: 'public',
     group: () => ({ ...flags }),
@@ -39,7 +40,7 @@ function harness(storeOverrides = {}) {
     groupSettingUpdate: async (...args) => { calls.push({ action: 'setting', args }); },
     groupUpdateSubject: async (...args) => { calls.push({ action: 'subject', args }); }
   };
-  return { store, flags, sock, calls, router: createRouter(config, store, logger, { now: () => 9999999999 }) };
+  return { store, flags, sock, calls, router: createRouter(config, store, logger, { now: () => (clock += 2000) }) };
 }
 test('math parser handles precedence and rejects injection', () => {
   assert.equal(calculate('10 + 2 * (3 + 4)'), 24);
@@ -87,7 +88,7 @@ test('economy persists, transfers atomically and prevents double claim', async t
   assert.equal(await e.transfer(alice, bob, 100), true);
   assert.equal(e.get(alice).balance, 20);
   assert.equal(e.get(bob).balance, 100);
-  await assert.rejects(e.transfer(alice, bob, -10));
+  assert.throws(() => e.transfer(alice, bob, -10));
   assert.equal(await e.transfer(alice, bob, 1000), false);
   await e.premium(alice, 3);
   assert.equal(e.get(alice).premium, true);

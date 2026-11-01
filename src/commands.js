@@ -58,10 +58,6 @@ function createRouter(config, store, logger, {
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
     if (!cmd && !linkViolation) return;
-    const prev = recent.get(sender) || 0;
-    if (!owner && now() - prev < 1800) return;
-    recent.set(sender, now());
-    if (recent.size > 4000) recent.clear();
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
     let rolePromise;
     const roles = async () => {
@@ -80,6 +76,11 @@ function createRouter(config, store, logger, {
         }
       }
       if (!cmd) return;
+      const prev = recent.get(sender) || 0;
+      const current = now();
+      if (!owner && current - prev < 1800) return;
+      recent.set(sender, current);
+      if (recent.size > 4000) recent.clear();
       if (['menu','help','allmenu','menugroup','menugrup','menumedia',
         'menutools','menugame','menuekonomi','menudownload','menuowner'].includes(cmd.name)) {
         return reply(menu(config, cmd.name));
