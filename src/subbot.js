@@ -124,7 +124,7 @@ class SubBotManager {
       void this.suspend(slot);
       return;
     }
-    const delay = Math.max(1, Math.min(3600000, until - this.now()));
+    const delay = Math.max(1, Math.min(60000, until - this.now()));
     slot.expiryTimer = this.schedule(() => {
       slot.expiryTimer = null;
       if (this.slot !== slot || this.shuttingDown) return;
@@ -218,7 +218,7 @@ class SubBotManager {
       catch (err) { this.logger.error({ error: err.message }, 'Cannot persist jadibot credentials'); }
     });
     const pair = async () => {
-      if (this.slot !== slot || slot.socket !== socket || slot.pairingInFlight ||
+      if (this.slot !== slot || slot.socket !== socket || slot.pairingInFlight || slot.status === 'pairing' ||
           state.creds.registered || slot.pairingAttempts >= 3 || !this.eligible(slot.owner)) return;
       slot.pairingInFlight = true;
       slot.pairingAttempts++;
@@ -248,8 +248,9 @@ class SubBotManager {
         slot.status = 'online';
         slot.retries = 0;
         slot.linked = true;
-        void this.writeMetadata(slot).catch(err =>
-          this.logger.error({ error: err.message }, 'Failed to persist jadibot metadata'));
+        void this.serial(async () => {
+          if (this.slot === slot && !this.shuttingDown) await this.writeMetadata(slot);
+        }).catch(err => this.logger.error({ error: err.message }, 'Failed to persist jadibot metadata'));
         void this.inform(slot, 'Jadibot tersambung! Nomor: ' + slot.phone + '. Gunakan cekjadibot untuk melihat status.');
       }
       if (update.connection === 'close') {
@@ -291,6 +292,11 @@ class SubBotManager {
       try { await this.onParticipants(socket, event); }
       catch (err) { this.logger.warn({ error: err.message }, 'Jadibot group event failed'); }
     });
+  }
+  async refreshMembership(user) {
+    const slot = this.slot;
+    if (!slot || slot.owner !== jid(user) || this.eligible(slot.owner)) return;
+    await this.suspend(slot);
   }
   stop(requester, force = false) {
     return this.serial(async () => {

@@ -170,3 +170,5 @@ test('no-prefix router delegates jadibot only in direct chat to manager', async 
   await router.handle(sock, { key: {remoteJid: user}, message: {conversation: 'stopjadibot'} });
   assert.equal(actions.at(-1).type, 'stop');
 });
+
+test('premium cancellation immediately suspends an already linked child session', async t => { const h=await fixture(t); await h.manager.start(user,phone); const sock=h.sockets[0]; h.creds.registered=true; sock.ev.emit('connection.update',{connection:'open'}); await tick(); h.setPremium(false); await h.manager.refreshMembership(user); assert.equal(h.manager.slot.status,'premium-habis'); assert.equal(sock.ended,true); await h.manager.stop(primary); });

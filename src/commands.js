@@ -66,6 +66,9 @@ function createRouter(config, store, logger, {
     const chat = message?.key?.remoteJid;
     if (!chat || message.key.fromMe || chat === 'status@broadcast' || !message.message) return;
     const sender = getSender(message);
+    const phoneAlias = [message.key.participantPn, message.key.remoteJidAlt]
+      .map(jid).find(p => p.endsWith('@s.whatsapp.net'));
+    const accountSender = phoneAlias || sender;
     const owner = [sender, message.key.participantPn, message.key.remoteJidAlt].some(p => jid(p) === config.ownerJid);
     const text = getText(message);
     if (!text || (store.mode === 'private' && !owner)) return;
@@ -86,7 +89,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, fetcher };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, fetcher };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -124,9 +127,9 @@ function createRouter(config, store, logger, {
         if (!subbot) return reply('Jadibot hanya bisa diakses lewat bot utama.');
         if (group) return reply('Gunakan jadibot melalui chat pribadi bot utama, bukan grup.');
         if (['cekjadibot','statusjadibot','listjadibot'].includes(cmd.name))
-          return reply(subbot.describe(sender, owner));
-        if (cmd.name === 'stopjadibot') return reply(await subbot.stop(sender, owner));
-        return reply(await subbot.start(sender, cmd.args[0], sock.user?.id));
+          return reply(subbot.describe(accountSender, owner));
+        if (cmd.name === 'stopjadibot') return reply(await subbot.stop(accountSender, owner));
+        return reply(await subbot.start(accountSender, cmd.args[0], sock.user?.id));
       }
       if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' ')));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;

@@ -146,10 +146,11 @@ function numberFrom(args, message) {
   return '';
 }
 async function handleEconomy(ctx) {
-  const { cmd, economy, reply, message, sender, owner, config, roles, chat } = ctx;
+  const { cmd, economy, reply, message, sender, accountSender, owner, config, roles, chat, subbot } = ctx;
+  const account = accountSender || sender;
   if (!ECONOMY_COMMANDS.has(cmd.name)) return false;
   if (!economy) { await reply('Database ekonomi belum tersedia.'); return true; }
-  const value = economy.get(sender);
+  const value = economy.get(account);
   if (cmd.name === 'balance' || cmd.name === 'limit' || cmd.name === 'cekpremium') {
     if (cmd.name === 'balance') await reply('Saldo: ' + value.balance + ' koin.');
     else if (cmd.name === 'limit') await reply('Limit: ' + (owner || value.premium ? 'Unlimited' : value.quota) + '\nPremium: ' + (value.premium ? 'Aktif' : 'Tidak'));
@@ -157,19 +158,19 @@ async function handleEconomy(ctx) {
     return true;
   }
   if (cmd.name === 'daily') {
-    const result = await economy.daily(sender);
+    const result = await economy.daily(account);
     await reply(result.claimed ? 'Daily +120 koin! Saldo: ' + result.balance : 'Daily belum tersedia. Coba lagi dalam ' + Math.ceil(result.wait / 3600000) + ' jam.');
     return true;
   }
   if (cmd.name === 'buylimit') {
-    await reply(await economy.buyLimit(sender) ? 'Berhasil membeli +10 limit untuk 100 koin.' : 'Saldo kurang dari 100 koin.');
+    await reply(await economy.buyLimit(account) ? 'Berhasil membeli +10 limit untuk 100 koin.' : 'Saldo kurang dari 100 koin.');
     return true;
   }
   if (cmd.name === 'transfer') {
     const to = numberFrom(cmd.args[0], message);
     const amount = Number(cmd.args.at(-1));
     if (!to || !Number.isSafeInteger(amount)) { await reply('Contoh: !transfer 62812xxxx 100'); return true; }
-    await reply(await economy.transfer(sender, to, amount) ? 'Transfer ' + amount + ' koin berhasil.' : 'Saldo tidak mencukupi / penerima melebihi batas.');
+    await reply(await economy.transfer(account, to, amount) ? 'Transfer ' + amount + ' koin berhasil.' : 'Saldo tidak mencukupi / penerima melebihi batas.');
     return true;
   }
   if (cmd.name === 'topglobal' || cmd.name === 'toplocal') {
@@ -197,7 +198,9 @@ async function handleEconomy(ctx) {
     const until = await economy.premium(to, days);
     await reply('Premium aktif hingga ' + new Date(until).toLocaleDateString('id-ID'));
   } else if (cmd.name === 'delpremium') {
-    await economy.revokePremium(to); await reply('Premium dicabut.');
+    await economy.revokePremium(to);
+    await subbot?.refreshMembership?.(to);
+    await reply('Premium dicabut.');
   }
   return true;
 }
