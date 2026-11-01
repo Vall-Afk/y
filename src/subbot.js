@@ -290,8 +290,12 @@ class SubBotManager {
         slot.status = 'online';
         slot.retries = 0;
         slot.linked = true;
+        if (slot.method === 'qr') {
+          const actual = jid(socket.user?.id || '').split('@')[0].split(':')[0];
+          if (validPhone(actual)) slot.phone = actual;
+        }
         void this.serial(async () => {
-          if (this.slot === slot && !this.shuttingDown) await this.writeMetadata(slot);
+          if (this.slot === slot) await this.writeMetadata(slot);
         }).catch(err => this.logger.error({ error: err.message }, 'Failed to persist jadibot metadata'));
         void this.inform(slot, 'Jadibot tersambung! Nomor: ' + slot.phone + '. Gunakan cekjadibot untuk melihat status.');
       }
