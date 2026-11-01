@@ -231,3 +231,9 @@ Versions before the syntax-check progress utility chained many node --check call
 
 ### Local Image Studio (no external uploads)
 Reply to an image with blur [1–30], grayscale, invert, rotate 90/180/270, flip, mirror, pixelate, circle, enhance, compress or resize 512. Each image is processed locally with Sharp; source size ≤5 MB, ≤20 MP. Send brat <text> to make a simple static text sticker, or reply to a text message with qc. Animations and online background removal are not claimed supported.
+
+### Audio/video converter (local FFmpeg)
+
+Supported keywords: `tomp3`, `toaudio` (quoted audio/video to MP3), `tovn` (quoted audio/video to Opus voice message), `tovideo` (quoted static image/sticker to 3-second MP4), `togif` (MP4 with GIF playback flag), and `tosticker` (quoted short video to animated WebP). Bounded input/output **12 MB**, duration 3–30 seconds depending on command, execution timeout 35 seconds and at most two concurrent conversions. The media is processed **locally**, not uploaded to third-party APIs; temporary files are removed.
+
+The optional `ffmpeg-static@5.3.0` package downloads an FFmpeg binary for your OS during `npm.cmd install`. If optional installation fails, other bot features still work but these media commands need a working FFmpeg executable on the system PATH, or an absolute `FFMPEG_PATH` in .env. FFmpeg binaries have their **own licenses** (bundled binary packages may carry GPL obligations). Consult upstream package licensing before redistributing the binary. Source videos and voice notes require runtime WhatsApp testing (FFmpeg codec availability can vary).

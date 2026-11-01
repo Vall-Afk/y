@@ -63,3 +63,7 @@ The PowerShell npm.cmd run check command now prints per-file progress and enforc
 
 ## New Media Studio commands
 brat <text>, qc (reply), blur [1-30], grayscale, greyscale, invert, negative, rotate 90/180/270, flip, mirror, pixelate, circle, enhance, compress, resize 128-2048. These use local Sharp processing and 5 MB input limits.
+
+## FFmpeg converters (optional runtime dependency)
+
+`tomp3`, `toaudio`, `tovn`, `tovideo`, `tosticker`, `togif` now have bounded local implementations. They require a working local FFmpeg binary (optional `ffmpeg-static` download, or `FFMPEG_PATH` in .env). Actual WhatsApp media and codecs require live verification; command presence is not proof of successful conversion for every format.
