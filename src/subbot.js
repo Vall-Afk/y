@@ -73,6 +73,10 @@ class SubBotManager {
     }
     const slot = this.newSlot(data);
     this.slot = slot;
+    if (!slot.linked) {
+      slot.status = 'menunggu-pairing';
+      return;
+    }
     if (!this.eligible(slot.owner)) {
       slot.status = 'premium-habis';
       return;
@@ -163,6 +167,10 @@ class SubBotManager {
         if (['online', 'menyiapkan', 'pairing', 'reconnecting'].includes(this.slot.status))
           return 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
         if (!this.eligible(owner)) throw new Error('Perpanjang premium terlebih dahulu.');
+        this.clearTimers(this.slot);
+        const stale = this.slot.socket;
+        this.slot.socket = null;
+        try { stale?.end?.(new Error('Restart jadibot session')); } catch {}
         this.slot.status = 'menyiapkan';
         this.slot.retries = 0;
         this.slot.pairingAttempts = 0;
@@ -190,6 +198,9 @@ class SubBotManager {
   async launch(slot) {
     if (this.slot !== slot || this.shuttingDown || !this.eligible(slot.owner)) return;
     this.clearTimers(slot);
+    const previousSocket = slot.socket;
+    slot.socket = null;
+    try { previousSocket?.end?.(new Error('Jadibot reconnect')); } catch {}
     await fs.mkdir(this.authDir, { recursive: true, mode: 0o700 });
     const { state, saveCreds } = await this.authState(this.authDir);
     if (this.slot !== slot || this.shuttingDown) return;
