@@ -41,7 +41,10 @@ const SECTIONS = Object.freeze([
   {
     id: 'rpg', icon: '⚔', idTitle: 'RPG WORLD', enTitle: 'RPG WORLD',
     commands: ['joinrpg', 'inventory', 'level', 'rpgshop', 'mining', 'nebang', 'mancing',
-      'hunt', 'adventure', 'heal', 'buy <item> <jumlah>', 'sell <item> <jumlah>']
+      'hunt', 'adventure', 'heal', 'buy <item> <jumlah>', 'sell <item> <jumlah>',
+      'lebur [jumlah]', 'craft sword|pickaxe', 'equip sword|pickaxe',
+      'killslime', 'killgoblin', 'killdevil', 'killbehemoth', 'killdemon',
+      'killdemonking', 'luckyday', 'goplanet', 'toprpg']
   },
   {
     id: 'economy', icon: '◇', idTitle: 'EKONOMI', enTitle: 'ECONOMY',

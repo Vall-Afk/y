@@ -239,3 +239,7 @@ Supported keywords: `tomp3`, `toaudio` (quoted audio/video to MP3), `tovn` (quot
 The optional `ffmpeg-static@5.3.0` package downloads an FFmpeg binary for your OS during `npm.cmd install`. If optional installation fails, other bot features still work but these media commands need a working FFmpeg executable on the system PATH, or an absolute `FFMPEG_PATH` in .env. FFmpeg binaries have their **own licenses** (bundled binary packages may carry GPL obligations). Consult upstream package licensing before redistributing the binary. Source videos and voice notes require runtime WhatsApp testing (FFmpeg codec availability can vary).
 
 **Sticker with pack/author:** reply to an image with `stickerwm My Pack | Vall` (or `wm My Pack | Vall`). The result embeds a WhatsApp-compatible WebP EXIF sticker-pack-name and sticker-pack-publisher, with bounded string lengths. This is static only and uses local image processing.
+
+### Advanced RPG / Legacy RPG World
+
+The virtual RPG now includes `lebur` (3 ore + 1 coal → ingot), `craft sword`, `craft pickaxe`, `equip sword`, `unequip`, `luckyday`, `goplanet`, `toprpg` and boss levels: `killslime`, `killgoblin`, `killdevil`, `killbehemoth`, `killdemon`, `killdemonking`. These are virtual activities only, with cooldowns, level and HP requirements, transactionally persisted items and no real-world money or wagers. Existing RPG save data is extended in place; do not delete `data/economy.json`.

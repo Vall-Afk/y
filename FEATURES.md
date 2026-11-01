@@ -69,3 +69,7 @@ brat <text>, qc (reply), blur [1-30], grayscale, greyscale, invert, negative, ro
 `tomp3`, `toaudio`, `tovn`, `tovideo`, `tosticker`, `togif` now have bounded local implementations. They require a working local FFmpeg binary (optional `ffmpeg-static` download, or `FFMPEG_PATH` in .env). Actual WhatsApp media and codecs require live verification; command presence is not proof of successful conversion for every format.
 
 **Stickerwm** / **wm** are implemented for static images with WebP EXIF metadata (pack and author names), bounded local conversion and no remote uploads.
+
+## Legacy RPG Advanced
+
+`lebur`, `jualingot`, `craft`, `equip`, `unequip`, `equipment`, `killslime`, `killgoblin`, `killdevil`, `killbehemoth`, `killdemon`, `killdemonking`, `luckyday`, `goplanet`, `toprpg`, `rpgboard`, `jelajah`, `sellikan`, `sellbesi`, `sellemas` are added as virtual RPG activities with atomic persistence. Boss difficulty and cooldown are checked server-side.
