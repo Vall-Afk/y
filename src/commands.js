@@ -1,6 +1,7 @@
 'use strict';
 const { jid, isGroup, getText, getCommand, getSender, roleFromMeta, isInvite } = require('./util');
 const { convertMedia } = require('./media');
+const { textSticker, memeSticker } = require('./features/sticker-tools');
 const { GROUP_COMMANDS, handleGroup } = require('./features/groups');
 const { TOOL_COMMANDS, handleTools } = require('./features/tools');
 const { ECONOMY_COMMANDS, handleEconomy } = require('./features/economy');
@@ -14,7 +15,7 @@ const MENU_COMMANDS = new Set([
   'menu','help','allmenu','menugroup','menugrup','menumedia','menutools',
   'menugame','menurpg','menuekonomi','menudownload','menupremium','menuowner'
 ]);
-const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk','sticker','s','toimg']);
+const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk','sticker','s','toimg','ttp','smeme']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
@@ -28,7 +29,7 @@ function menu(config, section = 'menu') {
     grup: ['groupinfo', 'welcome on|off', 'left on|off', 'antilink on|off', 'antiwame on|off',
       'tagall [pesan]', 'hidetag [pesan]', 'setwelcome <teks>', 'setleft <teks>', 'delsetwelcome', 'delsetleft', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <deskripsi>'],
-    media: ['sticker', 's', 'toimg'],
+    media: ['sticker', 's', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH (balas gambar)'],
     tools: ['say <teks>', 'reverse <teks>', 'count <teks>', 'calc <rumus>',
       'pilih a | b | c', 'roll [maks]', 'coin', 'password [8-64]'],
     game: ['tictactoe @user', 'tttmove 1-9', 'delttt', 'tebakangka', 'jawab <angka>', 'nyerah'],
@@ -138,6 +139,16 @@ function createRouter(config, store, logger, {
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
       if (RPG_COMMANDS.has(cmd.name) && await handleRpg(ctx)) return;
       if (NET_COMMANDS.has(cmd.name) && await handleNetwork(ctx)) return;
+      if (cmd.name === 'ttp') {
+        const sticker = await textSticker(cmd.args.join(' '));
+        await sock.sendMessage(chat, { sticker }, { quoted: message });
+        return;
+      }
+      if (cmd.name === 'smeme') {
+        const sticker = await memeSticker(sock, message, cmd.args.join(' '), logger);
+        await sock.sendMessage(chat, { sticker }, { quoted: message });
+        return;
+      }
       if (cmd.name === 'sticker' || cmd.name === 's') {
         const output = await convert(sock, message, 'sticker', logger);
         await sock.sendMessage(chat, { sticker: output }, { quoted: message });

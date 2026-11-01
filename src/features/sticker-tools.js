@@ -45,8 +45,8 @@ async function textSticker(text) {
 }
 function memeTextSvg(top, bottom) {
   const captions = [
-    ...splitText(top || ' ', 85).filter(x => x.trim()).map((s, i) => ({ text: s, y: 50 + 44 * i })),
-    ...splitText(bottom || ' ', 85).filter(x => x.trim()).map((s, i, arr) =>
+    ...(top?.trim() ? splitText(top.trim(), 85) : []).map((s, i) => ({ text: s, y: 50 + 44 * i })),
+    ...(bottom?.trim() ? splitText(bottom.trim(), 85) : []).map((s, i, arr) =>
       ({ text: s, y: 485 - (arr.length - i - 1) * 44 }))
   ];
   if (captions.length > 8) throw new Error('Terlalu banyak baris.');
