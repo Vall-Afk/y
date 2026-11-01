@@ -6,11 +6,11 @@ This is an audit of **428 distinct advertised legacy keywords**, not proof that 
 
 | Status | Count |
 |---|---:|
-| Implemented (unit-tested module) | 130 |
-| Not yet migrated | 179 |
+| Implemented (unit-tested module) | 135 |
+| Not yet migrated | 175 |
 | Deferred (consent/abuse risk) | 11 |
 | Excluded (content/safety review) | 76 |
-| Original local alternative | 32 |
+| Original local alternative | 31 |
 
 Commands with remote-provider behavior, fake/spoofing, adult material or unavailable secrets remain deliberately pending or disabled. **Do not claim 428/428 feature parity.**
 
@@ -54,17 +54,17 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `addlist` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
 | `dellist` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
 | `update` | STORE MENU | Implemented (unit-tested module) | src/features/catalog.js |
-| `jeda` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
+| `jeda` | STORE MENU | Not yet migrated | Workflow compatibility requires review |
 | `tambah` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
 | `kurang` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
 | `kali` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
 | `bagi` | STORE MENU | Implemented (unit-tested module) | src/features/tools.js |
-| `delsetdone` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `changedone` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `setdone` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `delsetproses` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `changeproses` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
-| `setproses` | STORE MENU | Not yet migrated | External dependency/legacy behavior needs review |
+| `delsetdone` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `changedone` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `setdone` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `delsetproses` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `changeproses` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `setproses` | STORE MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `inventory` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
 | `mining` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
 | `buy` | RPG GAMES | Implemented (unit-tested module) | src/features/rpg.js |
@@ -109,7 +109,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `afk` | GROUP MENU | Implemented (unit-tested module) | src/commands.js |
 | `welcome` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `left` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
-| `pppanjanggc` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `pppanjanggc` | GROUP MENU | Implemented (unit-tested module) | src/features/profile.js |
 | `setopen` | GROUP MENU | Implemented (unit-tested module) | src/features/moderation.js |
 | `changesetopen` | GROUP MENU | Implemented (unit-tested module) | src/features/moderation.js |
 | `delsetopen` | GROUP MENU | Implemented (unit-tested module) | src/features/moderation.js |
@@ -123,8 +123,8 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `changeleft` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `delsetleft` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `linkgc` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
-| `setppgc` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
-| `setppgc2` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
+| `setppgc` | GROUP MENU | Implemented (unit-tested module) | src/features/profile.js |
+| `setppgc2` | GROUP MENU | Implemented (unit-tested module) | src/features/profile.js |
 | `setnamegc` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `setdesc` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
 | `antilink` | GROUP MENU | Implemented (unit-tested module) | src/features/groups.js |
@@ -285,7 +285,7 @@ Commands with remote-provider behavior, fake/spoofing, adult material or unavail
 | `avengers` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
 | `metalr` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
 | `metalg` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
-| `metalg2` | TEXTPRO MENU | Original local alternative | src/features/textfx.js (not an identical TextPro effect) |
+| `metalg2` | TEXTPRO MENU | Not yet migrated | Not among implemented local SVG effect aliases |
 | `lion` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
 | `wolf_bw` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
 | `wolf_g` | TEXTPRO MENU | Not yet migrated | External dependency/legacy behavior needs review |
