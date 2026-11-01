@@ -55,7 +55,7 @@ function createRouter(config, store, logger, { now = () => Date.now(), convert =
         return reply(sock, message, 'Bot: ' + config.name +
           '\nMode: ' + store.mode + '\nUptime: ' + Math.floor(process.uptime()) + ' detik');
       }
-      if (cmd.name === 'owner') return reply(sock, message, 'Owner: https://wa.me/' + config.ownerNumber);
+      if (cmd.name === 'owner') return reply(sock, message, 'Owner: ' + config.ownerName + '\nWhatsApp: https://wa.me/' + config.ownerNumber + '\nInstagram: https://instagram.com/' + config.ownerInstagram);
       if (cmd.name === 'mode') {
         if (!owner) return reply(sock, message, 'Khusus owner.');
         if (!['public', 'private'].includes(flag)) return reply(sock, message, 'Contoh: ' + config.prefix + 'mode private');

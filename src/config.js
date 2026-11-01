@@ -9,6 +9,9 @@ function loadConfig(env = process.env) {
   const prefix = env.PREFIX === undefined ? '!' : env.PREFIX;
   if (!prefix || prefix.length > 3 || /[\s]/.test(prefix)) throw new Error('PREFIX must be 1-3 non-space characters');
   const name = (env.BOT_NAME || 'Beauté.').trim();
+  const ownerName = (env.OWNER_NAME || 'Vall').trim();
+  const ownerInstagram = (env.OWNER_INSTAGRAM || 'v4lonenonly').replace(/^@/, '').trim();
+  if (!/^[A-Za-z0-9._]{1,30}$/.test(ownerInstagram)) throw new Error('Invalid OWNER_INSTAGRAM');
   if (!name || name.length > 50) throw new Error('BOT_NAME must be 1-50 characters');
   const port = Number(env.PORT || 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid PORT');
@@ -19,6 +22,8 @@ function loadConfig(env = process.env) {
     ownerJid: raw + '@s.whatsapp.net',
     prefix,
     name,
+    ownerName,
+    ownerInstagram,
     port,
     dataDir,
     authDir,
