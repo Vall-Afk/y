@@ -1,7 +1,8 @@
 'use strict';
 const { randomInt, randomBytes } = require('node:crypto');
+const { statfs } = require('node:fs/promises');
 
-const TOOL_COMMANDS = new Set(['say','reverse','count','calc','hitung','pilih','roll','coin','password','runtime','speed','waktu','tambah','kurang','kali','bagi']);
+const TOOL_COMMANDS = new Set(['say','reverse','count','calc','hitung','pilih','roll','coin','password','runtime','speed','waktu','tambah','kurang','kali','bagi','cekdrive','cekbandwidth']);
 function calculate(expression) {
   const input = expression.replace(/\s+/g, '');
   if (!input || input.length > 120 || !/^[0-9.+*/()%\-]+$/.test(input)) throw new Error('Gunakan angka dan operator + - * / % ( ) saja.');
@@ -57,6 +58,18 @@ async function handleTools(ctx) {
         const [a,b] = cmd.args.map(Number);
         const expression = a + ({tambah:'+',kurang:'-',kali:'*',bagi:'/'}[cmd.name]) + b;
         await reply(expression + ' = ' + calculate(expression));
+        break;
+      }
+      case 'cekdrive': {
+        const disk = await statfs(process.cwd());
+        const total = Number(disk.blocks) * Number(disk.bsize);
+        const free = Number(disk.bavail) * Number(disk.bsize);
+        const gb = n => (n / (1024 ** 3)).toFixed(2);
+        await reply('Disk lokal bot: ' + gb(free) + ' GiB tersedia / ' + gb(total) + ' GiB total.');
+        break;
+      }
+      case 'cekbandwidth': {
+        await reply('Bandwidth jaringan tidak dapat diukur dari proses bot tanpa pemantauan antarmuka jaringan. Gunakan monitoring server/hosting; tidak ada angka palsu.');
         break;
       }
       case 'say': requireText(); await reply(text); break;
