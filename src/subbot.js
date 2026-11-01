@@ -14,7 +14,7 @@ class SubBotManager {
   constructor({
     config, economy, logger, makeSocket, authState, browsers, disconnectReason,
     onMessage, onParticipants, notify, getPrimaryId = () => '',
-    now = () => Date.now(), schedule = setTimeout, cancel = clearTimeout
+    now = () => Date.now(), schedule = setTimeout, cancel = clearTimeout, logoutTimeoutMs = 5000
   }) {
     this.config = config;
     this.economy = economy;
@@ -30,6 +30,7 @@ class SubBotManager {
     this.now = now;
     this.schedule = schedule;
     this.cancel = cancel;
+    this.logoutTimeoutMs = logoutTimeoutMs;
     this.dir = path.join(config.dataDir, 'jadibot');
     this.authDir = path.join(this.dir, 'auth');
     this.metadataFile = path.join(this.dir, 'session.json');
@@ -308,8 +309,19 @@ class SubBotManager {
       this.clearTimers(slot);
       const socket = slot.socket;
       slot.socket = null;
-      try { await socket?.logout?.(); }
-      catch (err) { this.logger.warn({ error: err.message }, 'Jadibot logout failed; will remove local auth'); }
+      let timeout = null;
+      try {
+        if (socket?.logout) await Promise.race([
+          Promise.resolve().then(() => socket.logout()),
+          new Promise((_, reject) => {
+            timeout = this.schedule(() => reject(new Error('Jadibot logout timeout')), this.logoutTimeoutMs);
+          })
+        ]);
+      } catch (err) {
+        this.logger.warn({ error: err.message }, 'Jadibot logout failed; will remove local auth');
+      } finally {
+        if (timeout) this.cancel(timeout);
+      }
       try { socket?.end?.(new Error('Stopped by user')); }
       catch {}
       await fs.rm(this.authDir, { recursive: true, force: true });

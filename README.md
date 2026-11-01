@@ -76,3 +76,5 @@ The pairing code is sensitive. Neither the app nor user should post .env, auth f
 Do not copy original obfuscated command/case.js, exposed tokens, unsafe scrapers, or old Telegram/RapidAPI credentials. Rotate compromised historical API keys. A passing CI validates syntax, unit tests and npm audit; new commands and group moderation still require WhatsApp testing.
 
 This development PR stays draft until its Jadibot pairing and group features are tested on a spare WhatsApp account.
+
+If a stop happens while the child account is offline, the server may not complete a remote logout. For safety, the child account holder should also remove the old linked device from WhatsApp → Linked devices to revoke its access.
