@@ -9,7 +9,7 @@
 |---|---|---|
 | No-prefix | keyword-based commands; legacy ! remains | Exact first keyword |
 | Primary | menu, ping, owner, status, mode, QR reconnection | Established baseline |
-| Premium jadibot | jadibot, subbot, cekjadibot, statusjadibot, listjadibot, stopjadibot | Global max 1 extra session; separate auth; premium restriction; private pairing code; expiry suspend |
+| Premium jadibot | jadibot <phone>, jadibot qr, subbot, cekjadibot, statusjadibot, listjadibot, stopjadibot | Global max 1 extra session; separate auth; premium restriction; private pairing code; expiry suspend |
 | Group | groupinfo, welcome, left, goodbye, antilink, antiwame, tagall, hidetag, kick, add, promote, demote, open, close, linkgc, revoke, setnamegc, setdesc | Requires group admin role |
 | Group templates | setwelcome, setleft, delsetwelcome, delsetleft | {user} and {group} placeholders |
 | Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium, listpremium, addpremium, delpremium | Local virtual coin database; premium admin main owner |

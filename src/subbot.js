@@ -5,6 +5,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { jid } = require('./util');
+const QRCode = require('qrcode');
 
 function validPhone(phone) { return typeof phone === 'string' && /^[1-9]\d{7,14}$/.test(phone); }
 function validRequester(value) {
@@ -13,7 +14,7 @@ function validRequester(value) {
 class SubBotManager {
   constructor({
     config, economy, logger, makeSocket, authState, browsers, disconnectReason,
-    onMessage, onParticipants, notify, getPrimaryId = () => '',
+    onMessage, onParticipants, notify, notifyQr = null, qrEncoder = QRCode.toBuffer, getPrimaryId = () => '',
     now = () => Date.now(), schedule = setTimeout, cancel = clearTimeout, logoutTimeoutMs = 5000
   }) {
     this.config = config;
@@ -26,6 +27,8 @@ class SubBotManager {
     this.onMessage = onMessage;
     this.onParticipants = onParticipants;
     this.notify = notify;
+    this.notifyQr = notifyQr;
+    this.qrEncoder = qrEncoder;
     this.getPrimaryId = getPrimaryId;
     this.now = now;
     this.schedule = schedule;
@@ -50,7 +53,7 @@ class SubBotManager {
     return jid(owner) === this.config.ownerJid ? Infinity : this.economy.get(jid(owner)).premiumUntil;
   }
   async writeMetadata(slot) {
-    const metadata = { owner: slot.owner, phone: slot.phone, createdAt: slot.createdAt, linked: Boolean(slot.linked) };
+    const metadata = { owner: slot.owner, phone: slot.phone, createdAt: slot.createdAt, linked: Boolean(slot.linked), method: slot.method };
     const temp = this.metadataFile + '.' + randomUUID() + '.tmp';
     try {
       await fs.writeFile(temp, JSON.stringify(metadata) + '\n', { flag: 'wx', mode: 0o600 });
@@ -65,7 +68,8 @@ class SubBotManager {
       if (text.length > 4096) throw new Error('Metadata terlalu besar.');
       data = JSON.parse(text);
       if (!validRequester(data.owner) || !validPhone(data.phone) ||
-          !Number.isFinite(data.createdAt) || typeof data.linked !== 'boolean') {
+          !Number.isFinite(data.createdAt) || typeof data.linked !== 'boolean' ||
+          (data.method !== undefined && !['pairing','qr'].includes(data.method))) {
         throw new Error('Format metadata invalid.');
       }
     } catch (err) {
@@ -91,9 +95,9 @@ class SubBotManager {
   newSlot(meta) {
     return {
       owner: jid(meta.owner), phone: meta.phone,
-      createdAt: meta.createdAt, linked: Boolean(meta.linked),
+      createdAt: meta.createdAt, linked: Boolean(meta.linked), method: meta.method || 'pairing',
       status: 'menyiapkan', socket: null, timer: null, expiryTimer: null,
-      retries: 0, pairingAttempts: 0, pairingInFlight: false
+      retries: 0, pairingAttempts: 0, pairingInFlight: false, lastQr: '', qrInFlight: false
     };
   }
   describe(requester, isMainOwner = false) {
@@ -102,7 +106,8 @@ class SubBotManager {
     if (jid(requester) !== s.owner && !isMainOwner) return 'Jadibot: slot sedang dipakai oleh pengguna premium lain.';
     return 'Jadibot: ' + s.status + '\nNomor: ' + s.phone +
       '\nPengguna: ' + s.owner.split('@')[0] +
-      '\nBuat/lanjut: jadibot ' + s.phone +
+      '\nMetode: ' + (s.method === 'qr' ? 'QR' : 'pairing') +
+      '\nBuat/lanjut: ' + (s.method === 'qr' ? 'jadibot qr' : 'jadibot ' + s.phone) +
       '\nHentikan: stopjadibot';
   }
   async inform(slot, message) {
@@ -152,22 +157,30 @@ class SubBotManager {
       if (err.code !== 'ENOENT') throw err;
     }
   }
-  start(owner, phone, primaryId) {
+  start(owner, phone, primaryId, method = 'pairing') {
     return this.serial(async () => {
       owner = jid(owner);
       if (!validRequester(owner)) throw new Error('Identitas pengirim tidak valid.');
       if (!this.eligible(owner)) throw new Error('Jadibot khusus premium aktif.');
-      if (!validPhone(phone)) throw new Error('Gunakan: jadibot 628xxxxxxxxxx (nomor akun kedua).');
+      if (!['pairing','qr'].includes(method)) throw new Error('Metode jadibot tidak dikenal.');
+      if (method === 'qr' && !this.notifyQr) throw new Error('Pengiriman QR tidak tersedia.');
+      if (method === 'qr' && !phone) phone = this.slot?.owner === owner ? this.slot.phone : '10000000';
+      if (!validPhone(phone)) throw new Error('Gunakan: jadibot 628xxxxxxxxxx atau jadibot qr.');
       const main = jid(primaryId || this.getPrimaryId());
-      if (phone === this.config.ownerNumber || jid(phone + '@s.whatsapp.net') === main) {
+      if (method === 'pairing' && (phone === this.config.ownerNumber || jid(phone + '@s.whatsapp.net') === main)) {
         throw new Error('Jangan tautkan akun bot utama sebagai jadibot.');
       }
       if (this.slot) {
-        if (this.slot.owner !== owner || this.slot.phone !== phone)
+        if (this.slot.owner !== owner || (method === 'pairing' && this.slot.phone !== phone))
           throw new Error('Slot jadibot sedang digunakan. Maksimal satu sesi tambahan.');
-        if (['online', 'menyiapkan', 'pairing', 'reconnecting'].includes(this.slot.status))
+        if (['online', 'menyiapkan', 'pairing', 'qr', 'reconnecting'].includes(this.slot.status))
           return 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
         if (!this.eligible(owner)) throw new Error('Perpanjang premium terlebih dahulu.');
+        if (this.slot.method !== method) {
+          this.slot.method = method;
+          this.slot.linked = false;
+          await this.writeMetadata(this.slot);
+        }
         this.clearTimers(this.slot);
         const stale = this.slot.socket;
         this.slot.socket = null;
@@ -179,7 +192,7 @@ class SubBotManager {
         return 'Mencoba menyambungkan kembali sesi jadibot. Periksa chat pribadi untuk kode baru jika diperlukan.';
       }
       await this.ensureCleanAuth();
-      const slot = this.newSlot({ owner, phone, createdAt: this.now(), linked: false });
+      const slot = this.newSlot({ owner, phone, createdAt: this.now(), linked: false, method });
       this.slot = slot;
       try {
         await this.writeMetadata(slot);
@@ -192,8 +205,9 @@ class SubBotManager {
         // Keep metadata and auth for explicit owner-controlled cleanup.
         throw err;
       }
-      return 'Sesi jadibot disiapkan untuk ' + phone +
-        '. Kode pairing akan dikirim melalui chat pribadi; jangan dibagikan. Maksimal 1 sesi tambahan.';
+      return 'Sesi jadibot disiapkan (' + method + '). ' +
+        (method === 'qr' ? 'QR akan dikirim melalui chat pribadi; pindai menggunakan WhatsApp akun kedua.' : 'Kode pairing akan dikirim melalui chat pribadi.') +
+        ' Maksimal 1 sesi tambahan.';
     });
   }
   async launch(slot) {
@@ -212,6 +226,8 @@ class SubBotManager {
     slot.socket = socket;
     slot.status = 'menyiapkan';
     slot.pairingInFlight = false;
+    slot.qrInFlight = false;
+    slot.lastQr = '';
     this.watchExpiry(slot);
     socket.ev.on('creds.update', async () => {
       if (this.slot !== slot || slot.socket !== socket) return;
@@ -241,10 +257,35 @@ class SubBotManager {
         }
       } finally { slot.pairingInFlight = false; }
     };
+    const sendQr = async qr => {
+      if (this.slot !== slot || slot.socket !== socket || this.shuttingDown ||
+          slot.method !== 'qr' || state.creds.registered || !this.eligible(slot.owner) ||
+          typeof qr !== 'string' || qr.length > 8192 ||
+          slot.qrInFlight || slot.lastQr === qr) return;
+      slot.qrInFlight = true;
+      slot.lastQr = qr;
+      try {
+        const png = await this.qrEncoder(qr, { type: 'png', width: 360, margin: 2, errorCorrectionLevel: 'M' });
+        if (!Buffer.isBuffer(png) || png.length > 1024 * 1024) throw new Error('QR image invalid.');
+        if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
+        await this.notifyQr(slot.owner, png,
+          'Beauté. Jadibot QR. Pindai dari WhatsApp akun kedua → Perangkat tertaut → Tautkan perangkat. QR dapat kedaluwarsa; jangan bagikan.');
+        slot.status = 'qr';
+      } catch (err) {
+        this.logger.warn({ error: err.message }, 'Jadibot QR delivery failed');
+        if (this.slot === slot && slot.socket === socket) {
+          slot.status = 'error';
+          slot.lastQr = '';
+          await this.inform(slot, 'Gagal mengirim QR Jadibot. Gunakan cekjadibot atau ulangi jadibot qr.');
+        }
+      } finally { slot.qrInFlight = false; }
+    };
     socket.ev.on('connection.update', update => {
       if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
-      if ((update.connection === 'connecting' || update.qr) && !state.creds.registered)
-        void pair();
+      if (!state.creds.registered) {
+        if (slot.method === 'qr' && update.qr) void sendQr(update.qr);
+        else if (slot.method === 'pairing' && (update.connection === 'connecting' || update.qr)) void pair();
+      }
       if (update.connection === 'open') {
         slot.status = 'online';
         slot.retries = 0;
@@ -339,6 +380,9 @@ class SubBotManager {
     slot.socket = null;
     try { socket?.end?.(new Error('App shutdown')); }
     catch {}
+    // Drain pending metadata writes before process shutdown; otherwise a fast
+    // restart may read linked=false even though the child already connected.
+    await this.pending;
     // Credentials deliberately retained so the one session can resume later.
   }
 }

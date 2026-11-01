@@ -37,7 +37,7 @@ function menu(config, section = 'menu') {
     ekonomi: ['daily', 'balance', 'limit', 'buylimit', 'transfer 62xxx <koin>',
       'topglobal', 'toplocal', 'cekpremium', 'listpremium'],
     internet: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>'],
-    premium: ['jadibot 628xxxx (1 sesi)', 'cekjadibot', 'stopjadibot'],
+    premium: ['jadibot 628xxxx (pairing)', 'jadibot qr (scan QR)', 'cekjadibot', 'stopjadibot'],
     owner: ['mode public|private', 'self', 'public', 'addpremium 62xxx <hari>', 'delpremium 62xxx']
   };
   const names = {
@@ -130,7 +130,8 @@ function createRouter(config, store, logger, {
         if (['cekjadibot','statusjadibot','listjadibot'].includes(cmd.name))
           return reply(subbot.describe(accountSender, owner));
         if (cmd.name === 'stopjadibot') return reply(await subbot.stop(accountSender, owner));
-        return reply(await subbot.start(accountSender, cmd.args[0], sock.user?.id));
+        const method = cmd.args[0]?.toLowerCase() === 'qr' ? 'qr' : 'pairing';
+        return reply(await subbot.start(accountSender, method === 'qr' ? undefined : cmd.args[0], sock.user?.id, method));
       }
       if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' ')));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;

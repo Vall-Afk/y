@@ -51,6 +51,8 @@ async function fixture(t) {
     onMessage: async (_sock, msg) => received.push(msg),
     onParticipants: async (_sock, event) => changes.push(event),
     notify: async (to, text) => sent.push([to, { text }]),
+    notifyQr: async (to, png, caption) => sent.push([to, { image: png, caption }]),
+    qrEncoder: async () => Buffer.from('mock-png'),
     getPrimaryId: () => '6289999999999@s.whatsapp.net'
   };
   const manager = new SubBotManager(opts);
@@ -174,3 +176,22 @@ test('no-prefix router delegates jadibot only in direct chat to manager', async 
 test('premium cancellation immediately suspends an already linked child session', async t => { const h=await fixture(t); await h.manager.start(user,phone); const sock=h.sockets[0]; h.creds.registered=true; sock.ev.emit('connection.update',{connection:'open'}); await tick(); h.setPremium(false); await h.manager.refreshMembership(user); assert.equal(h.manager.slot.status,'premium-habis'); assert.equal(sock.ended,true); await h.manager.stop(primary); });
 
 test('stop frees the only slot even when remote WhatsApp logout never resolves', async t => { const h=await fixture(t); await h.manager.start(user,phone); h.manager.logoutTimeoutMs=20; h.sockets[0].logout=() => new Promise(() => {}); const result=await h.manager.stop(user); assert.match(result,/slot|Slot/); assert.equal(h.manager.slot,null); });
+
+test('QR jadibot sends QR privately without requesting phone pairing code', async t => {
+  const h=await fixture(t);
+  await h.manager.start(user, undefined, undefined, 'qr');
+  const sock=h.sockets[0];
+  sock.ev.emit('connection.update',{qr:'private-qr-token'});
+  await tick();
+  assert.equal(h.sent.length,1);
+  assert.equal(h.sent[0][0],user);
+  assert.ok(Buffer.isBuffer(h.sent[0][1].image));
+  assert.equal(sock.pairedNumber,undefined);
+  sock.ev.emit('connection.update',{qr:'private-qr-token'});
+  await tick();
+  assert.equal(h.sent.length,1);
+  sock.ev.emit('connection.update',{qr:'new-qr-token'});
+  await tick();
+  assert.equal(h.sent.length,2);
+  await h.manager.stop(user);
+});

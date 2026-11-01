@@ -78,3 +78,7 @@ Do not copy original obfuscated command/case.js, exposed tokens, unsafe scrapers
 This development PR stays draft until its Jadibot pairing and group features are tested on a spare WhatsApp account.
 
 If a stop happens while the child account is offline, the server may not complete a remote logout. For safety, the child account holder should also remove the old linked device from WhatsApp → Linked devices to revoke its access.
+
+### Jadibot via QR (alternative to pairing code)
+
+A premium member sends `jadibot qr` by direct message to the MAIN BOT. The main bot sends a QR image privately; scan it using the separate account's WhatsApp → Linked devices → Link a device. The QR may expire and refresh automatically. Do not share the image. This uses the same ONE global child slot; it is not an additional slot. QR pairing and phone-code pairing are alternatives.
