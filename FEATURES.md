@@ -58,3 +58,5 @@ npm.cmd start
 ~~~
 
 Passing CI tests syntax, local unit logic and dependency checks only. Live WhatsApp pairing and external endpoints require separate validation with authorized accounts. Keep .env and data/auth untouched.
+
+The PowerShell npm.cmd run check command now prints per-file progress and enforces a 20-second timeout on any single node --check invocation, so stalled checks are identifiable rather than silent.
