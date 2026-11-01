@@ -27,8 +27,8 @@ const ALIAS=Object.freeze({
   cloudsky:'snow',xmas:'christmas',
   christmas2:'christmas',
   metalg:'metallic',metalr:'metallic',metals:'metallic',
-  3dsteel:'metallic',steel:'metallic',silver:'metallic',
-  space3d:'space',3dstone:'metallic',purple:'space',
+  '3dsteel':'metallic',steel:'metallic',silver:'metallic',
+  space3d:'space','3dstone':'metallic',purple:'space',
   natural:'wood',writing:'watercolor',sketch:'watercolor'
 });
 const TEXTFX_COMMANDS=new Set(['textfx',...Object.keys(THEMES),...Object.keys(ALIAS)]);
