@@ -111,8 +111,8 @@ test('group store is persistent and ordinary members cannot change it', async t 
 });
 test('catalog rejects oversized content, invalid keys and duplicate entries', async t => {
   const h=await fixture(t);
-  await assert.rejects(h.catalog.change(group,'invalid-key','x','add'),/Invalid/);
-  await assert.rejects(h.catalog.change(group,'item','x'.repeat(1001),'add'),/Invalid/);
+  assert.throws(() => h.catalog.change(group,'invalid-key','x','add'),/Invalid/);
+  assert.throws(() => h.catalog.change(group,'item','x'.repeat(1001),'add'),/Invalid/);
   assert.equal(await h.catalog.change(group,'item','first','add'),'ok');
   assert.equal(await h.catalog.change(group,'item','second','add'),'exists');
   assert.equal(await h.catalog.change(group,'other','value','update'),'missing');
