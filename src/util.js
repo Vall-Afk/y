@@ -27,7 +27,8 @@ function getCommand(text, prefix, knownCommands) {
   if (!prefixed && !(knownCommands instanceof Set)) return null;
   const body = (prefixed ? trimmed.slice(prefix.length) : trimmed).trim();
   const parts = body.split(/\s+/).filter(Boolean);
-  if (!parts.length || !/^[a-z][a-z0-9_-]{0,31}$/i.test(parts[0])) return null;
+  if (!parts.length || !/^(?:[a-z][a-z0-9_-]{0,31}|[0-9][a-z0-9_-]{1,31})$/i.test(parts[0]) ||
+      !/[a-z]/i.test(parts[0])) return null;
   const name = parts[0].toLowerCase();
   if (!prefixed && !knownCommands.has(name)) return null;
   return { name, args: parts.slice(1), prefixed };

@@ -324,3 +324,5 @@ In a **private owner DM**, use `autoread on|off`, `autobio on|off`, `autorespond
 ### Browse 145 newly migrated TextPro-style aliases
 
 Use `menutextpro` or `textfx list 1` through `textfx list 5` to see all original local style names, then send `<style> <your text>`, e.g. `jewelry8 Beauté.`. The local renderer makes procedural artwork with distinct patterns and palettes per legacy keyword, not copies of the proprietary TextPro images.
+
+Legacy numeric-leading style keywords such as `3dchrome`, `3dbox`, `3dsteel`, and `3dstone` are explicitly recognized as commands (ordinary numeric messages remain ignored).

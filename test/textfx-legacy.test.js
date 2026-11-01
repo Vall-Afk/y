@@ -43,3 +43,20 @@ test('paginated TextFX listing is available without a prefix',async()=>{
   await router.handle(sock,msg('textfx list 6'));
   assert.match(sent.at(-1).text,/1-5/);
 });
+
+test('legacy 3D numeric-leading command names route without treating numbers as commands',async()=>{
+  const {getCommand}=require('../src/util');
+  const {createRouter,ALL_COMMANDS}=require('../src/commands');
+  const {loadConfig}=require('../src/config');
+  assert.equal(getCommand('3dchrome Beauté','!',ALL_COMMANDS).name,'3dchrome');
+  assert.equal(getCommand('!3dsteel HELLO','!',ALL_COMMANDS).name,'3dsteel');
+  assert.equal(getCommand('123','!',ALL_COMMANDS),null);
+  const sent=[],sock={user:{id:'6289999999999@s.whatsapp.net'},
+    sendMessage:async(_to,body)=>sent.push(body)};
+  const router=createRouter(loadConfig({OWNER_NUMBER:'6287721373781'}),
+    {mode:'public',group:()=>({})},{warn(){}},
+    {now:(()=>{let n=1;return()=>n+=2000;})()});
+  await router.handle(sock,{key:{remoteJid:'6281111111111@s.whatsapp.net'},
+    message:{conversation:'3dchrome HELLO'}});
+  assert.ok(Buffer.isBuffer(sent.at(-1).image));
+});
