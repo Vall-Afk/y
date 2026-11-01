@@ -20,7 +20,7 @@ test('custom welcome and left templates are stored safely', async t => {
   await store.setGroupText('12345@g.us', 'welcomeText', 'Selamat datang, {user}, di {group}');
   await store.setGroupText('12345@g.us', 'goodbyeText', 'Sampai jumpa, {user}');
   assert.match(store.group('12345@g.us').welcomeText, /{group}/);
-  assert.throws(() => store.setGroupText('12345@g.us', 'welcomeText', 'x'.repeat(301)), /300/);
+  await assert.rejects(store.setGroupText('12345@g.us', 'welcomeText', 'x'.repeat(301)), /300/);
   const reload = new Store(file);
   await reload.init();
   assert.equal(reload.group('12345@g.us').welcome, true);

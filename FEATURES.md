@@ -1,42 +1,40 @@
-# Beauté. — Legacy + Modern migration ledger
+# Beauté. — Legacy + Modern Migration Ledger
 
 **Branch:** feature/beaute-legacy-modern
-**Upstream:** v9.1. Its command/help.js lists many commands, but the critical command/case.js is obfuscated. We only mark code as implemented if a readable replacement and tests exist. This file is a migration ledger, not a promise that every original API works.
+**Upstream:** original v9.1. Original menu in command/help.js is readable, but main handler is obfuscated. Do not assume source feature parity.
 
-## Phase 1: implemented in this branch
+## Implemented in this branch
 
-| Category | Commands | Notes |
+| Area | Commands | Notes |
 |---|---|---|
-| Connection | QR, persisted auth, reconnect, owner-only private mode | Reuses verified working baseline |
-| Owner | owner, mode, self, public, addpremium, delpremium | Owner Vall, 6287721373781 |
-| Group | groupinfo, welcome, left/goodbye, antilink, antiwame, tagall, hidetag, kick, add, promote, demote, open, close, linkgc, revoke, setnamegc, setdesc | Bot must be group admin for mutations |
-| Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium, listpremium | Local virtual currency; no cash or payment gateway |
-| Tools | say, reverse, count, calc/hitung, pilih, roll, coin, password, runtime/speed, waktu | Safe math parser, no eval |
-| Games | tictactoe/ttt, tttmove, delttt, tebakangka, jawab, nyerah | In-memory sessions, reset on restart |
-| RPG | joinrpg, inventory, level, rpgshop, mining, nebang, mancing, hunt, adventure, heal, buy, sell, jualikan, jualkayu, jualcoal, jualstone | Persistent RPG inside economy database; cooldowns and health |
-| AFK | afk | In-memory mentions and auto-return |
-| Network | github, gitclone, wiki, cuaca | Official/public endpoints, fixed hostname allowlist, response limits |
-| Media | sticker/s, toimg | Static images, local conversion |
-| Menus | menu/allmenu/help, menugroup, menumedia, menutools, menugame, menuekonomi, menudownload, menuowner | All displayed commands have routing |
+| No-prefix | keyword-based commands; legacy ! remains | Exact first keyword |
+| Primary | menu, ping, owner, status, mode, QR reconnection | Established baseline |
+| Premium jadibot | jadibot, subbot, cekjadibot, statusjadibot, listjadibot, stopjadibot | Global max 1 extra session; separate auth; premium restriction; private pairing code; expiry suspend |
+| Group | groupinfo, welcome, left, goodbye, antilink, antiwame, tagall, hidetag, kick, add, promote, demote, open, close, linkgc, revoke, setnamegc, setdesc | Requires group admin role |
+| Group templates | setwelcome, setleft, delsetwelcome, delsetleft | {user} and {group} placeholders |
+| Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium, listpremium, addpremium, delpremium | Local virtual coin database; premium admin main owner |
+| RPG | joinrpg, inventory, level, rpgshop, mining, nebang, mancing, hunt, adventure, heal, buy, sell | Persistent |
+| Games | tictactoe, tttmove, delttt, tebakangka, jawab, nyerah | In memory |
+| Media | sticker, toimg, ttp, smeme | Static-only converter and meme captions |
+| Tools | say, reverse, count, calc, hitung, pilih, roll, coin, password, runtime, waktu | No eval |
+| Search | github, gitclone, wiki, cuaca | Bounded allowlisted APIs |
+| AFK | afk | In memory |
 
-## Phase 2: not yet implemented, must be reviewed individually
+## Not yet implemented (requires new review and development)
 
-- Old converter variants: stickerwm, smeme, tovideo, tomp3, emojimix, text drawing, audio/video conversion.
-- Downloads: TikTok, YouTube audio/video, Instagram, MediaFire; requires evaluation of API stability, platform rules, content, downloader size limits, no scraped login cookies.
-- Group and store: custom messages, timed open/close, response list, afk, sewa, broadcast (with explicit opt-in and anti-spam limitations).
-- Advanced RPG content: bosses, equipment, special planets, hunting variants, trading recipes, enhanced leaderboard.
-- Search: Pinterest, lyrics, YouTube metadata, image search, translation.
-- Text effects, legacy game variants, premium integrations and custom sticker packs.
-- Legacy adult content and third-party topup/payments: **not restored automatically** due to privacy, safety, external dependencies and account/payment risk.
+- Sticker pack metadata, animated stickers/video-to-audio conversions and additional text effects
+- TikTok, YouTube, Instagram and MediaFire downloaders
+- Advanced group scheduled controls, group store messages, anti-spam and opt-in broadcast
+- RPG bosses, planets, crafting, special inventory equipment and advanced leaderboards
+- Pinterest, YouTube search, translation, lyrics and other external search integrations
+- Payment/topup and adult-content legacy commands: not restored automatically due to external keys, account/security and user protection issues
 
-## Testing & operating notes
-Run from PowerShell or CMD in this branch:
-1. npm install
-2. npm test
-3. npm run check
-4. npm audit --omit=dev
-5. npm start (uses existing .env and data/auth, do not delete them)
+## Windows PowerShell testing
 
-Before testing live, stop any other bot process that uses the same WhatsApp session. Test group commands in a temporary test group where the bot is admin. Never add unsafe API tokens into source code. Scan QR only if the existing session has expired or is absent.
+    npm.cmd install
+    npm.cmd test
+    npm.cmd run check
+    npm.cmd audit --omit=dev
+    npm.cmd start
 
-**External API and live-account checks are not covered by unit tests.** GitHub Actions validates installation, tests, syntax and dependency vulnerabilities, not end-to-end WhatsApp group moderation.
+Test on a separate test WhatsApp number. A CI pass is not proof of successful pairing, group operation, or external API responses. Keep two sessions isolated, never reveal auth files, and leave PRs as drafts until WhatsApp verification.
