@@ -1,0 +1,6 @@
+.beaute-panel-token
+node_modules/
+.env
+session/
+sessions/
+*.log
