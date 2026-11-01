@@ -1,40 +1,60 @@
-# Beauté. — Legacy + Modern Migration Ledger
+# Beauté. — Implemented Features (v1.3.0)
 
-**Branch:** feature/beaute-legacy-modern
-**Upstream:** original v9.1. Original menu in command/help.js is readable, but main handler is obfuscated. Do not assume source feature parity.
+**GitHub:** https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern  
+**Goal:** Legacy Complete (incremental). **Not full legacy parity yet.** Consult [LEGACY_AUDIT.md](LEGACY_AUDIT.md).
 
-## Implemented in this branch
+## FREE / GRATIS
 
-| Area | Commands | Notes |
+| Category | Commands | Notes |
 |---|---|---|
-| No-prefix | keyword-based commands; legacy ! remains | Exact first keyword |
-| Primary | menu, ping, owner, status, mode, QR reconnection | Established baseline |
-| Premium jadibot | jadibot <phone>, jadibot qr, subbot, cekjadibot, statusjadibot, listjadibot, stopjadibot | Global max 1 extra session; separate auth; premium restriction; private pairing code; expiry suspend |
-| Group | groupinfo, welcome, left, goodbye, antilink, antiwame, tagall, hidetag, kick, add, promote, demote, open, close, linkgc, revoke, setnamegc, setdesc | Requires group admin role |
-| Group templates | setwelcome, setleft, delsetwelcome, delsetleft | {user} and {group} placeholders |
-| Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium, listpremium, addpremium, delpremium | Local virtual coin database; premium admin main owner |
-| RPG | joinrpg, inventory, level, rpgshop, mining, nebang, mancing, hunt, adventure, heal, buy, sell | Persistent |
-| Games | tictactoe, tttmove, delttt, tebakangka, jawab, nyerah | In memory |
-| Media | sticker, toimg, ttp, smeme | Static-only converter and meme captions |
-| Tools | say, reverse, count, calc, hitung, pilih, roll, coin, password, runtime, waktu | No eval |
-| Search | github, gitclone, wiki, cuaca | Bounded allowlisted APIs |
-| AFK | afk | In memory |
+| Main / language | menu, help, allmenu, ping, status, infobot, owner, bahasa id/en, language id/en, lang, listbahasa, languages | Persisted language per WhatsApp user; old ! prefix still works |
+| Tools | say, reverse, count, calc, hitung, **tambah, kurang, kali, bagi**, pilih, roll, coin, password, runtime, speed, waktu | No eval, bounded inputs |
+| Group | groupinfo, welcome, left, goodbye, antilink, antiwame, kick, add, promote, demote, tagall, hidetag, linkgc, revoke, open, close, setnamegc, setdesc | Admin rights checked |
+| Group welcome templates | setwelcome, setleft, delsetwelcome, delsetleft | {user}/{group} placeholders; saved |
+| **Legacy Store** | **list, getlist, addlist, update, dellist** | Persistent per group, members can read; admin writes only |
+| **Legacy order workflows** | **setproses, changeproses, delsetproses, setdone, changedone, delsetdone, proses, done** | Admin-only status on quoted order; {order}/{user}/{group} placeholders |
+| Media | sticker, s, toimg, ttp, smeme | Static images, capped sizes |
+| RPG | joinrpg, inventory, level, rpgshop, mining, mine, nebang, mancing, hunt, adventure, heal, buy, sell, jualikan, jualkayu, jualcoal, jualstone | Economy persistence; cooldowns |
+| Games | tictactoe, ttt, tttmove, delttt, tebakangka, jawab, nyerah | In-memory games |
+| Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium | Virtual coins |
+| Network | github, gitclone, wiki, cuaca | Fixed allowlist; size/timeout limits; free network quota |
 
-## Not yet implemented (requires new review and development)
+## ★ PREMIUM EXCLUSIVE
 
-- Sticker pack metadata, animated stickers/video-to-audio conversions and additional text effects
-- TikTok, YouTube, Instagram and MediaFire downloaders
-- Advanced group scheduled controls, group store messages, anti-spam and opt-in broadcast
-- RPG bosses, planets, crafting, special inventory equipment and advanced leaderboards
-- Pinterest, YouTube search, translation, lyrics and other external search integrations
-- Payment/topup and adult-content legacy commands: not restored automatically due to external keys, account/security and user protection issues
+| Commands | Notes |
+|---|---|
+| jadibot 628xxxx, jadibot qr | Premium-only one GLOBAL secondary connection |
+| cekjadibot, statusjadibot, listjadibot, stopjadibot | Controlled sessions and private QR/pairing |
+| Network premium access | No daily quota deduction where network limit applies |
 
-## Windows PowerShell testing
+## ♛ OWNER ONLY
 
-    npm.cmd install
-    npm.cmd test
-    npm.cmd run check
-    npm.cmd audit --omit=dev
-    npm.cmd start
+| Commands | Notes |
+|---|---|
+| mode public/private, self, public | Control main bot mode |
+| addpremium 62xxx <days>, delpremium 62xxx, listpremium | Only MAIN owner, not all premium members |
 
-Test on a separate test WhatsApp number. A CI pass is not proof of successful pairing, group operation, or external API responses. Keep two sessions isolated, never reveal auth files, and leave PRs as drafts until WhatsApp verification.
+## MENU HELPERS
+
+menu, menugroup, menugrup, menustore, menutoko, menumedia, menutools, menugame, menurpg, menuekonomi, menudownload, menupremium, menuowner, menubahasa. In the main menu, Free, Premium and Owner sections remain visually distinct.
+
+## English language
+
+Send **language en** or **bahasa en**, then **menu**. Supported replies include main interface, group moderation, store and workflow, economy, tools, AFK, core game and RPG feedback, Wikipedia language selection and weather labels. The preference is stored across restarts. Legacy commands keep their established keyword names; some low-level errors, remote responses and missing translations may be in Indonesian.
+
+## Not yet implemented
+
+TikTok, YouTube and Instagram downloaders; MediaFire; animated sticker conversion, stickerwm metadata; Pinterest, lyrics, translation services, text effects; scheduled group controls; advanced RPG; storage; anonymous chats; mass broadcast. Adult and casino features are not automatically migrated. No legacy obfuscated handler or exposed tokens were copied.
+
+## QA
+
+Use PowerShell commands:
+~~~powershell
+npm.cmd install
+npm.cmd test
+npm.cmd run check
+npm.cmd audit --omit=dev
+npm.cmd start
+~~~
+
+Passing CI tests syntax, local unit logic and dependency checks only. Live WhatsApp pairing and external endpoints require separate validation with authorized accounts. Keep .env and data/auth untouched.
