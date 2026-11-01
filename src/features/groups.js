@@ -4,7 +4,7 @@ const { jid, isGroup } = require('../util');
 const GROUP_COMMANDS = new Set([
   'groupinfo','welcome','left','goodbye','antilink','antiwame','kick','add',
   'promote','demote','tagall','hidetag','linkgc','revoke','open','close','setnamegc','setdesc',
-  'setwelcome','setleft','delsetwelcome','delsetleft',
+  'setwelcome','setleft','changewelcome','changeleft','delsetwelcome','delsetleft',
   'setproses','setdone','changeproses','changedone','delsetproses','delsetdone','proses','done'
 ]);
 const ADMIN_COMMANDS = new Set([...GROUP_COMMANDS].filter(x => x !== 'groupinfo'));
@@ -55,7 +55,7 @@ async function handleGroup(ctx) {
     await reply(key + ': ' + flag);
     return true;
   }
-  if (['setwelcome','setleft','delsetwelcome','delsetleft'].includes(cmd.name)) {
+  if (['setwelcome','setleft','changewelcome','changeleft','delsetwelcome','delsetleft'].includes(cmd.name)) {
     const field = cmd.name.endsWith('welcome') ? 'welcomeText' : 'goodbyeText';
     const deleting = cmd.name.startsWith('del');
     const body = deleting ? '' : cmd.args.join(' ').trim();

@@ -277,3 +277,7 @@ Use these commands **only for media you created, own, or are permitted to downlo
 ### Profile and group join/leave (authorization required)
 
 Owner-only: `join https://chat.whatsapp.com/<invite-code>` from a private chat (the owner must have a valid invitation), `leavegc` inside the group, `setnamebot <name>`, `setbiobot <status>`, `setppbot` / `setppbot2` (reply to an image), and `delppbot`. Group admins, only when the bot is a group admin: `setppgc` / `setppgc2` / `pppanjanggc` (reply to an image), and `delppgc`. Photos are resized/cropped to a 640px JPEG locally using Sharp; the legacy long-profile alias does not preserve a taller crop. These operations use WhatsApp APIs and require live group/profile tests.
+
+### Legacy compatibility aliases
+
+`changewelcome` and `changeleft` now accept the same arguments as `setwelcome` and `setleft`; these are permission-gated group admin aliases. The `dashboard` command shows a small private owner-only bot summary without exposing credentials. The `donate` command links to the owner contact, **not** a payment method (none was provided).

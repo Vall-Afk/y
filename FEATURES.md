@@ -105,3 +105,5 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Owner/group profile controls
 
 `join`, `leavegc`, `setnamebot`, `setbiobot`, `setppbot`, `setppbot2`, `delppbot`; admin + bot-admin `setppgc`, `setppgc2`, `pppanjanggc`, `delppgc`. Profile photo operations require live Baileys testing; all input images are local capped JPEG conversions.
+
+Additional legacy aliases: `changewelcome`, `changeleft`, `dashboard` (main owner private status) and `donate` (owner contact only, no payment integration).

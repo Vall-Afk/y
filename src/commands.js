@@ -31,7 +31,7 @@ const MENU_COMMANDS = new Set([
   'menustore','menutoko','menubahasa'
 ]);
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
-  'sticker','s','toimg','ttp','smeme','react','source','script','sc','credits','thanks','bahasa','language','lang','listbahasa','languages','listlanguages']);
+  'sticker','s','toimg','ttp','smeme','react','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
@@ -129,6 +129,22 @@ function createRouter(config, store, logger, {
       }
       if (['credits','thanks'].includes(cmd.name)) {
         return reply(t('credits', {name: config.ownerName, instagram: config.ownerInstagram}));
+      }
+      if (cmd.name === 'donate') return reply(
+        (lang === 'en' ? 'For donation information, contact the owner: ' :
+          'Untuk informasi donasi, hubungi owner: ') +
+          'https://wa.me/' + config.ownerNumber +
+          '\n' + (lang === 'en' ? 'No payment account is configured.' :
+            'Belum ada rekening pembayaran yang dikonfigurasi.')
+      );
+      if (cmd.name === 'dashboard') {
+        if (!owner) return reply(t('ownerOnly'));
+        return reply('✦ ' + config.name + ' Dashboard' +
+          '\nMode: ' + store.mode +
+          '\nUptime: ' + Math.floor(process.uptime()) + 's' +
+          '\nUsers: ' + Object.keys(economy?.state?.users || {}).length +
+          '\nJadibot: ' + (subbot?.slot?.status || 'offline') +
+          '\nCommands loaded: ' + ALL_COMMANDS.size);
       }
       if (cmd.name === 'owner') return reply('Owner: ' + config.ownerName +
         '\nWhatsApp: https://wa.me/' + config.ownerNumber +

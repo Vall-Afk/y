@@ -3,7 +3,7 @@
 const SECTIONS = Object.freeze([
   {
     id: 'main', icon: '✦', idTitle: 'UMUM', enTitle: 'GENERAL',
-    commands: ['menu', 'ping', 'status', 'owner', 'credits', 'script', 'bahasa id|en', 'listbahasa', 'afk [alasan]']
+    commands: ['menu', 'ping', 'status', 'owner', 'credits', 'script', 'donate', 'bahasa id|en', 'listbahasa', 'afk [alasan]']
   },
   {
     id: 'tools', icon: '⚙', idTitle: 'TOOLS', enTitle: 'TOOLS',
@@ -80,7 +80,7 @@ const SECTIONS = Object.freeze([
   }
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
-const OWNER = Object.freeze(['mode public|private', 'self', 'public',
+const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard',
   'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium',
   'addsewa <group@g.us> 30', 'delsewa <group@g.us>', 'listsewa', 'backup (private DM)',
   'join <invite link> (DM)', 'leavegc (group)', 'setnamebot <teks>',
