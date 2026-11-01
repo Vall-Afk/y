@@ -9,8 +9,18 @@ const { NET_COMMANDS, handleNetwork } = require('./features/network');
 const { RPG_COMMANDS, handleRpg, RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
 
+const MENU_COMMANDS = new Set([
+  'menu','help','allmenu','menugroup','menugrup','menumedia','menutools',
+  'menugame','menurpg','menuekonomi','menudownload','menuowner'
+]);
+const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk','sticker','s','toimg']);
+const ALL_COMMANDS = new Set([
+  ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
+  ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS
+]);
+
 function menu(config, section = 'menu') {
-  const p = config.prefix;
+  const p = ''; // Native keyword commands; the legacy prefix still works.
   const parts = {
     umum: ['menu', 'ping', 'status', 'owner', 'waktu', 'runtime', 'afk [alasan]'],
     grup: ['groupinfo', 'welcome on|off', 'left on|off', 'antilink on|off', 'antiwame on|off',
@@ -57,7 +67,7 @@ function createRouter(config, store, logger, {
     const text = getText(message);
     if (!text || (store.mode === 'private' && !owner)) return;
     const group = isGroup(chat);
-    const cmd = getCommand(text, config.prefix);
+    const cmd = getCommand(text, config.prefix, ALL_COMMANDS);
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
     if (cmd?.name !== 'afk') {
@@ -88,8 +98,7 @@ function createRouter(config, store, logger, {
       if (!owner && current - prev < 1800) return;
       recent.set(sender, current);
       if (recent.size > 4000) recent.clear();
-      if (['menu','help','allmenu','menugroup','menugrup','menumedia',
-        'menutools','menugame','menurpg','menuekonomi','menudownload','menuowner'].includes(cmd.name)) {
+      if (MENU_COMMANDS.has(cmd.name)) {
         return reply(menu(config, cmd.name));
       }
       if (cmd.name === 'ping') return reply('Pong! ' + config.name);
@@ -104,7 +113,7 @@ function createRouter(config, store, logger, {
       if (['mode', 'self', 'public'].includes(cmd.name)) {
         if (!owner) return reply('Khusus owner.');
         const choice = cmd.name === 'self' ? 'private' : cmd.name === 'public' ? 'public' : cmd.args[0]?.toLowerCase();
-        if (!['public', 'private'].includes(choice)) return reply('Contoh: ' + config.prefix + 'mode private');
+        if (!['public', 'private'].includes(choice)) return reply('Contoh: mode private');
         await store.setMode(choice);
         return reply('Mode berhasil diatur: ' + choice);
       }
@@ -131,4 +140,4 @@ function createRouter(config, store, logger, {
   }
   return { handle };
 }
-module.exports = { createRouter, menu };
+module.exports = { createRouter, menu, ALL_COMMANDS };

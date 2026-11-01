@@ -18,11 +18,19 @@ function getText(message) {
     m.buttonsResponseMessage?.selectedButtonId ||
     m.listResponseMessage?.singleSelectReply?.selectedRowId)) || '').trim();
 }
-function getCommand(text, prefix) {
-  if (!text.startsWith(prefix)) return null;
-  const parts = text.slice(prefix.length).trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return null;
-  return { name: parts[0].toLowerCase(), args: parts.slice(1) };
+function getCommand(text, prefix, knownCommands) {
+  if (typeof text !== 'string' || text.length > 4000) return null;
+  const trimmed = text.trim();
+  const prefixed = trimmed.startsWith(prefix);
+  // Bare commands are opt-in and matched by exact FIRST keyword only.
+  // Ordinary WhatsApp messages must not be interpreted as bot commands.
+  if (!prefixed && !(knownCommands instanceof Set)) return null;
+  const body = (prefixed ? trimmed.slice(prefix.length) : trimmed).trim();
+  const parts = body.split(/\s+/).filter(Boolean);
+  if (!parts.length || !/^[a-z][a-z0-9_-]{0,31}$/i.test(parts[0])) return null;
+  const name = parts[0].toLowerCase();
+  if (!prefixed && !knownCommands.has(name)) return null;
+  return { name, args: parts.slice(1), prefixed };
 }
 function getSender(message) {
   return jid(message?.key?.participant || message?.key?.remoteJid || '');

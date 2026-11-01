@@ -51,7 +51,7 @@ test('math parser handles precedence and rejects injection', () => {
 });
 test('menu includes legacy and modern commands', () => {
   const text = menu(config);
-  for (const cmd of ['!promote','!tictactoe','!gitclone','!daily','!antilink','!calc','!sticker']) {
+  for (const cmd of ['promote','tictactoe','gitclone','daily','antilink','calc','sticker']) {
     assert.ok(text.includes(cmd), cmd);
   }
 });
@@ -124,3 +124,5 @@ test('trusted fetching rejects arbitrary hosts and oversized documents', async (
   assert.deepEqual(repoInput('https://github.com/Vall-Afk/y.git'), ['Vall-Afk','y']);
   assert.throws(() => repoInput('https://evil.com/x/y'));
 });
+
+test('prefixless ping works and ordinary messages do not trigger replies', async () => { const h=harness(); await h.router.handle(h.sock,msg(bob,'selamat malam semuanya')); assert.equal(h.calls.length,0); await h.router.handle(h.sock,msg(bob,'ping')); assert.match(h.calls.at(-1)?.payload?.text,/Pong!/); await h.router.handle(h.sock,msg(bob,'!ping')); assert.match(h.calls.at(-1)?.payload?.text,/Pong!/); });
