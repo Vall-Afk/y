@@ -17,7 +17,7 @@ const SECTIONS = Object.freeze([
       'setwelcome <teks>', 'setleft <teks>', 'delsetwelcome', 'delsetleft',
       'antispam on|off', 'warn @user', 'unwarn @user', 'listwarn',
       'rules', 'setrules <teks>', 'addresponse key | reply',
-      'listresponse', 'setopen 08:00', 'setclose 22:00', 'listschedule',
+      'listresponse', 'setopen 08:00', 'setclose 22:00', 'listschedule', 'checksewa',
       'tagall [teks]', 'hidetag [teks]', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <teks>']
   },
@@ -58,7 +58,8 @@ const SECTIONS = Object.freeze([
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
 const OWNER = Object.freeze(['mode public|private', 'self', 'public',
-  'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium']);
+  'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium',
+  'addsewa <group@g.us> 30', 'delsewa <group@g.us>', 'listsewa']);
 const ALIASES = Object.freeze({
   menu: 'all', help: 'all', allmenu: 'all',
   menugroup: 'group', menugrup: 'group',

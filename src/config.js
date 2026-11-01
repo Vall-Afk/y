@@ -27,6 +27,7 @@ function loadConfig(env = process.env) {
     port,
     dataDir,
     authDir,
+    requireRental: ['1','true','yes'].includes(String(env.REQUIRE_SEWA || '').toLowerCase()),
     logLevel: ['fatal', 'error', 'warn', 'info', 'debug'].includes(env.LOG_LEVEL) ? env.LOG_LEVEL : 'info'
   });
 }

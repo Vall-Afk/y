@@ -16,6 +16,7 @@ const { Away } = require('./features/afk');
 const { SubBotManager } = require('./subbot');
 const { GroupCatalog } = require('./features/catalog');
 const { ModerationStore, runGroupSchedules } = require('./features/moderation');
+const { RentalRegistry } = require('./features/rental');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -33,15 +34,19 @@ async function main() {
   await catalog.init();
   const moderation = new ModerationStore(path.join(config.dataDir, 'moderation.json'));
   await moderation.init();
+  const rentals = new RentalRegistry(path.join(config.dataDir, 'rentals.json'));
+  await rentals.init();
   const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
   await childStore.init();
   const childCatalog = new GroupCatalog(path.join(config.dataDir, 'jadibot', 'group-catalog.json'));
   await childCatalog.init();
   const childModeration = new ModerationStore(path.join(config.dataDir, 'jadibot', 'moderation.json'));
   await childModeration.init();
+  const childRentals = new RentalRegistry(path.join(config.dataDir, 'jadibot', 'rentals.json'));
+  await childRentals.init();
   const childRouter = createRouter(config, childStore, logger, {
     economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog,
-    moderation: childModeration
+    moderation: childModeration, rentals: childRentals
   });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
 
@@ -87,7 +92,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

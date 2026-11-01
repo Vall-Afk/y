@@ -73,3 +73,7 @@ brat <text>, qc (reply), blur [1-30], grayscale, greyscale, invert, negative, ro
 ## Legacy RPG Advanced
 
 `lebur`, `jualingot`, `craft`, `equip`, `unequip`, `equipment`, `killslime`, `killgoblin`, `killdevil`, `killbehemoth`, `killdemon`, `killdemonking`, `luckyday`, `goplanet`, `toprpg`, `rpgboard`, `jelajah`, `sellikan`, `sellbesi`, `sellemas` are added as virtual RPG activities with atomic persistence. Boss difficulty and cooldown are checked server-side.
+
+## Manual group rental (sewa)
+
+Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. Optional `REQUIRE_SEWA=true` gates group commands if expired; default is false and preserves existing groups.

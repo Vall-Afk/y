@@ -15,6 +15,7 @@ const { tr } = require('./i18n');
 const { IMAGE_COMMANDS, handleImage } = require('./features/image-studio');
 const { MEDIA_COMMANDS, handleTranscode } = require('./features/transcode');
 const { STICKERWM_COMMANDS, handleStickerWm } = require('./features/stickerwm');
+const { RENTAL_COMMANDS, handleRental } = require('./features/rental');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -33,7 +34,7 @@ const ALL_COMMANDS = new Set([
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   async function handle(sock, message) {
@@ -66,7 +67,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, fetcher, lang, t };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, fetcher, lang, t };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -77,6 +78,13 @@ function createRouter(config, store, logger, {
       }
       if (await inspectModeration(ctx, spamDetector)) return;
       if (!cmd) return;
+      if (group && config.requireRental && !owner &&
+          !['menu','help','allmenu','owner','ceksewa','checksewa','sewa'].includes(cmd.name) &&
+          !rentals?.get(chat)?.active) {
+        return reply(lang === 'en' ?
+          'This group has no active rental. Contact the bot owner.' :
+          'Sewa grup belum aktif. Hubungi owner bot.');
+      }
       const prev = recent.get(sender) || 0;
       const current = now();
       if (!owner && current - prev < 1800) return;
@@ -133,6 +141,7 @@ function createRouter(config, store, logger, {
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;
       if (CATALOG_COMMANDS.has(cmd.name) && await handleCatalog(ctx)) return;
       if (MOD_COMMANDS.has(cmd.name) && await handleModeration(ctx)) return;
+      if (RENTAL_COMMANDS.has(cmd.name) && await handleRental(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;

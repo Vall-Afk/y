@@ -243,3 +243,7 @@ The optional `ffmpeg-static@5.3.0` package downloads an FFmpeg binary for your O
 ### Advanced RPG / Legacy RPG World
 
 The virtual RPG now includes `lebur` (3 ore + 1 coal → ingot), `craft sword`, `craft pickaxe`, `equip sword`, `unequip`, `luckyday`, `goplanet`, `toprpg` and boss levels: `killslime`, `killgoblin`, `killdevil`, `killbehemoth`, `killdemon`, `killdemonking`. These are virtual activities only, with cooldowns, level and HP requirements, transactionally persisted items and no real-world money or wagers. Existing RPG save data is extended in place; do not delete `data/economy.json`.
+
+### Group rental / Sewa (owner only)
+
+Manual rental registry: `addsewa <group-id@g.us> 30`, `delsewa <group-id@g.us>`, `listsewa`. Group members can use `checksewa` to see expiry. Rental status is only metadata; it does **not** process money or send mass messages. **Default `REQUIRE_SEWA=false`**, so existing groups keep working. Only if you explicitly set `REQUIRE_SEWA=true` in .env does the bot restrict non-owner group commands when no active rental exists. The bot does not kick members or leave groups automatically. Main and Jadibot store rental ledgers separately.
