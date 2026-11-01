@@ -29,6 +29,10 @@ test('downloaders validate public media URLs and strip tracking queries',()=>{
 test('command args constrain size duration, avoid playlist/auth/config, and do not invoke shell',async()=>{
   const args=downloadArgs('ytmp3','https://www.youtube.com/watch?v=abcdefghijk');
   assert.ok(args.includes('--ignore-config'));
+  assert.ok(args.includes('--no-plugin-dirs'));
+  assert.ok(args.includes('--no-remote-components'));
+  assert.ok(args.includes('--max-downloads'));
+  assert.ok(args.includes('default,-generic'));
   assert.ok(args.includes('--no-playlist'));
   assert.ok(args.includes('--max-filesize'));
   assert.ok(args.includes('12M'));

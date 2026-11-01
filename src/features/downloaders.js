@@ -59,7 +59,9 @@ function normalizeLink(input, command) {
 function downloadArgs(command, url) {
   if (!DOWNLOAD_COMMANDS.has(command)) throw new Error('Unsupported downloader command.');
   const base = [
-    '--ignore-config','--no-playlist','--playlist-items','1',
+    '--ignore-config','--no-plugin-dirs','--no-remote-components',
+    '--ies','default,-generic',
+    '--no-playlist','--playlist-items','1','--max-downloads','1',
     '--no-cache-dir','--no-warnings','--no-progress',
     '--match-filters','!is_live & duration <=? 180',
     '--no-write-subs','--no-write-thumbnail','--no-write-info-json',

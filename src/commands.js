@@ -138,7 +138,9 @@ function createRouter(config, store, logger, {
             'Belum ada rekening pembayaran yang dikonfigurasi.')
       );
       if (cmd.name === 'dashboard') {
-        if (!owner) return reply(t('ownerOnly'));
+        if (!owner || group) return reply(lang === 'en' ?
+          'Owner dashboard is only available in a private chat.' :
+          'Dashboard owner hanya bisa dibuka lewat chat pribadi.');
         return reply('✦ ' + config.name + ' Dashboard' +
           '\nMode: ' + store.mode +
           '\nUptime: ' + Math.floor(process.uptime()) + 's' +
