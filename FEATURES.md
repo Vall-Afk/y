@@ -101,3 +101,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 ## Optional public-media downloaders
 
 `ytmp3`, `ytmp4`, `tiktok`, `tiktoknowm`, `tiktokaudio`, `instagram`, `igphoto`, `igvideo`, `igreels` use an optional user-installed `yt-dlp` executable for bounded, individual public media URLs. They are not part of the automated unit network tests: extractor behavior and availability require live user verification. No account cookies/private media/paywall bypass. `tiktoknowm` does not guarantee watermark removal.
+
+## Owner/group profile controls
+
+`join`, `leavegc`, `setnamebot`, `setbiobot`, `setppbot`, `setppbot2`, `delppbot`; admin + bot-admin `setppgc`, `setppgc2`, `pppanjanggc`, `delppgc`. Profile photo operations require live Baileys testing; all input images are local capped JPEG conversions.
