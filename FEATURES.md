@@ -13,7 +13,7 @@
 | Group welcome templates | setwelcome, setleft, delsetwelcome, delsetleft | {user}/{group} placeholders; saved |
 | **Legacy Store** | **list, getlist, addlist, update, dellist** | Persistent per group, members can read; admin writes only |
 | **Legacy order workflows** | **setproses, changeproses, delsetproses, setdone, changedone, delsetdone, proses, done** | Admin-only status on quoted order; {order}/{user}/{group} placeholders |
-| Media | sticker, s, toimg, ttp, smeme | Static images, capped sizes |
+| Media | sticker, s, toimg, ttp, smeme | Static images, capped sizes; local blur/grayscale/invert/rotate/flip/mirror/pixelate/circle/enhance/compress/resize; Brat and quoted text stickers |
 | RPG | joinrpg, inventory, level, rpgshop, mining, mine, nebang, mancing, hunt, adventure, heal, buy, sell, jualikan, jualkayu, jualcoal, jualstone | Economy persistence; cooldowns |
 | Games | tictactoe, ttt, tttmove, delttt, tebakangka, jawab, nyerah | In-memory games |
 | Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium | Virtual coins |
@@ -60,3 +60,6 @@ npm.cmd start
 Passing CI tests syntax, local unit logic and dependency checks only. Live WhatsApp pairing and external endpoints require separate validation with authorized accounts. Keep .env and data/auth untouched.
 
 The PowerShell npm.cmd run check command now prints per-file progress and enforces a 20-second timeout on any single node --check invocation, so stalled checks are identifiable rather than silent.
+
+## New Media Studio commands
+brat <text>, qc (reply), blur [1-30], grayscale, greyscale, invert, negative, rotate 90/180/270, flip, mirror, pixelate, circle, enhance, compress, resize 128-2048. These use local Sharp processing and 5 MB input limits.

@@ -12,6 +12,7 @@ const { Away } = require('./features/afk');
 const { CATALOG_COMMANDS, handleCatalog } = require('./features/catalog');
 const { menu } = require('./menu');
 const { tr } = require('./i18n');
+const { IMAGE_COMMANDS, handleImage } = require('./features/image-studio');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -25,7 +26,7 @@ const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
-  ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS
+  ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
@@ -135,6 +136,7 @@ function createRouter(config, store, logger, {
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
       if (RPG_COMMANDS.has(cmd.name) && await handleRpg(ctx)) return;
       if (NET_COMMANDS.has(cmd.name) && await handleNetwork(ctx)) return;
+      if (IMAGE_COMMANDS.has(cmd.name) && await handleImage(ctx)) return;
       if (cmd.name === 'react') {
         const emoji = cmd.args[0] || '';
         if (!emoji || [...emoji].length > 12 ||

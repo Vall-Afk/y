@@ -47,7 +47,10 @@ function imageTransform(buffer,command,args=[]){
     case 'mirror':image=image.flop();break;
     case 'enhance':image=image.normalize().sharpen();break;
     case 'pixelate':
-      image=image.resize(64,64,{fit:'fill'}).resize(512,512,{kernel:'nearest'});break;
+      return sharp(buffer,{limitInputPixels:20_000_000,animated:false})
+        .resize(64,64,{fit:'fill'}).toBuffer()
+        .then(small=>sharp(small).resize(512,512,{kernel:'nearest'})
+          .flatten({background:'#ffffff'}).jpeg({quality:83}).toBuffer());
     case 'resize':{
       const n=Number(args[0]);
       if (!Number.isInteger(n)||n<128||n>2048) throw new Error('Use resize 128 to 2048.');
@@ -70,7 +73,7 @@ function isSimpleText(text,max){
     !/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text);
 }
 function svgTextImage(text,variant='brat',caption=''){
-  if (!isSimpleText(text,220)||!isSimpleText(caption||' ',60)) throw new Error('Text too long (max 220).');
+  if (!isSimpleText(text,220)||(caption && !isSimpleText(caption,60))) throw new Error('Text too long (max 220).');
   const lines=splitText(text.trim(),220);
   if (lines.length>9) throw new Error('Too many lines.');
   const font=variant==='qc'?'Arial, sans-serif':'Arial, sans-serif';

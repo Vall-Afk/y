@@ -228,3 +228,6 @@ Fitur downloader TikTok/YouTube/Instagram/MediaFire, fitur search tertentu, anim
 ### Troubleshooting: npm.cmd run check seems stuck on Windows
 
 Versions before the syntax-check progress utility chained many node --check calls without printing individual progress. The new npm.cmd run check checks all JavaScript files under src/, prints each filename and the result, and stops with a clear error if one check exceeds **20 seconds**. This is a diagnostic timeout, not a promise that every computer can check every file in under 20 seconds. If it fails, send the last filename/error; try node --version and node --check .\src\index.js to isolate the problem. Do not disable antivirus or change PowerShell execution policy. Remember that node --check only checks syntax; it does not connect to WhatsApp or launch the bot.
+
+### Local Image Studio (no external uploads)
+Reply to an image with blur [1–30], grayscale, invert, rotate 90/180/270, flip, mirror, pixelate, circle, enhance, compress or resize 512. Each image is processed locally with Sharp; source size ≤5 MB, ≤20 MP. Send brat <text> to make a simple static text sticker, or reply to a text message with qc. Animations and online background removal are not claimed supported.

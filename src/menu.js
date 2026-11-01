@@ -28,7 +28,9 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'media', icon: '✎', idTitle: 'STIKER / MEDIA', enTitle: 'STICKERS / MEDIA',
-    commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)']
+    commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)',
+      'brat <teks>', 'qc (reply)', 'blur [1-30]', 'grayscale', 'invert',
+      'rotate 90', 'flip', 'mirror', 'pixelate', 'circle', 'enhance', 'compress', 'resize 512']
   },
   {
     id: 'game', icon: '♜', idTitle: 'GAME', enTitle: 'GAMES',
