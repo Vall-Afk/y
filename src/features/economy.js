@@ -9,7 +9,7 @@ const ECONOMY_COMMANDS = new Set([
 ]);
 const MAX_BALANCE = 100_000_000;
 const DAY = 86_400_000;
-function validUser(value) { return /^[1-9]\d{7,14}@s\.whatsapp\.net$/.test(value); }
+function validUser(value) { return /^[1-9]\d{4,19}@(s\.whatsapp\.net|lid)$/.test(value); }
 function initialUser() { return { balance: 0, dailyAt: 0, quotaDay: '', used: 0, extra: 0, premiumUntil: 0 }; }
 function userFrom(state, id) {
   if (!validUser(id)) throw new Error('Nomor pengguna tidak valid.');
@@ -200,4 +200,4 @@ async function handleEconomy(ctx) {
   }
   return true;
 }
-module.exports = { Economy, ECONOMY_COMMANDS, handleEconomy, validUser, numberFrom };
+module.exports = { Economy, ECONOMY_COMMANDS, handleEconomy, validUser, numberFrom, userFrom };

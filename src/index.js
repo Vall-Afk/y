@@ -11,6 +11,8 @@ const { Store } = require('./store');
 const { createRouter } = require('./commands');
 const { Economy } = require('./features/economy');
 const { GameHub } = require('./features/games');
+const { RpgService } = require('./features/rpg');
+const { Away } = require('./features/afk');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -22,7 +24,9 @@ async function main() {
   const economy = new Economy(path.join(config.dataDir, 'economy.json'));
   await economy.init();
   const games = new GameHub();
-  const router = createRouter(config, store, logger, { economy, games });
+  const rpg = new RpgService(economy);
+  const afk = new Away();
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }

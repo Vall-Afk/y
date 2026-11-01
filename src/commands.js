@@ -6,11 +6,13 @@ const { TOOL_COMMANDS, handleTools } = require('./features/tools');
 const { ECONOMY_COMMANDS, handleEconomy } = require('./features/economy');
 const { GAME_COMMANDS, handleGames, GameHub } = require('./features/games');
 const { NET_COMMANDS, handleNetwork } = require('./features/network');
+const { RPG_COMMANDS, handleRpg, RpgService } = require('./features/rpg');
+const { Away } = require('./features/afk');
 
 function menu(config, section = 'menu') {
   const p = config.prefix;
   const parts = {
-    umum: ['menu', 'ping', 'status', 'owner', 'waktu', 'runtime'],
+    umum: ['menu', 'ping', 'status', 'owner', 'waktu', 'runtime', 'afk [alasan]'],
     grup: ['groupinfo', 'welcome on|off', 'left on|off', 'antilink on|off', 'antiwame on|off',
       'tagall [pesan]', 'hidetag [pesan]', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <deskripsi>'],
@@ -18,6 +20,7 @@ function menu(config, section = 'menu') {
     tools: ['say <teks>', 'reverse <teks>', 'count <teks>', 'calc <rumus>',
       'pilih a | b | c', 'roll [maks]', 'coin', 'password [8-64]'],
     game: ['tictactoe @user', 'tttmove 1-9', 'delttt', 'tebakangka', 'jawab <angka>', 'nyerah'],
+    rpg: ['joinrpg', 'inventory', 'level', 'rpgshop', 'mining', 'nebang', 'mancing', 'hunt', 'adventure', 'heal', 'buy <item> <jumlah>', 'sell <item> <jumlah>'],
     ekonomi: ['daily', 'balance', 'limit', 'buylimit', 'transfer 62xxx <koin>',
       'topglobal', 'toplocal', 'cekpremium', 'listpremium'],
     internet: ['github owner/repo', 'gitclone owner/repo', 'wiki <topik>', 'cuaca <kota>'],
@@ -25,12 +28,12 @@ function menu(config, section = 'menu') {
   };
   const names = {
     umum: 'UMUM', grup: 'GRUP', media: 'MEDIA', tools: 'TOOLS',
-    game: 'GAME', ekonomi: 'EKONOMI', internet: 'INTERNET', owner: 'OWNER'
+    game: 'GAME', rpg: 'RPG', ekonomi: 'EKONOMI', internet: 'INTERNET', owner: 'OWNER'
   };
   const aliases = {
     menu: 'all', help: 'all', allmenu: 'all',
     menugroup: 'grup', menugrup: 'grup', menumedia: 'media',
-    menutools: 'tools', menugame: 'game', menuekonomi: 'ekonomi',
+    menutools: 'tools', menugame: 'game', menurpg: 'rpg', menuekonomi: 'ekonomi',
     menudownload: 'internet', menuowner: 'owner'
   };
   const target = aliases[section] || section;
@@ -43,7 +46,7 @@ function menu(config, section = 'menu') {
 }
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   async function handle(sock, message) {
@@ -57,6 +60,10 @@ function createRouter(config, store, logger, {
     const cmd = getCommand(text, config.prefix);
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
+    if (cmd?.name !== 'afk') {
+      const notice = afk.activity(sender, message);
+      if (notice) await sock.sendMessage(chat, { text: notice }).catch(() => {});
+    }
     if (!cmd && !linkViolation) return;
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
     let rolePromise;
@@ -66,7 +73,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, owner, text, cmd, chat, group, reply, roles, economy, games, fetcher };
+    const ctx = { config, store, logger, sock, message, sender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, fetcher };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -82,7 +89,7 @@ function createRouter(config, store, logger, {
       recent.set(sender, current);
       if (recent.size > 4000) recent.clear();
       if (['menu','help','allmenu','menugroup','menugrup','menumedia',
-        'menutools','menugame','menuekonomi','menudownload','menuowner'].includes(cmd.name)) {
+        'menutools','menugame','menurpg','menuekonomi','menudownload','menuowner'].includes(cmd.name)) {
         return reply(menu(config, cmd.name));
       }
       if (cmd.name === 'ping') return reply('Pong! ' + config.name);
@@ -101,10 +108,12 @@ function createRouter(config, store, logger, {
         await store.setMode(choice);
         return reply('Mode berhasil diatur: ' + choice);
       }
+      if (cmd.name === 'afk') return reply(afk.set(sender, cmd.args.join(' ')));
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
+      if (RPG_COMMANDS.has(cmd.name) && await handleRpg(ctx)) return;
       if (NET_COMMANDS.has(cmd.name) && await handleNetwork(ctx)) return;
       if (cmd.name === 'sticker' || cmd.name === 's') {
         const output = await convert(sock, message, 'sticker', logger);

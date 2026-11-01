@@ -104,7 +104,7 @@ async function handleRpg(ctx) {
   const { cmd, rpg, sender, reply } = ctx;
   if (!RPG_COMMANDS.has(cmd.name)) return false;
   if (!rpg) { await reply('RPG belum aktif.'); return true; }
-  if (cmd.name === 'joinrpg') return reply(await rpg.join(sender)), true;
+  if (cmd.name === 'joinrpg') { await reply(await rpg.join(sender)); return true; }
   if (cmd.name === 'inventory' || cmd.name === 'level') {
     const current = rpg.snapshot(sender);
     await reply(current ? status(current) : 'Daftar dulu: !joinrpg');
