@@ -14,7 +14,7 @@ async function boundedFetch(url, options = {}) {
   const result = await fetcher(u.href, {
     method: 'GET', redirect: 'error',
     signal: AbortSignal.timeout(options.timeout || 12000),
-    headers: { 'User-Agent': 'BeauteBot/1.1 (GitHub: Vall-Afk/y)', 'Accept': 'application/json' }
+    headers: { 'User-Agent': 'BeauteBot/1.1 (GitHub: Vall-Afk/y)', 'Accept': u.hostname === 'codeload.github.com' ? 'application/zip' : 'application/json' }
   });
   if (!result.ok) throw new Error('Layanan sedang gagal (HTTP ' + result.status + ').');
   const max = options.maxBytes || 256 * 1024;

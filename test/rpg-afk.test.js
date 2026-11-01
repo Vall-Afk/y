@@ -1,0 +1,66 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const { Economy } = require('../src/features/economy');
+const { RpgService } = require('../src/features/rpg');
+const { Away } = require('../src/features/afk');
+const id = '6287700000001@s.whatsapp.net';
+const other = '6287700000002@s.whatsapp.net';
+
+test('RPG join, mine, cooldown, trade, heal and reload', async t => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'beaute-rpg-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const file = path.join(dir, 'economy.json');
+  let time = Date.UTC(2026, 10, 1);
+  const economy = new Economy(file, () => time);
+  await economy.init();
+  await economy.daily(id);
+  const rpg = new RpgService(economy, min => min);
+  assert.match(await rpg.action(id, 'mining'), /Daftar dulu/);
+  assert.match(await rpg.join(id), /Berhasil bergabung/);
+  assert.match(await rpg.action(id, 'mining'), /Berhasil mining/);
+  assert.equal(rpg.snapshot(id).items.stone, 1);
+  assert.match(await rpg.action(id, 'mining'), /Cooldown/);
+  assert.match(await rpg.trade(id, 'sell', 'stone', 1), /Menjual/);
+  assert.equal(economy.get(id).balance, 128);
+  assert.match(await rpg.trade(id, 'buy', 'meat', 2), /Membeli/);
+  assert.match(await rpg.heal(id), /HP pulih/);
+  assert.equal(rpg.snapshot(id).hp, 100);
+  time += 301000;
+  assert.match(await rpg.action(id, 'mining'), /Berhasil mining/);
+  const reload = new Economy(file, () => time);
+  await reload.init();
+  assert.equal(reload.state.users[id].rpg.items.stone, 1);
+  assert.equal(reload.state.users[id].rpg.hp, 92);
+});
+test('RPG rejects impossible purchases', async t => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'beaute-rpg2-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const e = new Economy(path.join(dir, 'economy.json'));
+  await e.init();
+  const rpg = new RpgService(e);
+  await rpg.join(id);
+  await assert.rejects(rpg.trade(id, 'buy', 'stone', -5), /tidak valid/);
+  assert.match(await rpg.trade(id, 'buy', 'stone', 3), /Koin kurang/);
+});
+test('AFK resumes automatically and mention notices are throttled', () => {
+  let clock = 2_000_000;
+  const away = new Away(() => clock);
+  assert.match(away.set(id, 'sedang belajar'), /AFK aktif/);
+  const message = { message: { extendedTextMessage: { contextInfo: { mentionedJid: [id] } } } };
+  assert.match(away.activity(other, message), /sedang belajar/);
+  assert.equal(away.activity(other, message), '');
+  clock += 120000;
+  assert.match(away.activity(other, message), /sedang belajar/);
+  assert.match(away.activity(id, { message: { conversation: 'halo' } }), /Selamat datang kembali/);
+});
+test('LID identity keys work with economy', async t => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'beaute-lid-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const e = new Economy(path.join(dir, 'economy.json'));
+  await e.init();
+  assert.equal((await e.daily('123456789012345@lid')).claimed, true);
+});

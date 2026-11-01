@@ -13,6 +13,8 @@
 | Economy | daily, balance, limit, buylimit, transfer, topglobal, toplocal, cekpremium, listpremium | Local virtual currency; no cash or payment gateway |
 | Tools | say, reverse, count, calc/hitung, pilih, roll, coin, password, runtime/speed, waktu | Safe math parser, no eval |
 | Games | tictactoe/ttt, tttmove, delttt, tebakangka, jawab, nyerah | In-memory sessions, reset on restart |
+| RPG | joinrpg, inventory, level, rpgshop, mining, nebang, mancing, hunt, adventure, heal, buy, sell, jualikan, jualkayu, jualcoal, jualstone | Persistent RPG inside economy database; cooldowns and health |
+| AFK | afk | In-memory mentions and auto-return |
 | Network | github, gitclone, wiki, cuaca | Official/public endpoints, fixed hostname allowlist, response limits |
 | Media | sticker/s, toimg | Static images, local conversion |
 | Menus | menu/allmenu/help, menugroup, menumedia, menutools, menugame, menuekonomi, menudownload, menuowner | All displayed commands have routing |
@@ -22,7 +24,7 @@
 - Old converter variants: stickerwm, smeme, tovideo, tomp3, emojimix, text drawing, audio/video conversion.
 - Downloads: TikTok, YouTube audio/video, Instagram, MediaFire; requires evaluation of API stability, platform rules, content, downloader size limits, no scraped login cookies.
 - Group and store: custom messages, timed open/close, response list, afk, sewa, broadcast (with explicit opt-in and anti-spam limitations).
-- RPG and inventory: mining, hunt, adventure, items, purchase, selling, leaderboards (new game data schema needed).
+- Advanced RPG content: bosses, equipment, special planets, hunting variants, trading recipes, enhanced leaderboard.
 - Search: Pinterest, lyrics, YouTube metadata, image search, translation.
 - Text effects, legacy game variants, premium integrations and custom sticker packs.
 - Legacy adult content and third-party topup/payments: **not restored automatically** due to privacy, safety, external dependencies and account/payment risk.

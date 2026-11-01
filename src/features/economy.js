@@ -180,10 +180,11 @@ async function handleEconomy(ctx) {
       ids = (role.metadata?.participants || []).flatMap(p => [jid(p.id), jid(p.phoneNumber)].filter(validUser));
     }
     const top = economy.leaderboard(ids);
-    await reply('*Top saldo*\n' + (top.map((x, i) => (i + 1) + '. ' + x.id.split('@')[0] + ': ' + x.balance + ' koin').join('\n') || 'Belum ada data.'));
+    await reply('*Top saldo*\n' + (top.map((x, i) => (i + 1) + '. ***' + x.id.split('@')[0].slice(-4) + ': ' + x.balance + ' koin').join('\n') || 'Belum ada data.'));
     return true;
   }
   if (cmd.name === 'listpremium') {
+    if (!owner) { await reply('Khusus owner.'); return true; }
     const all = economy.listPremium();
     await reply('*Premium*\n' + (all.map(x => x.id.split('@')[0] + ' — ' + new Date(x.until).toLocaleDateString('id-ID')).join('\n') || 'Belum ada.'));
     return true;
