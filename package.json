@@ -1,8 +1,8 @@
 {
   "name": "beaute-whatsapp-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Auditable WhatsApp bot with QR pairing and role-based commands",
+  "description": "Auditable WhatsApp bot with QR pairing and modular legacy-modern features",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0"
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node --env-file=.env src/index.js",
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/commands.js && node --check src/media.js && node --check src/config.js && node --check src/store.js && node --check src/util.js",
+    "check": "node --check src/index.js && node --check src/commands.js && node --check src/media.js && node --check src/config.js && node --check src/store.js && node --check src/util.js && node --check src/features/groups.js && node --check src/features/tools.js && node --check src/features/economy.js && node --check src/features/games.js && node --check src/features/network.js",
     "audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {

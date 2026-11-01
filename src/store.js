@@ -2,6 +2,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const FLAGS = new Set(['welcome','goodbye','antilink','antiwame']);
 class Store {
   constructor(file) {
     this.file = file;
@@ -14,7 +15,7 @@ class Store {
       const data = await fs.readFile(this.file, 'utf8');
       if (data.length > 1_000_000) throw new Error('Store file is unexpectedly large');
       const parsed = JSON.parse(data);
-      if (!parsed || !['public', 'private'].includes(parsed.mode) ||
+      if (!parsed || !['public','private'].includes(parsed.mode) ||
           !parsed.groups || typeof parsed.groups !== 'object' ||
           Array.isArray(parsed.groups)) throw new Error('Invalid store schema');
       this.state = { mode: parsed.mode, groups: parsed.groups };
@@ -26,18 +27,18 @@ class Store {
   get mode() { return this.state.mode; }
   group(chat) {
     const g = this.state.groups[chat] || {};
-    return { welcome: g.welcome === true, antilink: g.antilink === true };
+    return { welcome: g.welcome === true, goodbye: g.goodbye === true,
+      antilink: g.antilink === true, antiwame: g.antiwame === true };
   }
   async setMode(mode) {
-    if (!['public', 'private'].includes(mode)) throw new Error('Invalid mode');
+    if (!['public','private'].includes(mode)) throw new Error('Invalid mode');
     this.state.mode = mode;
     return this.save();
   }
   async setGroupFlag(chat, field, enabled) {
-    if (!chat.endsWith('@g.us') || !['welcome', 'antilink'].includes(field) ||
-        typeof enabled !== 'boolean') throw new Error('Invalid group settings');
-    const previous = this.group(chat);
-    this.state.groups[chat] = { ...previous, [field]: enabled };
+    if (!chat.endsWith('@g.us') || !FLAGS.has(field) || typeof enabled !== 'boolean')
+      throw new Error('Invalid group settings');
+    this.state.groups[chat] = { ...this.group(chat), [field]: enabled };
     return this.save();
   }
   save() {
