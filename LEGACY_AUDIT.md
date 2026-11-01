@@ -1,65 +1,67 @@
-# Beauté. — Legacy v9.1 Audit & Complete Migration Roadmap
+# Beauté. — Legacy Complete Migration Audit
 
-**Repository:** https://github.com/Vall-Afk/y  
-**Audited source:** v9.1 / command/help.js, README.md and package.json; new readable modules on feature/beaute-legacy-modern.  
-**Goal:** migrate safe legacy functionality incrementally, without copying obfuscated code, unsafe credentials or brittle dependencies.
+**Maintainer / Recode:** Vall · GitHub **[@Vall-Afk](https://github.com/Vall-Afk)** · Instagram **[@v4lonenonly](https://instagram.com/v4lonenonly)**  
+**Source:** https://github.com/Vall-Afk/y · **Active development branch:** feature/beaute-legacy-modern  
+**Original source audited:** v9.1/command/help.js, v9.1/package.json, v9.1/README.md.
 
-## Scope and evidence
+## Scope and truthful status
 
-The original v9.1 help menu contains **434 command mentions, 428 distinct command names**, spanning 17 headings. Its primary command/case.js is around 1.73 MB and heavily obfuscated. The old help menu is a **claim of feature availability**, not proof that each command's runtime implementation was operational. Legacy package.json carries old Baileys v4, outdated scraper clients, external keys/APIs and native/audio dependencies. We will not claim full 428-command parity until each replacement is readable, tested and independently verified.
+The legacy help menu advertises **428 distinct commands** from 434 mentions across 17 sections. That figure is **not proof** that all old commands worked; the v9.1 primary handler is obfuscated and depends on old web scrapers, Baileys v4, remote APIs and sometimes exposed credentials. A safer modern build is used in place of copying these components.
 
-### Audited source menu categories
+**Per-keyword migration ledger:** [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md)
 
-MAIN MENU; CONVERTER/TOOLS; ANONYMOUS CHATS; STORE MENU; RPG GAMES; DOWNLOADS MENU; GROUP MENU; GAME MENU; SEARCH MENU; RANDOM MENU; BALANCE MENU; STORAGE; BAILEYS; OWNERS MENU; ASUPAN MENU; NSFW MENU; TEXTPRO MENU.
+| Audit state | Legacy keywords |
+|---|---:|
+| Implemented by readable local modules / tested at module level | **135** |
+| Original local visual alternatives (not exact proprietary copies) | **31** |
+| Not yet migrated | **175** |
+| Deferred pending consent/abuse safeguards | **11** |
+| Excluded from automatic migration for safety/content review | **76** |
+| **Total** | **428** |
 
-The two source-level checks for each migration are: (1) explicit readable command implementation and permissions, and (2) automated tests for normal/denied/bad input. External calls and real WhatsApp operations additionally need live testing.
+"Implemented" does **not** mean every external provider and every WhatsApp account flow has passed live testing. Legacy parity is **NOT complete**. Some newly implemented commands are not present in the 428-command source listing, so the actual modern feature count differs.
 
-## Feature migration ledger
+## What has been migrated in the readable build
 
-| Legacy source category | Current status | Verified approach / remaining work |
+| Domain | Current scope | Important limitation |
 |---|---|---|
-| Main / owner | **Migrated in part** | menu, help, infobot/status, owner, ping, public/self, premium admin; English language preference and clear Free/Premium menus |
-| Basic converter | **Migrated in part** | sticker, toimg, smeme, ttp; image size/pixel checks; animated media, branded WebP metadata, emoji mixing remain |
-| Store | **Migrated in part (this phase)** | list, addlist, update, dellist; process/done templates: setproses, changeproses, delsetproses, setdone, changedone, delsetdone, proses, done; group-only admin permission for changes |
-| Calculator | **Migrated in part (this phase)** | tambah, kurang, kali, bagi via bounded arithmetic parser; no eval |
-| Group | **Migrated in part** | welcome, left, custom templates, antiwame/antilink, moderation, link, subject/desc, tagging; scheduled open/close and group store extensions still pending |
-| Economy | **Migrated in part** | coins, limit, daily, transfer, global/local leaderboard and premium; old buyglimit/game limit not yet migrated |
-| RPG | **Migrated in part** | basic persistent progress, mining, logging, fishing, hunting, inventory, trades and healing; bosses, equipment and planets pending |
-| Games | **Migrated in part** | Tic Tac Toe and number guessing; casino intentionally excluded pending product/safety review |
-| Network & download | **Migrated in part** | github, gitclone, wiki (id/en), cuaca; video/music/social downloaders not yet migrated; use trusted APIs and bounded outputs only |
-| Language | **Newly implemented** | bahasa id/en, language id/en, listbahasa; per-user saved preferences and deterministic English UX for major modules |
-| Jadibot | **Newly implemented** | premium-only, one shared session, QR or phone pairing, expiry checks, isolated auth; live testing required |
-| Search | **Partial** | wiki and github; lyrics, Pinterest, YouTube catalog, reverse search require safe provider evaluation |
-| Anonymous / menfess | **Not migrated** | privacy, abuse prevention, consent and rate limiting must be designed before enabling |
-| Storage / forwarded media | **Not migrated** | require explicit consent, retention policy, disk limits and user deletion |
-| Broadcast and fake messages | **Not migrated** | mass messages, spoofing and impersonation risk; require opt-in/no-spam constraints |
-| Adult / NSFW / asupan | **Not migrated** | deliberately excluded from automatic migration; safety and content consent |
-| TextPro (hundreds of effects) | **Not migrated** | external services, upload privacy, image rendering constraints; select safe effects individually |
-| Payment / topup | **Not migrated** | no old secrets copied; require explicit approved provider and full transactional review |
+| Main / owner | Prefixless commands, menus, bilingual preferences, status/owner/source/credits, dashboard, private mode, premium ledger | Status is process-local; real WhatsApp profile effects require live testing |
+| Group | Welcome/left templates, invite links, admin management, warnings, rules, anti-link/anti-wa.me/anti-spam, exact auto replies, scheduled open/close WIB, group avatars | Admin checks required; schedule only when bot is online and admin |
+| Store | Persistent group catalog, add/update/delete, quoted status workflows proses/done with placeholders | Admin-only writes; no payment processor |
+| Tools & economy | Safe math parser, old arithmetic aliases, random/password helpers, virtual coins, daily/limit/transfer/leaderboard | No gambling/real-money payout |
+| RPG | Basic equipment, recipes, lebur, HP/XP, gather/trade, levels, six bosses, goplanet and leaderboard | Virtual-only economy; cooldown and level gates |
+| Games | Tic Tac Toe, number guessing | Old casino not auto-enabled |
+| Media | Sharp static stickers, stickerwm EXIF, TTP/smeme/brat/qc, image filters and effects | Image source max 5MB; WhatsApp codecs need live tests |
+| Audio/video | Optional local FFmpeg to MP3/voice, static picture to MP4 and video to animated sticker | FFmpeg required; bounded sizes and timeouts |
+| TextPro-style | 14 distinct original SVG/Sharp effect themes, 31 matching source names with local alternatives | **Not** the original proprietary TextPro renders |
+| Downloaders | Optional yt-dlp on public single YouTube, TikTok, Instagram videos and posts | yt-dlp separately installed; 12 MB limit; no private sessions; platform changes may break |
+| Search/translation | GitHub/Gitclone, Indonesian/English Wikipedia, Open-Meteo weather, LRCLIB lyric-source links, MyMemory translation, official YouTube metadata search | YouTube Data API key user-supplied; metadata not guaranteed; lyrics not reproduced in full |
+| Anonymous | Opt-in 2-party text-only sessions, stop/next and mutual consent for contact links | No storage, no media forwarding, no unsolicited menfess |
+| Media storage | Per-group opt-in saved sticker/audio/photo/video commands with quotas | Group admin writes, member reads; separate filesystem retention/consent |
+| Rental/sewa | Manually maintained group rental expiry with optional REQUIRE_SEWA=true access gate | Default false; no actual payments or silent group exits |
+| Backup | Private owner DM export of JSON settings/economy/catalog/other group data | Excludes all credentials and .env; no remote restore |
+| Premium Jadibot | One GLOBAL extra connection, QR or pairing code, isolated credentials and premium expiry | Requires live WhatsApp pairing verification |
 
-## Important security decisions
+## Not yet migrated / purposely withheld
 
-1. **No copying command/case.js** or unreviewed minified/obfuscated handlers.
-2. **No reuse of exposed API keys**, cookies, session credentials or external payment tokens. Rotate leaked historical secrets.
-3. **No unrestricted URL fetches** (avoid SSRF); use allowlisted hosts, strict timeouts and response limits.
-4. **No untrusted eval or shell execution.** Calculator uses a bounded parser.
-5. **No group modification by non-admins**, no additional premium rights beyond defined entitlement, and no child-bot spawning unlimited sockets.
-6. **No uploads of auth folders, .env or QR/pairing codes** to GitHub.
-7. Preserve original contributors' notices/licenses while crediting **Vall / Vall-Afk** for modifications.
+- Hundreds of obsolete visual effect aliases and vendor-specific TextPro artwork; only independently recreated local styles are offered.
+- General-purpose MediaFire and arbitrary URL downloaders, Pinterest arbitrary image fetch and reverse-image search: untrusted URL/SSRF, privacy and provider challenges.
+- Legacy anonymous menfess messaging to users who did **not** opt in; contact consent is required.
+- Mass broadcast, messages simulating another person, impersonation or fake quotes: abuse/spam risk. An opt-in, non-spamming consent workflow would be needed before enabling any broadcast.
+- Adult/NSFW/asupan sources: not part of the automatically enabled bot while content, age restrictions and consent remain unreviewed.
+- Legacy casino tied to virtual or real coins: excluded from automatic migration, not falsely advertised.
+- Payment/topup secrets and private APIs: no old API key or cookie copied. Replace exposed historical tokens rather than reusing them.
+- WhatsApp-specific functions requiring interaction with groups and devices are not fully verified until end-to-end testing with authorized accounts.
 
-## Next safe batches (not yet implemented)
+### Source attribution and safety
 
-**Phase B — Media:** safe text effect variants, metadata-aware stickerwm, capped audio/video conversions with an explicit FFmpeg setup.
+This is a modified **Vall** version of the repo under **Vall-Afk**. It does not erase earlier authors' credits or license notices (original repository referenced Haruka-Md / ZeeoneOfc). The README contains user-requested Thanks To: **Tritunggal Mahakudus, Orang Tua, Keluarga, Saya sendiri**.
 
-**Phase C — Moderation:** warnings, antispam, custom responses, scheduled group opening/closing with timezone rules and restart-safe jobs.
+Rules maintained in the codebase: no eval of untrusted expressions, no arbitrary arbitrary-host fetch, fixed timeouts/size caps on media/network, admin privileges for group-changing commands, privacy-preserving default settings, separate main bot/Jadibot credentials, never publish auth/.env or historical tokens.
 
-**Phase D — External search:** audited providers for lyric/translation/metadata; downloads only if platform rules and bounded content handling permit.
+## Verification gates
 
-**Phase E — Advanced RPG:** bosses, crafting and leaderboards; strong transaction tests and resource caps.
-
-**Phase F — Operational tools:** opt-in group rental (sewa), backup/restore excluding credentials, log rotation and storage cleanup.
-
-## Windows test workflow
+Run from PowerShell in the development branch:
 
 ~~~powershell
 npm.cmd install
@@ -69,6 +71,6 @@ npm.cmd audit --omit=dev
 npm.cmd start
 ~~~
 
-CI unit tests do not exercise real WhatsApp servers, pairing QR expiry, admin permissions or API limits in production. All main-account and child-account auth files must remain separate and private.
+Automated GitHub Actions verifies local unit tests, syntax and dependency audit, not a successful live YouTube/TikTok/Instagram extraction or real WhatsApp QR scan.
 
-See [README.md](README.md) and [FEATURES.md](FEATURES.md) for installation and the **currently available** commands.
+See [README.md](README.md), [FEATURES.md](FEATURES.md), and [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md). The PR targeting the secure rebuild remains a **draft** until real WhatsApp and group-permission testing.

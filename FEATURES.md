@@ -1,4 +1,4 @@
-# Beauté. — Implemented Features (v1.3.0)
+# Beauté. — Implemented Features (v1.5.0 roadmap)
 
 **GitHub:** https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern  
 **Goal:** Legacy Complete (incremental). **Not full legacy parity yet.** Consult [LEGACY_AUDIT.md](LEGACY_AUDIT.md).
@@ -42,9 +42,9 @@ menu, menugroup, menugrup, menustore, menutoko, menumedia, menutools, menugame, 
 
 Send **language en** or **bahasa en**, then **menu**. Supported replies include main interface, premium Jadibot operations, group moderation, store and workflow, economy, tools, AFK, core game and RPG feedback, Wikipedia language selection and weather labels. The preference is stored across restarts. Legacy commands keep their established keyword names; some low-level errors, remote responses and missing translations may be in Indonesian.
 
-## Not yet implemented
+## Not yet migrated or not verified live
 
-TikTok, YouTube and Instagram downloaders; MediaFire; animated sticker conversion, stickerwm metadata; Pinterest, lyrics, translation services, text effects; scheduled group controls; advanced RPG; storage; anonymous chats; mass broadcast. Adult and casino features are not automatically migrated. No legacy obfuscated handler or exposed tokens were copied.
+Not included: MediaFire arbitrary files, arbitrary Pinterest/reverse-image retrieval, exact proprietary TextPro styles, unsolicited menfess, mass broadcast, fake/impersonation messages, old payment/topup API keys, adult/asupan and casino modules. New YouTube/TikTok/Instagram downloadable media is **optional yt-dlp integration**, requires a separately installed executable and individual lawful public URLs; extractors and WhatsApp playback remain **unverified live**. QR pairing and FFmpeg commands also require user-run end-to-end tests. See [full 428-command ledger](LEGACY_COMMAND_MATRIX.md).
 
 ## QA
 
@@ -107,3 +107,7 @@ Owner: `addsewa`, `delsewa`, `listsewa`. Group: `ceksewa`, `checksewa`, `sewa`. 
 `join`, `leavegc`, `setnamebot`, `setbiobot`, `setppbot`, `setppbot2`, `delppbot`; admin + bot-admin `setppgc`, `setppgc2`, `pppanjanggc`, `delppgc`. Profile photo operations require live Baileys testing; all input images are local capped JPEG conversions.
 
 Additional legacy aliases: `changewelcome`, `changeleft`, `dashboard` (main owner private status) and `donate` (owner contact only, no payment integration).
+
+## Current migration accounting
+
+Audit of the legacy help menu: **135 readable handler keywords, 31 original local visual alternatives, 175 not migrated, 11 privacy/abuse deferred, 76 content/safety excluded**. Total **428 distinct advertised legacy keywords**. This is a phased project, not complete old feature parity. Details and source locations: [LEGACY_COMMAND_MATRIX.md](LEGACY_COMMAND_MATRIX.md).

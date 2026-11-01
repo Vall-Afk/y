@@ -3,11 +3,11 @@
 # ✦ Beauté. ✦
 ### WhatsApp Multi-Device Bot — Legacy × Modern
 
-**Legacy Complete Roadmap · Version 1.3.0**
+**Legacy Complete Roadmap · Version 1.5.0 (staged migration)**
 
 **Tanpa prefix · Free & Premium · Bahasa Indonesia & English · Jadibot 1 Sesi**
 
-[**🔗 LINK SCRIPT BEAUTÉ.**](https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern) · [**GitHub Repository**](https://github.com/Vall-Afk/y) · [**Status Migrasi**](FEATURES.md) · [**Audit Legacy**](LEGACY_AUDIT.md)
+[**🔗 LINK SCRIPT BEAUTÉ.**](https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern) · [**GitHub Repository**](https://github.com/Vall-Afk/y) · [**Status Migrasi**](FEATURES.md) · [**Audit 428 Perintah**](LEGACY_COMMAND_MATRIX.md)
 
 </div>
 
@@ -45,7 +45,7 @@ https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern
 
 **Buka / unduh source melalui GitHub** menggunakan tautan di atas (menu **Code → Download ZIP**) atau Git clone. Branch default v9.1 berisi source lama dan **belum** otomatis menerima perubahan di branch pengembangan. Gunakan branch yang tertulis di atas jika ingin menjalankan Beauté. versi ini.
 
-> **Penting:** Legacy Complete adalah *roadmap migrasi*, belum berarti 428 command lama sudah sepenuhnya berfungsi. Periksa daftar yang sudah aktif di FEATURES.md dan hasil audit di LEGACY_AUDIT.md.
+> **Penting:** Legacy Complete adalah *roadmap migrasi*, belum berarti 428 command lama sudah sepenuhnya berfungsi. Periksa daftar yang sudah aktif di FEATURES.md, hasil audit di LEGACY_AUDIT.md, serta [matriks status 428 perintah](LEGACY_COMMAND_MATRIX.md).
 
 ## ⚙️ Persyaratan / Requirements
 
@@ -281,3 +281,7 @@ Owner-only: `join https://chat.whatsapp.com/<invite-code>` from a private chat (
 ### Legacy compatibility aliases
 
 `changewelcome` and `changeleft` now accept the same arguments as `setwelcome` and `setleft`; these are permission-gated group admin aliases. The `dashboard` command shows a small private owner-only bot summary without exposing credentials. The `donate` command links to the owner contact, **not** a payment method (none was provided).
+
+## ✦ Migration dashboard — current branch
+
+This version audits **428 unique advertised legacy keywords**. Based on the current [full matrix](LEGACY_COMMAND_MATRIX.md), **135** have readable module handlers (module-level unit tests), **31** have local alternative visual effects, **175** remain unimplemented, **11** deferred for opt-in/privacy and abuse safeguards, and **76** excluded from automatic migration pending content/safety review. Counts are for old advertised keywords, not complete feature parity or guarantees of live WhatsApp compatibility. The active menu deliberately avoids listing unsupported legacy commands as if they were operational.
