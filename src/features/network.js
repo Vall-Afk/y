@@ -57,7 +57,7 @@ async function handleNetwork(ctx) {
     return true;
   }
   if (economy && !owner) {
-    const can = await economy.consume(accountSender || sender);
+    const can = await economy.consume(accountSender || sender,chat);
     if (!can) { await reply(lang === 'en' ? 'Your daily API quota is used up. Use daily and buylimit, or ask the owner about premium.' : 'Limit harian habis. Gunakan daily lalu buylimit, atau hubungi owner untuk premium.'); return true; }
   }
   try {

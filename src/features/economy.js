@@ -4,11 +4,12 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { jid } = require('../util');
 const ECONOMY_COMMANDS = new Set([
-  'daily','balance','limit','buylimit','transfer','topglobal','toplocal',
+  'daily','balance','limit','buylimit','buyglimit','transfer','topglobal','toplocal',
   'cekpremium','listpremium','addpremium','delpremium'
 ]);
 const MAX_BALANCE = 100_000_000;
 const DAY = 86_400_000;
+const GROUP_RE=/^[a-zA-Z0-9_-]{3,64}@g\.us$/;
 function validUser(value) { return /^[1-9]\d{4,19}@(s\.whatsapp\.net|lid)$/.test(value); }
 function initialUser() { return { balance: 0, dailyAt: 0, quotaDay: '', used: 0, extra: 0, premiumUntil: 0 }; }
 function userFrom(state, id) {
@@ -34,7 +35,7 @@ class Economy {
   constructor(file, now = () => Date.now()) {
     this.file = file;
     this.now = now;
-    this.state = { users: {} };
+    this.state = { users: {}, groups: {} };
     this.pending = Promise.resolve();
   }
   async init() {
@@ -44,7 +45,14 @@ class Economy {
       if (data.length > 2_000_000) throw new Error('Database terlalu besar.');
       const parsed = JSON.parse(data);
       if (!parsed || !parsed.users || Array.isArray(parsed.users) || typeof parsed.users !== 'object') throw new Error('Format database tidak sesuai.');
-      this.state = parsed;
+      const groups=parsed.groups===undefined?{}:parsed.groups;
+      if(!groups||typeof groups!=='object'||Array.isArray(groups)||
+        Object.keys(groups).length>1000||Object.entries(groups).some(([id,g])=>
+          !GROUP_RE.test(id)||!g||!Number.isSafeInteger(g.extra)||g.extra<0||g.extra>10000||
+          !Number.isSafeInteger(g.used)||g.used<0||g.used>10000||
+          typeof g.quotaDay!=='string'||g.quotaDay.length>10))
+        throw new Error('Invalid group quota data.');
+      this.state = {...parsed,groups};
     } catch (err) {
       if (err.code !== 'ENOENT') throw new Error('Database ekonomi rusak, data tidak ditimpa: ' + err.message);
       await this.write(this.state);
@@ -91,6 +99,29 @@ class Economy {
       return true;
     });
   }
+  groupQuota(chat) {
+    if(!GROUP_RE.test(chat||''))return 0;
+    const g=this.state.groups?.[chat];
+    if(!g)return 0;
+    return Math.max(0,g.extra-(g.quotaDay===new Date(this.now()).toISOString().slice(0,10)?g.used:0));
+  }
+  buyGroupLimit(id,chat) {
+    if(!validUser(id)||!GROUP_RE.test(chat||''))throw new Error('Group quota needs a valid group.');
+    return this.transact(db=>{
+      const buyer=userFrom(db,id);
+      if(buyer.balance<250)return false;
+      if(!db.groups)db.groups={};
+      if(!Object.hasOwn(db.groups,chat)){
+        if(Object.keys(db.groups).length>=1000)throw new Error('Group quota storage full.');
+        db.groups[chat]={extra:0,used:0,quotaDay:''};
+      }
+      const g=db.groups[chat];
+      if(g.extra>9990)return false;
+      buyer.balance-=250;
+      g.extra+=10;
+      return true;
+    });
+  }
   transfer(from, to, amount) {
     if (!validUser(from) || !validUser(to) || from === to ||
         !Number.isSafeInteger(amount) || amount < 1 || amount > 1_000_000) throw new Error('Transfer tidak valid.');
@@ -104,14 +135,18 @@ class Economy {
       return true;
     });
   }
-  consume(id) {
+  consume(id,chat) {
     return this.transact((db, time) => {
       const user = userFrom(db, id);
       normalizeQuota(user, time);
       if (isPremium(user, time)) return true;
-      if (user.used >= 20 + user.extra) return false;
-      user.used++;
-      return true;
+      if (user.used < 20 + user.extra) {user.used++;return true;}
+      const group=db.groups?.[chat];
+      if(group){
+        normalizeQuota(group,time);
+        if(group.used<group.extra){group.used++;return true;}
+      }
+      return false;
     });
   }
   premium(id, days) {
@@ -153,13 +188,23 @@ async function handleEconomy(ctx) {
   const value = economy.get(account);
   if (cmd.name === 'balance' || cmd.name === 'limit' || cmd.name === 'cekpremium') {
     if (cmd.name === 'balance') await reply(t('balance',{amount:value.balance}));
-    else if (cmd.name === 'limit') await reply(t('quota',{quota:owner || value.premium ? 'Unlimited' : value.quota, premium:t(value.premium ? 'premActive' : 'premInactive')}));
+    else if (cmd.name === 'limit') await reply(t('quota',{quota:owner || value.premium ? 'Unlimited' : value.quota, premium:t(value.premium ? 'premActive' : 'premInactive')})+
+      (chat.endsWith('@g.us')?'\nGroup bonus: '+economy.groupQuota(chat):''));
     else await reply('Premium: ' + (owner || value.premium ? t('premActive') : t('premInactive')) + (value.premium ? '\n' + t('premUntil',{date:new Date(value.premiumUntil).toLocaleDateString(lang === 'en' ? 'en-US' : 'id-ID')}) : ''));
     return true;
   }
   if (cmd.name === 'daily') {
     const result = await economy.daily(account);
     await reply(result.claimed ? t('dailyClaimed',{amount:result.balance}) : t('dailyCooldown',{hours:Math.ceil(result.wait / 3600000)}));
+    return true;
+  }
+  if (cmd.name === 'buyglimit') {
+    if(!chat.endsWith('@g.us')){await reply(lang==='en'?'Use buyglimit inside a group.':'Gunakan buyglimit di grup.');return true;}
+    const ok=await economy.buyGroupLimit(account,chat);
+    await reply(ok?(lang==='en'?'Bought 10 shared daily API requests for this group (250 virtual coins).':
+      'Berhasil membeli 10 kuota API harian bersama untuk grup (250 koin virtual).'):
+      (lang==='en'?'Insufficient coins or group quota limit reached.':
+        'Koin tidak cukup atau batas kuota grup tercapai.'));
     return true;
   }
   if (cmd.name === 'buylimit') {

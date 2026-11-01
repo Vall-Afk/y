@@ -145,7 +145,7 @@ async function handleDownload(ctx,download=downloadPublicMedia){
   try{
     normalizeLink(url,cmd.name);
     if(economy&&!owner){
-      const allowed=await economy.consume(accountSender);
+      const allowed=await economy.consume(accountSender,chat);
       if(!allowed){await reply(lang==='en'?'Daily download quota exceeded.':'Limit download harian habis.');return true;}
     }
     const media=await download({command:cmd.name,url});

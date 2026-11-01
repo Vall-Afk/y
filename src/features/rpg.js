@@ -7,7 +7,7 @@ const RPG_COMMANDS=new Set([
   'joinrpg','inventory','rpgshop','level','mining','mine','nebang','mancing',
   'hunt','adventure','jelajah','heal','buy','sell','jualikan','jualkayu',
   'jualcoal','jualstone','sellikan','sellbesi','sellemas',
-  'jualingot','lebur','craft','equip','unequip','equipment',
+  'jualingot','jualbahankimia','lebur','craft','equip','unequip','equipment',
   'killslime','killgoblin','killdevil','killbehemoth','killdemon','killdemonking',
   'goplanet','luckyday','rpgboard','toprpg'
 ]);
@@ -15,6 +15,7 @@ const ITEMS=Object.freeze({
   wood:{buy:15,sell:6},stone:{buy:20,sell:8},
   coal:{buy:50,sell:22},ore:{buy:80,sell:35},
   fish:{buy:22,sell:10},meat:{buy:30,sell:12},
+  chemical:{buy:180,sell:65},
   ingot:{buy:250,sell:95},gold:{buy:650,sell:240},gem:{buy:1600,sell:600},
   sword:{buy:2500,sell:500},pickaxe:{buy:1600,sell:350}
 });
@@ -51,7 +52,7 @@ function status(r){
 }
 function itemAliases(name){
   return ({ikan:'fish',kayu:'wood',batu:'stone',besi:'ore',emas:'gold',
-    daging:'meat',batu_bara:'coal'})[name]||name;
+    daging:'meat',batu_bara:'coal',bahankimia:'chemical'})[name]||name;
 }
 class RpgService {
   constructor(economy,random=randomInt){this.economy=economy;this.random=random;}
@@ -85,6 +86,7 @@ class RpgService {
       r.hp-=rule.hp;r.xp+=rule.xp;
       r.items[rule.item]+=amount;
       if(rule.chance&&this.random(0,100)<25)r.items[rule.chance]++;
+      if(name==='adventure'&&this.random(0,100)<20)r.items.chemical++;
       r.actions[name]=time;
       return 'Berhasil '+name+': +'+amount+' '+rule.item+
         '\nHP: '+r.hp+'/100, XP: '+r.xp+'.';
@@ -243,7 +245,8 @@ async function handleRpg(ctx){
     await reply('*RPG TOP*\n'+(rpg.leaderboard().join('\n')||'Belum ada.'));return true;
   }
   const named={jualikan:'fish',sellikan:'fish',jualkayu:'wood',jualcoal:'coal',
-    jualstone:'stone',jualingot:'ingot',sellbesi:'ore',sellemas:'gold'};
+    jualstone:'stone',jualingot:'ingot',sellbesi:'ore',sellemas:'gold',
+    jualbahankimia:'chemical'};
   if(Object.hasOwn(named,cmd.name)){
     await reply(en(await rpg.trade(account,'sell',named[cmd.name],cmd.args.length?Number(cmd.args[0]):1)));return true;
   }

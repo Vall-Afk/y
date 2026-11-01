@@ -115,3 +115,5 @@ Audit of the legacy help menu: **140 readable handler keywords, 31 original loca
 Legacy local utilities: `attp` (FFmpeg animated sticker), `emojimix` (original WebP composition), `nuliskiri`, `nuliskanan`, `foliokiri`, `foliokanan` (notebook PNG), `cecan`, `cogan`, `waifu` (original illustrated avatars), `jeda` (bounded delay), `getquoted` (quoted text only), `nowa` (wa.me link only). Limited link/fingerprint alternatives: `mediafire` (file-page link only), `pinterest`/`grupwa` (browser search links only), `searchbyimage` (local SHA-256 only, not reverse-image search).
 
 Owner automation: persisted opt-in `autoread`, `autobio`, `autorespond`, `anticall` (OFF by default), requiring owner DM and live WhatsApp tests. `autoblok212` refuses blanket country-code blocking. `setcmd`/`delcmd` are safe group-admin exact-keyword response aliases, not executable plugins or built-in overrides.
+
+`buyglimit`: transactional 250-coin purchase of 10 shared daily API requests/group, consumed after personal quotas. `jualbahankimia`: virtual chemical RPG item with bounded sale and inventory normalization.
