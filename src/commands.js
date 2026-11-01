@@ -14,6 +14,7 @@ const { menu } = require('./menu');
 const { tr } = require('./i18n');
 const { IMAGE_COMMANDS, handleImage } = require('./features/image-studio');
 const { MEDIA_COMMANDS, handleTranscode } = require('./features/transcode');
+const { STICKERWM_COMMANDS, handleStickerWm } = require('./features/stickerwm');
 const { MOD_COMMANDS, SpamDetector, inspectModeration, handleModeration } = require('./features/moderation');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
@@ -139,6 +140,7 @@ function createRouter(config, store, logger, {
       if (NET_COMMANDS.has(cmd.name) && await handleNetwork(ctx)) return;
       if (IMAGE_COMMANDS.has(cmd.name) && await handleImage(ctx)) return;
       if (MEDIA_COMMANDS.has(cmd.name) && await handleTranscode(ctx)) return;
+      if (STICKERWM_COMMANDS.has(cmd.name) && await handleStickerWm(ctx)) return;
       if (cmd.name === 'react') {
         const emoji = cmd.args[0] || '';
         if (!emoji || [...emoji].length > 12 ||

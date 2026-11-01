@@ -29,7 +29,7 @@ const SECTIONS = Object.freeze([
   {
     id: 'media', icon: '✎', idTitle: 'STIKER / MEDIA', enTitle: 'STICKERS / MEDIA',
     commands: ['sticker', 'toimg', 'ttp <teks>', 'smeme ATAS | BAWAH', 'react ❤️ (reply)',
-      'brat <teks>', 'qc (reply)', 'blur [1-30]', 'grayscale', 'invert',
+      'brat <teks>', 'qc (reply)', 'stickerwm Pack | Author', 'blur [1-30]', 'grayscale', 'invert',
       'rotate 90', 'flip', 'mirror', 'pixelate', 'circle', 'enhance', 'compress', 'resize 512',
       'tomp3 (reply)', 'toaudio (reply)', 'tovn (reply)', 'tovideo (reply sticker)',
       'tosticker (reply video)', 'togif (reply image)']
