@@ -4,7 +4,8 @@ const { jid, isGroup } = require('../util');
 const GROUP_COMMANDS = new Set([
   'groupinfo','welcome','left','goodbye','antilink','antiwame','kick','add',
   'promote','demote','tagall','hidetag','linkgc','revoke','open','close','setnamegc','setdesc',
-  'setwelcome','setleft','delsetwelcome','delsetleft'
+  'setwelcome','setleft','delsetwelcome','delsetleft',
+  'setproses','setdone','changeproses','changedone','delsetproses','delsetdone','proses','done'
 ]);
 const ADMIN_COMMANDS = new Set([...GROUP_COMMANDS].filter(x => x !== 'groupinfo'));
 
@@ -64,6 +65,39 @@ async function handleGroup(ctx) {
     }
     await store.setGroupText(chat, field, body);
     await reply(t(deleting ? 'groupTextReset' : 'groupTextSaved'));
+    return true;
+  }
+  if (['setproses','setdone','changeproses','changedone','delsetproses','delsetdone'].includes(cmd.name)) {
+    const field = cmd.name.includes('proses') ? 'processText' : 'doneText';
+    const clear = cmd.name.startsWith('del');
+    const value = clear ? '' : cmd.args.join(' ').trim();
+    if (!clear && (!value || value.length > 300)) {
+      await reply(t('workflowUsage', {command: cmd.name}));
+      return true;
+    }
+    await store.setGroupText(chat, field, value);
+    await reply(t(clear ? 'workflowRemoved' : 'workflowSaved'));
+    return true;
+  }
+  if (cmd.name === 'proses' || cmd.name === 'done') {
+    const original = message.message?.extendedTextMessage?.contextInfo;
+    const quoted = original?.quotedMessage;
+    if (!quoted || !original?.stanzaId) {
+      await reply(t('workflowReplyFirst'));
+      return true;
+    }
+    const order = String(quoted.conversation || quoted.extendedTextMessage?.text ||
+      quoted.imageMessage?.caption || quoted.videoMessage?.caption || '').trim();
+    if (!order) { await reply(t('workflowNoText')); return true; }
+    const meta = store.group(chat);
+    const template = cmd.name === 'proses'
+      ? (meta.processText || (ctx.lang === 'en' ? '⏳ Processing order:\n{order}' : '⏳ Pesanan diproses:\n{order}'))
+      : (meta.doneText || (ctx.lang === 'en' ? '✅ Order complete:\n{order}' : '✅ Pesanan selesai:\n{order}'));
+    const mentioned = original.participant ? [jid(original.participant)] : [];
+    const final = template.replace(/\{order\}/gi, order.slice(0, 550))
+      .replace(/\{user\}/gi, mentioned.length ? '@' + mentioned[0].split('@')[0] : (ctx.lang === 'en' ? 'customer' : 'pelanggan'))
+      .replace(/\{group\}/gi, String(role.metadata?.subject || 'group').slice(0, 100));
+    await sock.sendMessage(chat, { text: final.slice(0, 1100), mentions: mentioned }, { quoted: message });
     return true;
   }
   if (cmd.name === 'tagall' || cmd.name === 'hidetag') {

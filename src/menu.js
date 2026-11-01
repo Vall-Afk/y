@@ -20,7 +20,8 @@ const SECTIONS = Object.freeze([
   },
   {
     id: 'store', icon: '▦', idTitle: 'TOKO / GRUP', enTitle: 'GROUP STORE',
-    commands: ['list', 'list <nama>', 'addlist nama | isi', 'update nama | isi', 'dellist nama']
+    commands: ['list', 'list <nama>', 'addlist nama | isi', 'update nama | isi', 'dellist nama',
+      'setproses <teks>', 'setdone <teks>', 'proses (reply)', 'done (reply)', 'delsetproses', 'delsetdone']
   },
   {
     id: 'media', icon: '✎', idTitle: 'STIKER / MEDIA', enTitle: 'STICKERS / MEDIA',

@@ -4,6 +4,7 @@ const ORIGINS = new Set([
   'https://api.github.com',
   'https://codeload.github.com',
   'https://id.wikipedia.org',
+  'https://en.wikipedia.org',
   'https://geocoding-api.open-meteo.com',
   'https://api.open-meteo.com'
 ]);
@@ -42,13 +43,13 @@ function repoInput(text) {
 }
 function simpleText(value, max = 1000) { return String(value || '').replace(/[\x00-\x1f]+/g, ' ').slice(0, max); }
 async function handleNetwork(ctx) {
-  const { cmd, reply, sock, chat, message, config, economy, sender, accountSender, owner, fetcher } = ctx;
+  const { cmd, reply, sock, chat, message, config, economy, sender, accountSender, owner, fetcher, lang } = ctx;
   if (!NET_COMMANDS.has(cmd.name)) return false;
   const text = cmd.args.join(' ').trim();
-  if (!text || text.length > 120) { await reply('Masukkan kata kunci / nama repo (maksimal 120 karakter).'); return true; }
+  if (!text || text.length > 120) { await reply(lang === 'en' ? 'Enter a topic or repository name (max 120 characters).' : 'Masukkan kata kunci / nama repo (maksimal 120 karakter).'); return true; }
   if (economy && !owner) {
     const can = await economy.consume(accountSender || sender);
-    if (!can) { await reply('Limit harian habis. Gunakan !daily lalu !buylimit, atau hubungi owner untuk premium.'); return true; }
+    if (!can) { await reply(lang === 'en' ? 'Your daily API quota is used up. Use daily and buylimit, or ask the owner about premium.' : 'Limit harian habis. Gunakan daily lalu buylimit, atau hubungi owner untuk premium.'); return true; }
   }
   try {
     if (cmd.name === 'github' || cmd.name === 'gitclone') {
@@ -58,7 +59,7 @@ async function handleNetwork(ctx) {
       if (cmd.name === 'github') {
         await reply('*GitHub*\n' + simpleText(data.full_name, 120) +
           '\n⭐ ' + Number(data.stargazers_count || 0) +
-          '\nBahasa: ' + simpleText(data.language, 50) +
+          '\n' + (lang === 'en' ? 'Language: ' : 'Bahasa: ') + simpleText(data.language, 50) +
           '\n' + simpleText(data.description, 500) +
           '\nhttps://github.com/' + user + '/' + repo);
         return true;
@@ -79,34 +80,34 @@ async function handleNetwork(ctx) {
       return true;
     }
     if (cmd.name === 'wiki') {
-      const data = await jsonFetch('https://id.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&format=json&titles=' + encodeURIComponent(text), { fetcher });
+      const data = await jsonFetch('https://' + (lang === 'en' ? 'en' : 'id') + '.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&format=json&titles=' + encodeURIComponent(text), { fetcher });
       const page = Object.values(data.query?.pages || {})[0];
       const extract = simpleText(page?.extract, 1500);
-      await reply(extract || 'Artikel tidak ditemukan.');
+      await reply(extract || (lang === 'en' ? 'Article not found.' : 'Artikel tidak ditemukan.'));
       return true;
     }
     if (cmd.name === 'cuaca') {
       const place = await jsonFetch('https://geocoding-api.open-meteo.com/v1/search?name=' +
-        encodeURIComponent(text) + '&count=1&language=id&format=json', { fetcher });
+        encodeURIComponent(text) + '&count=1&language=' + (lang === 'en' ? 'en' : 'id') + '&format=json', { fetcher });
       const city = place.results?.[0];
       if (!city || !Number.isFinite(city.latitude) || !Number.isFinite(city.longitude)) {
-        await reply('Kota tidak ditemukan.'); return true;
+        await reply(lang === 'en' ? 'City not found.' : 'Kota tidak ditemukan.'); return true;
       }
       const data = await jsonFetch('https://api.open-meteo.com/v1/forecast?latitude=' +
         city.latitude + '&longitude=' + city.longitude +
         '&current=temperature_2m,relative_humidity_2m,precipitation,weather_code&timezone=auto', { fetcher });
       const current = data.current;
-      if (!current) throw new Error('Cuaca belum tersedia.');
-      await reply('Cuaca ' + simpleText(city.name, 100) +
+      if (!current) throw new Error(lang === 'en' ? 'Weather is unavailable.' : 'Cuaca belum tersedia.');
+      await reply((lang === 'en' ? 'Weather in ' : 'Cuaca ') + simpleText(city.name, 100) +
         '\n🌡️ ' + current.temperature_2m + '°C' +
-        '\nKelembapan: ' + current.relative_humidity_2m + '%' +
-        '\nHujan: ' + current.precipitation + ' mm' +
-        '\nKode cuaca: ' + current.weather_code +
+        '\n' + (lang === 'en' ? 'Humidity: ' : 'Kelembapan: ') + current.relative_humidity_2m + '%' +
+        '\n' + (lang === 'en' ? 'Precipitation: ' : 'Hujan: ') + current.precipitation + ' mm' +
+        '\n' + (lang === 'en' ? 'Weather code: ' : 'Kode cuaca: ') + current.weather_code +
         '\nSumber: Open-Meteo');
       return true;
     }
   } catch (e) {
-    await reply('Layanan gagal: ' + simpleText(e.message, 200));
+    await reply((lang === 'en' ? 'Service failed: ' : 'Layanan gagal: ') + simpleText(e.message, 200));
   }
   return true;
 }

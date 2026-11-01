@@ -36,7 +36,9 @@ class Store {
     return { welcome: g.welcome === true, goodbye: g.goodbye === true,
       antilink: g.antilink === true, antiwame: g.antiwame === true,
       welcomeText: typeof g.welcomeText === 'string' ? g.welcomeText.slice(0, 300) : '',
-      goodbyeText: typeof g.goodbyeText === 'string' ? g.goodbyeText.slice(0, 300) : '' };
+      goodbyeText: typeof g.goodbyeText === 'string' ? g.goodbyeText.slice(0, 300) : '',
+      processText: typeof g.processText === 'string' ? g.processText.slice(0, 300) : '',
+      doneText: typeof g.doneText === 'string' ? g.doneText.slice(0, 300) : '' };
   }
   language(sender) {
     return Object.hasOwn(this.state.languages, sender) && this.state.languages[sender] === 'en' ? 'en' : 'id';
@@ -61,7 +63,7 @@ class Store {
     return this.save();
   }
   async setGroupText(chat, field, value) {
-    if (!chat.endsWith('@g.us') || !['welcomeText','goodbyeText'].includes(field) ||
+    if (!chat.endsWith('@g.us') || !['welcomeText','goodbyeText','processText','doneText'].includes(field) ||
         typeof value !== 'string' || value.length > 300)
       throw new Error('Teks grup tidak valid (maksimal 300 karakter).');
     this.state.groups[chat] = { ...this.group(chat), [field]: value.trim() };
