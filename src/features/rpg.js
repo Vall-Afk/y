@@ -101,12 +101,13 @@ class RpgService {
   }
 }
 async function handleRpg(ctx) {
-  const { cmd, rpg, sender, reply } = ctx;
+  const { cmd, rpg, sender, accountSender, reply } = ctx;
+  const account = accountSender || sender;
   if (!RPG_COMMANDS.has(cmd.name)) return false;
   if (!rpg) { await reply('RPG belum aktif.'); return true; }
-  if (cmd.name === 'joinrpg') { await reply(await rpg.join(sender)); return true; }
+  if (cmd.name === 'joinrpg') { await reply(await rpg.join(account)); return true; }
   if (cmd.name === 'inventory' || cmd.name === 'level') {
-    const current = rpg.snapshot(sender);
+    const current = rpg.snapshot(account);
     await reply(current ? status(current) : 'Daftar dulu: !joinrpg');
     return true;
   }
@@ -116,14 +117,14 @@ async function handleRpg(ctx) {
     return true;
   }
   if (['mining','mine','nebang','mancing','hunt','adventure'].includes(cmd.name)) {
-    await reply(await rpg.action(sender, cmd.name === 'mine' ? 'mining' : cmd.name));
+    await reply(await rpg.action(account, cmd.name === 'mine' ? 'mining' : cmd.name));
     return true;
   }
-  if (cmd.name === 'heal') { await reply(await rpg.heal(sender)); return true; }
+  if (cmd.name === 'heal') { await reply(await rpg.heal(account)); return true; }
   const named = { jualikan: 'fish', jualkayu: 'wood', jualcoal: 'coal', jualstone: 'stone' };
   if (Object.hasOwn(named, cmd.name)) {
     const qty = cmd.args.length ? Number(cmd.args[0]) : 1;
-    await reply(await rpg.trade(sender, 'sell', named[cmd.name], qty));
+    await reply(await rpg.trade(account, 'sell', named[cmd.name], qty));
     return true;
   }
   if (['buy','sell'].includes(cmd.name)) {

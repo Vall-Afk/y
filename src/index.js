@@ -42,7 +42,17 @@ async function main() {
         const who = typeof person === 'string' ? person : person.id;
         if (!who) continue;
         const action = event.action === 'add' ? 'Selamat datang' : 'Sampai jumpa';
-        await client.sendMessage(event.id, { text: action + ', @' + who.split('@')[0] + '!', mentions: [who] });
+        const template = event.action === 'add' ? flags.welcomeText : flags.goodbyeText;
+        let groupName = 'grup';
+        if (template && /\{group\}/i.test(template)) {
+          try { groupName = String((await client.groupMetadata(event.id))?.subject || 'grup').slice(0, 100); }
+          catch {}
+        }
+        const body = template
+          ? template.replace(/\{user\}/gi, '@' + who.split('@')[0])
+            .replace(/\{group\}/gi, groupName)
+          : action + ', @' + who.split('@')[0] + '!';
+        await client.sendMessage(event.id, { text: body.slice(0, 600), mentions: [who] });
       }
     } catch (err) { logger.warn({ error: err.message }, 'Group participant event failed'); }
   }

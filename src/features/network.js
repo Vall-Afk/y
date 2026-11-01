@@ -42,12 +42,12 @@ function repoInput(text) {
 }
 function simpleText(value, max = 1000) { return String(value || '').replace(/[\x00-\x1f]+/g, ' ').slice(0, max); }
 async function handleNetwork(ctx) {
-  const { cmd, reply, sock, chat, message, config, economy, sender, owner, fetcher } = ctx;
+  const { cmd, reply, sock, chat, message, config, economy, sender, accountSender, owner, fetcher } = ctx;
   if (!NET_COMMANDS.has(cmd.name)) return false;
   const text = cmd.args.join(' ').trim();
   if (!text || text.length > 120) { await reply('Masukkan kata kunci / nama repo (maksimal 120 karakter).'); return true; }
   if (economy && !owner) {
-    const can = await economy.consume(sender);
+    const can = await economy.consume(accountSender || sender);
     if (!can) { await reply('Limit harian habis. Gunakan !daily lalu !buylimit, atau hubungi owner untuk premium.'); return true; }
   }
   try {

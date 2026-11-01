@@ -28,7 +28,9 @@ class Store {
   group(chat) {
     const g = this.state.groups[chat] || {};
     return { welcome: g.welcome === true, goodbye: g.goodbye === true,
-      antilink: g.antilink === true, antiwame: g.antiwame === true };
+      antilink: g.antilink === true, antiwame: g.antiwame === true,
+      welcomeText: typeof g.welcomeText === 'string' ? g.welcomeText.slice(0, 300) : '',
+      goodbyeText: typeof g.goodbyeText === 'string' ? g.goodbyeText.slice(0, 300) : '' };
   }
   async setMode(mode) {
     if (!['public','private'].includes(mode)) throw new Error('Invalid mode');
@@ -39,6 +41,13 @@ class Store {
     if (!chat.endsWith('@g.us') || !FLAGS.has(field) || typeof enabled !== 'boolean')
       throw new Error('Invalid group settings');
     this.state.groups[chat] = { ...this.group(chat), [field]: enabled };
+    return this.save();
+  }
+  async setGroupText(chat, field, value) {
+    if (!chat.endsWith('@g.us') || !['welcomeText','goodbyeText'].includes(field) ||
+        typeof value !== 'string' || value.length > 300)
+      throw new Error('Teks grup tidak valid (maksimal 300 karakter).');
+    this.state.groups[chat] = { ...this.group(chat), [field]: value.trim() };
     return this.save();
   }
   save() {

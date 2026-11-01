@@ -3,7 +3,8 @@ const { jid, isGroup } = require('../util');
 
 const GROUP_COMMANDS = new Set([
   'groupinfo','welcome','left','goodbye','antilink','antiwame','kick','add',
-  'promote','demote','tagall','hidetag','linkgc','revoke','open','close','setnamegc','setdesc'
+  'promote','demote','tagall','hidetag','linkgc','revoke','open','close','setnamegc','setdesc',
+  'setwelcome','setleft','delsetwelcome','delsetleft'
 ]);
 const ADMIN_COMMANDS = new Set([...GROUP_COMMANDS].filter(x => x !== 'groupinfo'));
 
@@ -51,6 +52,18 @@ async function handleGroup(ctx) {
     const key = ['left', 'goodbye'].includes(cmd.name) ? 'goodbye' : cmd.name;
     await store.setGroupFlag(chat, key, flag === 'on');
     await reply(key + ': ' + flag);
+    return true;
+  }
+  if (['setwelcome','setleft','delsetwelcome','delsetleft'].includes(cmd.name)) {
+    const field = cmd.name.endsWith('welcome') ? 'welcomeText' : 'goodbyeText';
+    const deleting = cmd.name.startsWith('del');
+    const body = deleting ? '' : cmd.args.join(' ').trim();
+    if (!deleting && (!body || body.length > 300)) {
+      await reply('Contoh: setwelcome Halo {user}, selamat datang di {group} (maksimal 300 karakter).');
+      return true;
+    }
+    await store.setGroupText(chat, field, body);
+    await reply(deleting ? 'Pesan otomatis dikembalikan ke default.' : 'Pesan otomatis berhasil disimpan. Aktifkan welcome on / left on.');
     return true;
   }
   if (cmd.name === 'tagall' || cmd.name === 'hidetag') {

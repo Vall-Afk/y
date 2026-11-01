@@ -26,7 +26,7 @@ function menu(config, section = 'menu') {
   const parts = {
     umum: ['menu', 'ping', 'status', 'owner', 'waktu', 'runtime', 'afk [alasan]'],
     grup: ['groupinfo', 'welcome on|off', 'left on|off', 'antilink on|off', 'antiwame on|off',
-      'tagall [pesan]', 'hidetag [pesan]', 'kick @user', 'add 62xxx', 'promote @user',
+      'tagall [pesan]', 'hidetag [pesan]', 'setwelcome <teks>', 'setleft <teks>', 'delsetwelcome', 'delsetleft', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <deskripsi>'],
     media: ['sticker', 's', 'toimg'],
     tools: ['say <teks>', 'reverse <teks>', 'count <teks>', 'calc <rumus>',
