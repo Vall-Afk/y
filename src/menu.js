@@ -121,7 +121,9 @@ function menu(config, section = 'menu', profile = {}) {
     if (all) {
       return [...header, '\n╔═══ ' + (english ? 'FREE FEATURES' : 'FITUR GRATIS') + ' ═══╗',
         ...SECTIONS.map(g => g.icon + ' *' + (english ? g.enTitle : g.idTitle) +
-          '*\n ' + g.commands.slice(0, 4).join(' · ') +
+          '*\n ' + (g.id === 'group'
+            ? ['groupinfo', 'antilink', 'promote', 'tagall']
+            : g.commands.slice(0, 4)).join(' · ') +
           '\n ' + (english ? 'See:' : 'Lihat:') + ' ' +
           (Object.keys(ALIASES).find(k => ALIASES[k] === g.id) || 'menu')),
         '\n╔═══ ★ PREMIUM EXCLUSIVE ★ ═══╗',

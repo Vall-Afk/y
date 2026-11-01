@@ -14,6 +14,7 @@ const { GameHub } = require('./features/games');
 const { RpgService } = require('./features/rpg');
 const { Away } = require('./features/afk');
 const { SubBotManager } = require('./subbot');
+const { GroupCatalog } = require('./features/catalog');
 const { isGroup } = require('./util');
 async function main() {
   const config = loadConfig();
@@ -27,9 +28,15 @@ async function main() {
   const games = new GameHub();
   const rpg = new RpgService(economy);
   const afk = new Away();
+  const catalog = new GroupCatalog(path.join(config.dataDir, 'group-catalog.json'));
+  await catalog.init();
   const childStore = new Store(path.join(config.dataDir, 'jadibot', 'settings.json'));
   await childStore.init();
-  const childRouter = createRouter(config, childStore, logger, { economy, games: new GameHub(), rpg, afk: new Away() });
+  const childCatalog = new GroupCatalog(path.join(config.dataDir, 'jadibot', 'group-catalog.json'));
+  await childCatalog.init();
+  const childRouter = createRouter(config, childStore, logger, {
+    economy, games: new GameHub(), rpg, afk: new Away(), catalog: childCatalog
+  });
   let socket = null, timer = null, attempts = 0, stopping = false, connecting = false, connected = false;
 
   async function handleParticipants(client, event, groupStore) {
@@ -73,7 +80,7 @@ async function main() {
     getPrimaryId: () => socket?.user?.id || ''
   });
   await subbot.init();
-  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot });
+  const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog });
   const health = http.createServer((req, res) => {
     if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

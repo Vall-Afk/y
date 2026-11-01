@@ -129,7 +129,7 @@ async function handleRpg(ctx) {
   }
   if (['buy','sell'].includes(cmd.name)) {
     const qty = Number(cmd.args[1]);
-    await reply(await rpg.trade(sender, cmd.name, cmd.args[0] || '', qty));
+    await reply(await rpg.trade(account, cmd.name, cmd.args[0] || '', qty));
   }
   return true;
 }
