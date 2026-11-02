@@ -165,7 +165,8 @@ test('English wiki requests English Wikipedia and returns original summary', asy
 test('script and credits show the correct identity; react only targets quoted messages', async t => {
   const h=await fixture(t);
   await h.router.handle(h.socket,message(member,'script'));
-  assert.match(h.calls.at(-1).payload.text,/github.com\/Vall-Afk\/y\/tree/);
+  assert.match(h.calls.at(-1).payload.text,/owner/);
+  assert.doesNotMatch(h.calls.at(-1).payload.text,/github\\.com/);
   await h.router.handle(h.socket,message(member,'credits'));
   assert.match(h.calls.at(-1).payload.text,/Tritunggal Mahakudus/);
   await h.router.handle(h.socket,message(member,'react ❤️'));
