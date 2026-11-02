@@ -5,7 +5,7 @@
 
 **Legacy Complete Roadmap · Version 1.5.0 (staged migration)**
 
-**Tanpa prefix · Fitur gratis · Sewa grup terjangkau · Jadibot gratis (1 slot)**
+**Tanpa prefix · Fitur gratis · Sewa grup terjangkau · Jadibot gratis (1 slot) · Bahasa Indonesia & English**
 
 [**Panduan Fitur**](FEATURES.md) · [**Audit 428 Perintah**](LEGACY_COMMAND_MATRIX.md)
 
