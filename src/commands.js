@@ -24,6 +24,7 @@ const { IMAGE_COMMANDS, handleImage } = require('./features/image-studio');
 const { MEDIA_COMMANDS, handleTranscode } = require('./features/transcode');
 const { STICKERWM_COMMANDS, handleStickerWm } = require('./features/stickerwm');
 const { RENTAL_COMMANDS, handleRental } = require('./features/rental');
+const { sendPayment } = require('./features/payment');
 const { BACKUP_COMMANDS, handleBackup } = require('./features/backup');
 const { ANON_COMMANDS, AnonymousHub, handleAnonymous, relayAnonymous } = require('./features/anonymous');
 const { TEXTFX_COMMANDS, handleTextFx } = require('./features/textfx');
@@ -37,7 +38,7 @@ const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot
 
 const MENU_COMMANDS = new Set(Object.keys(ALIASES));
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
-  'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
+  'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','paymethod','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS, ...ACADEMIC_COMMANDS, ...AI_COMMANDS, ...STATS_COMMANDS, ...BROADCAST_COMMANDS, ...STUDY_COMMANDS, ...UTIL_COMMANDS, ...WEB_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
@@ -185,6 +186,7 @@ function createRouter(config, store, logger, {
       if (GROUP_COMMANDS.has(cmd.name) && await handleGroup(ctx)) return;
       if (CATALOG_COMMANDS.has(cmd.name) && await handleCatalog(ctx)) return;
       if (MOD_COMMANDS.has(cmd.name) && await handleModeration(ctx)) return;
+      if (cmd.name === 'paymethod') { await sendPayment(ctx); return; }
       if (RENTAL_COMMANDS.has(cmd.name) && await handleRental(ctx)) return;
       if (BACKUP_COMMANDS.has(cmd.name) && await handleBackup(ctx)) return;
       if (ANON_COMMANDS.has(cmd.name) && await handleAnonymous(ctx)) return;
