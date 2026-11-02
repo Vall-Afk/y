@@ -167,19 +167,19 @@ async function main() {
       }
     } finally { connecting = false; }
   }
+  let rentalRunning=false;
+  const rentalTimer=setInterval(()=>{if(stopping||rentalRunning)return;rentalRunning=true;(async()=>{if(connected&&socket)await expireRentals({rentals,socket,logger});const child=subbot.slot?.socket;if(child&&subbot.slot?.status==='online')await expireRentals({rentals:childRentals,socket:child,logger});})().catch(err=>logger.warn({error:err.message},'Rental expiry check failed')).finally(()=>{rentalRunning=false;});},1000);
+  rentalTimer.unref?.();
   let scheduleRunning = false;
   const mainScheduleInProgress = new Set(), childScheduleInProgress = new Set();
   const scheduleTimer = setInterval(() => {
     if (stopping || scheduleRunning) return;
     scheduleRunning = true;
     (async () => {
-      if (connected && socket) await expireRentals({rentals,socket,logger});
       if (connected && socket) await runGroupSchedules({
         moderation, socket, logger, inProgress:mainScheduleInProgress
       });
       const child = subbot.slot?.socket;
-      if (child && subbot.slot?.status === 'online')
-        await expireRentals({rentals:childRentals,socket:child,logger});
       if (child && subbot.slot?.status === 'online')
         await runGroupSchedules({ moderation:childModeration, socket:child, logger,
           inProgress:childScheduleInProgress });
@@ -192,6 +192,7 @@ async function main() {
     stopping = true;
     if (timer) clearTimeout(timer);
     clearInterval(scheduleTimer);
+    clearInterval(rentalTimer);
     await subbot.shutdown();
     try { socket?.end(new Error('Shutdown')); } catch {}
     await new Promise(resolve => health.close(resolve));
