@@ -5,7 +5,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {isGroup}=require('../util');
-const RENTAL_COMMANDS=new Set(['addsewa','delsewa','listsewa','checksewa','ceksewa','sewa','hargasewa']);
+const RENTAL_COMMANDS=new Set(['addsewa','delsewa','listsewa','checksewa','ceksewa','sewa','hargasewa','joinsewa']);
 const JAKARTA_OFFSET=7*60*60*1000;
 const PRICES=Object.freeze({minggu:10000,bulan:30000});
 function midnightJakarta(year,month,day){return Date.UTC(year,month,day)-JAKARTA_OFFSET;}
@@ -95,6 +95,17 @@ async function handleRental(ctx){
     return true;
   }
   if(!owner){await reply(lang==='en'?'Main owner only.':'Khusus owner utama.');return true;}
+  if(cmd.name==='joinsewa'){
+    const [link,plan]=cmd.args;
+    const match=/^https:\/\/chat\.whatsapp\.com\/([a-zA-Z0-9]{20,24})\/?$/.exec(link||'');
+    if(!match||!Object.hasOwn(PRICES,plan||'')){await reply('Format: joinsewa https://chat.whatsapp.com/KODE bulan|minggu. Aktifkan hanya setelah pembayaran dikonfirmasi.');return true;}
+    if(typeof ctx.sock?.groupAcceptInvite!=='function'){await reply('Fitur bergabung grup tidak tersedia pada koneksi ini.');return true;}
+    const id=await ctx.sock.groupAcceptInvite(match[1]);
+    if(!GROUP.test(id||'')){await reply('Bot bergabung, tetapi ID grup tidak valid untuk registrasi. Periksa grup secara manual.');return true;}
+    try{const state=await rentals.setPlan(id,plan);await reply('Sewa aktif: '+id+'\\nPaket: '+plan+' Rp'+PRICES[plan].toLocaleString('id-ID')+'\\nBerakhir: '+formatJakarta(state.until));}
+    catch(err){await ctx.sock.groupLeave?.(id).catch(()=>{});throw err;}
+    return true;
+  }
   if(cmd.name==='listsewa'){
     const rows=rentals.list();
     await reply('Group rentals:\n'+(rows.length?rows.map(x=>x.id+' — '+
