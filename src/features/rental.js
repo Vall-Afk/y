@@ -83,7 +83,7 @@ async function handleRental(ctx){
   const {cmd,owner,chat,reply,rentals,lang}=ctx;
   if(!RENTAL_COMMANDS.has(cmd.name))return false;
   if(!rentals){await reply('Group rental database is unavailable.');return true;}
-  if(cmd.name==='hargasewa'||(cmd.name==='sewa'&&!cmd.args.length&&!isGroup(chat))){await reply('Tarif sewa Beauté.\\n• 7 hari: Rp10.000\\n• 1 bulan kalender: Rp30.000\\nPembayaran dan aktivasi melalui owner. Ketik owner.\\nMasa sewa berakhir pukul 00.00 WIB pada tanggal jatuh tempo.');return true;}
+  if(cmd.name==='hargasewa'||(cmd.name==='sewa'&&!cmd.args.length&&!isGroup(chat))){await reply('Tarif sewa Beauté.\n• 7 hari: Rp10.000\n• 1 bulan kalender: Rp30.000\nPembayaran dan aktivasi melalui owner. Ketik owner.\nMasa sewa berakhir pukul 00.00 WIB pada tanggal jatuh tempo.');return true;}
   const isCheck=['checksewa','ceksewa','sewa'].includes(cmd.name);
   if(isCheck){
     const id=rentalGroup(ctx,cmd.args[0]);
@@ -102,7 +102,7 @@ async function handleRental(ctx){
     if(typeof ctx.sock?.groupAcceptInvite!=='function'){await reply('Fitur bergabung grup tidak tersedia pada koneksi ini.');return true;}
     const id=await ctx.sock.groupAcceptInvite(match[1]);
     if(!GROUP.test(id||'')){await reply('Bot bergabung, tetapi ID grup tidak valid untuk registrasi. Periksa grup secara manual.');return true;}
-    try{const state=await rentals.setPlan(id,plan);await reply('Sewa aktif: '+id+'\\nPaket: '+plan+' Rp'+PRICES[plan].toLocaleString('id-ID')+'\\nBerakhir: '+formatJakarta(state.until));}
+    try{const state=await rentals.setPlan(id,plan);await reply('Sewa aktif: '+id+'\nPaket: '+plan+' Rp'+PRICES[plan].toLocaleString('id-ID')+'\nBerakhir: '+formatJakarta(state.until));}
     catch(err){await ctx.sock.groupLeave?.(id).catch(()=>{});throw err;}
     return true;
   }
