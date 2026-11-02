@@ -240,11 +240,6 @@ The downloader commands `instagram`, `igphoto`, `igvideo`, `igreels`, `tiktok`, 
 
 Public source access is not guaranteed: platform changes, unsupported carousels, rate limits, login requirements and unavailable formats may cause downloads to fail. No credentials, cookies, private posts, profile feeds, arbitrary URLs or DRM circumvention are supported. `tiktoknowm` prefers clean available sources but **does not erase embedded watermarks**. Save or share only content you have rights to use.
 
-### Optional public-media downloaders (yt-dlp)
-
-Legacy keywords `ytmp3`, `ytmp4`, `tiktok`, `tiktoknowm`, `tiktokaudio`, `instagram`, `igphoto`, `igvideo`, `igreels` now have an **optional executable-based implementation** for **single public media**. This uses the external, independently maintained `yt-dlp` utility (https://github.com/yt-dlp/yt-dlp), which is **not bundled with Beauté.** Install the official standalone executable yourself and put it on `PATH`, or set `YTDLP_PATH=C:\\path\\to\\yt-dlp.exe` in `.env`. For `ytmp3` and `tiktokaudio`, FFmpeg must also be available. `npm.cmd install` does not install yt-dlp automatically. Only HTTPS YouTube, TikTok and Instagram **individual public post/video** URLs are accepted; no playlists, private content, cookies, credentials, paywalls, DRM, or generic URL downloads. 12 MB output ceiling, 3-minute max source duration when metadata exists, 90-second process timeout, 1 simultaneous download. Inability to download due to changing platform extractor behavior will be reported as an error.
-
-Use these commands **only for media you created, own, or are permitted to download/re-share**, and comply with the source platform's terms. A public page is not automatic redistribution permission. The alias `tiktoknowm` does **not** guarantee watermark removal; it currently uses the same source-preserving pipeline as `tiktok`.
 
 ### Profile and group join/leave (authorization required)
 
