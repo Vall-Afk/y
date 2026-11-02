@@ -1,5 +1,5 @@
 'use strict';
-// A single, premium-only secondary WhatsApp connection. Credentials never leave
+// A single, free secondary WhatsApp connection. Credentials never leave
 // data/jadibot/auth; only the requester receives the pairing code in private chat.
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -48,10 +48,10 @@ class SubBotManager {
     return result;
   }
   eligible(owner) {
-    return jid(owner) === this.config.ownerJid || Boolean(this.economy.get(jid(owner)).premium);
+    return validRequester(jid(owner));
   }
   expiry(owner) {
-    return jid(owner) === this.config.ownerJid ? Infinity : this.economy.get(jid(owner)).premiumUntil;
+    return Infinity;
   }
   async writeMetadata(slot) {
     const metadata = { owner: slot.owner, phone: slot.phone, createdAt: slot.createdAt, linked: Boolean(slot.linked), method: slot.method };
@@ -83,10 +83,7 @@ class SubBotManager {
       slot.status = 'menunggu-pairing';
       return;
     }
-    if (!this.eligible(slot.owner)) {
-      slot.status = 'premium-habis';
-      return;
-    }
+    
     try { await this.launch(slot); }
     catch (err) {
       slot.status = 'error';
@@ -111,8 +108,8 @@ class SubBotManager {
     if (!s) return en ? 'Jadibot: no active session. One slot available.' :
       'Jadibot: belum ada sesi. Slot tersedia (maksimal 1).';
     if (jid(requester) !== s.owner && !isMainOwner)
-      return en ? 'Jadibot: the only slot is occupied by another premium member.' :
-        'Jadibot: slot sedang dipakai oleh pengguna premium lain.';
+      return en ? 'Jadibot: the only slot is occupied by another user.' :
+        'Jadibot: slot sedang dipakai oleh pengguna lain.';
     const status = en ? ({
       menyiapkan:'connecting', pairing:'pairing', qr:'awaiting QR scan',
       online:'online', reconnecting:'reconnecting', terputus:'disconnected',
@@ -141,7 +138,7 @@ class SubBotManager {
   watchExpiry(slot) {
     if (slot.expiryTimer) this.cancel(slot.expiryTimer);
     if (this.slot !== slot || this.shuttingDown || slot.status === 'premium-habis') return;
-    if (slot.owner === this.config.ownerJid) return;
+    return; // Jadibot is free: no membership expiry.
     const until = this.expiry(slot.owner);
     if (!(until > this.now())) {
       void this.suspend(slot);
@@ -178,7 +175,7 @@ class SubBotManager {
     return this.serial(async () => {
       owner = jid(owner);
       if (!validRequester(owner)) throw new Error('Identitas pengirim tidak valid.');
-      if (!this.eligible(owner)) throw new Error(this.language(owner) === 'en' ? 'Jadibot requires an active premium membership.' : 'Jadibot khusus premium aktif.');
+      
       if (!['pairing','qr'].includes(method)) throw new Error('Metode jadibot tidak dikenal.');
       if (method === 'qr' && !this.notifyQr) throw new Error('Pengiriman QR tidak tersedia.');
       if (method === 'qr' && !phone) phone = this.slot?.owner === owner ? this.slot.phone : '10000000';
@@ -192,7 +189,7 @@ class SubBotManager {
           throw new Error(this.language(owner) === 'en' ? 'Jadibot slot is occupied. Only one additional session is allowed.' : 'Slot jadibot sedang digunakan. Maksimal satu sesi tambahan.');
         if (['online', 'menyiapkan', 'pairing', 'qr', 'reconnecting'].includes(this.slot.status))
           return this.language(owner) === 'en' ? 'Jadibot is already running. Use cekjadibot.' : 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
-        if (!this.eligible(owner)) throw new Error('Perpanjang premium terlebih dahulu.');
+        
         if (this.slot.method !== method) {
           this.slot.method = method;
           this.slot.linked = false;
