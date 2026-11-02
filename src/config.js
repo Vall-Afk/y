@@ -6,7 +6,7 @@ function loadConfig(env = process.env) {
   if (!/^([1-9][0-9]{7,14})$/.test(raw)) {
     throw new Error('OWNER_NUMBER must contain 8-15 digits with a country code, e.g. 62812...');
   }
-  const prefix = env.PREFIX === undefined ? '!' : env.PREFIX;
+  const prefix = env.BOT_PREFIX === undefined ? '!' : env.BOT_PREFIX;
   if (!prefix || prefix.length > 3 || /[\s]/.test(prefix)) throw new Error('PREFIX must be 1-3 non-space characters');
   const name = (env.BOT_NAME || 'Beauté.').trim();
   const ownerName = (env.OWNER_NAME || 'Vall').trim();
