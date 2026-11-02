@@ -2,7 +2,7 @@
 // Offline UI strings. Commands remain stable across languages.
 const MESSAGES = Object.freeze({
   id: {
-    scriptLink: '✦ Script Beauté.\nhttps://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern',
+    scriptLink: 'Kode sumber Beauté. tersedia melalui pembelian resmi. Untuk informasi lisensi, harga, dan prosedur pembelian, silakan hubungi pemilik dengan mengetik owner.',
     credits: '✦ BEAUTÉ. CREDITS\nOwner / Recoder: {name}\nGitHub: @Vall-Afk\nInstagram: @{instagram}\nThanks To: Tritunggal Mahakudus, Orang Tua, Keluarga, Saya sendiri.',
     languageUsage: 'Pilihan bahasa: bahasa id atau bahasa en. Gunakan listbahasa untuk melihat opsi.',
     languageList: '🌐 Bahasa tersedia:\n• bahasa id — Bahasa Indonesia\n• bahasa en — English\n\nPengaturan disimpan per pengguna.',
@@ -88,7 +88,7 @@ const MESSAGES = Object.freeze({
     noPermission: 'Izin tidak mencukupi.'
   },
   en: {
-    scriptLink: '✦ Beauté. Source Code\nhttps://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern',
+    scriptLink: 'Beauté. source code is available through an official purchase. For licensing, pricing, and purchasing information, please contact the owner by typing owner.',
     credits: '✦ BEAUTÉ. CREDITS\nOwner / Recoder: {name}\nGitHub: @Vall-Afk\nInstagram: @{instagram}\nThanks To: The Most Holy Trinity, Parents, Family, and Myself.',
     languageUsage: 'Choose a language: language en or language id. Use listbahasa to see options.',
     languageList: '🌐 Available languages:\n• language id — Indonesian\n• language en — English\n\nYour preference is saved per user.',
