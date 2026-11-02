@@ -130,7 +130,7 @@ function menu(config, section = 'menu', profile = {}) {
   ];
   for (const group of (profile.commandGroups || [])) {
     const known = new Set(entries.flatMap(g => g.commands.map(c => c.split(' ')[0].toLowerCase())));
-    const missing = (group.commands || []).filter(c => !known.has(c));
+    const missing = (group.commands || []).filter(c => !known.has(c) && c !== 'autoblok212');
     if (missing.length) entries.push({ id: group.id, icon: '✦', idTitle: group.title, enTitle: group.title, commands: missing });
   }
   const selected = all ? entries : entries.filter(g => g.id === target);
