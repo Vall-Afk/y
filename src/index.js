@@ -123,7 +123,7 @@ async function main() {
       sock.ev.on('creds.update', saveCreds);
       if (!state.creds.registered && process.env.PAIRING_NUMBER) {
         const phone = process.env.PAIRING_NUMBER.replace(/[^0-9]/g, '');
-        if (!/^\\d{8,15}$/.test(phone)) throw new Error('PAIRING_NUMBER must be 8-15 digits including country code.');
+        if (!/^[0-9]{8,15}$/.test(phone)) throw new Error('PAIRING_NUMBER must be 8-15 digits including country code.');
         const requestPairing = async () => {
           try {
             const code = await sock.requestPairingCode(phone);
