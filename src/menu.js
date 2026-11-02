@@ -91,7 +91,7 @@ const ACADEMIC = Object.freeze([
   'keuangan 1000000 0.05 12', 'investasi 0.04 1.2 0.10',
   'peluang binomial 10 3 0.5', 'anova 1,2,3;4,5,6',
   'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027',
-  'alkitab Matius 1:1', 'vulgata Ioannes III:XVI'
+  'alkitab Matius 1:1', 'vulgata Ioannes III:XVI', 'google <pencarian>', 'ai <pertanyaan>'
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
 const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard',
