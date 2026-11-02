@@ -5,7 +5,12 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {isGroup}=require('../util');
-const RENTAL_COMMANDS=new Set(['addsewa','delsewa','listsewa','checksewa','ceksewa','sewa']);
+const RENTAL_COMMANDS=new Set(['addsewa','delsewa','listsewa','checksewa','ceksewa','sewa','hargasewa']);
+const JAKARTA_OFFSET=7*60*60*1000;
+const PRICES=Object.freeze({minggu:10000,bulan:30000});
+function midnightJakarta(year,month,day){return Date.UTC(year,month,day)-JAKARTA_OFFSET;}
+function rentalExpiry(start,plan){if(!['minggu','bulan'].includes(plan))throw Error('Paket sewa tidak valid');const local=new Date(start+JAKARTA_OFFSET);const y=local.getUTCFullYear(),m=local.getUTCMonth(),d=local.getUTCDate();if(plan==='minggu')return midnightJakarta(y,m,d+7);return midnightJakarta(y,m+1,Math.min(d,new Date(Date.UTC(y,m+2,0)).getUTCDate()));}
+function formatJakarta(ms){return new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms))+' WIB';}
 const GROUP=/^[a-zA-Z0-9_-]{8,64}@g\.us$/;
 const DAY=86400000;
 class RentalRegistry {
@@ -46,6 +51,9 @@ class RentalRegistry {
       .sort((a,b)=>a[1]-b[1]).slice(0,100)
       .map(([id,until])=>({id,until}));
   }
+  async setPlan(id,plan){if(!GROUP.test(id||''))throw Error('Invalid group JID.');if(!Object.hasOwn(PRICES,plan))throw Error('Paket tidak valid');const task=this.pending.then(async()=>{const next=structuredClone(this.groups);if(!Object.hasOwn(next,id)&&Object.keys(next).length>=2000)throw Error('Rental registry full.');const start=Math.max(this.now(),next[id]||0);const until=rentalExpiry(start,plan);Object.defineProperty(next,id,{value:until,enumerable:true,writable:true,configurable:true});await this.write(next);this.groups=next;return this.get(id);});this.pending=task.catch(()=>{});return task;}
+  expired(){return Object.entries(this.groups).filter(([,end])=>end<=this.now()).map(([id,until])=>({id,until}));}
+  async clearExpired(id,until){if(!GROUP.test(id))return false;const task=this.pending.then(async()=>{if(this.groups[id]!==until||until>this.now())return false;const next=structuredClone(this.groups);delete next[id];await this.write(next);this.groups=next;return true;});this.pending=task.catch(()=>{});return task;}
   change(id,days){
     if(!GROUP.test(id||''))throw new Error('Invalid group JID.');
     if(days!==0&&(!Number.isInteger(days)||days<1||days>365))
@@ -75,13 +83,14 @@ async function handleRental(ctx){
   const {cmd,owner,chat,reply,rentals,lang}=ctx;
   if(!RENTAL_COMMANDS.has(cmd.name))return false;
   if(!rentals){await reply('Group rental database is unavailable.');return true;}
+  if(cmd.name==='hargasewa'||(cmd.name==='sewa'&&!cmd.args.length&&!isGroup(chat))){await reply('Tarif sewa Beauté.\\n• 7 hari: Rp10.000\\n• 1 bulan kalender: Rp30.000\\nPembayaran dan aktivasi melalui owner. Ketik owner.\\nMasa sewa berakhir pukul 00.00 WIB pada tanggal jatuh tempo.');return true;}
   const isCheck=['checksewa','ceksewa','sewa'].includes(cmd.name);
   if(isCheck){
     const id=rentalGroup(ctx,cmd.args[0]);
     if(!id){await reply('Use checksewa in a group, or checksewa <group@g.us>.');return true;}
     const info=rentals.get(id);
     await reply((lang==='en'?'Group rental: ':'Sewa grup: ')+
-      (info.active?(lang==='en'?'active until ':'aktif sampai ')+new Date(info.until).toISOString().slice(0,10):
+      (info.active?(lang==='en'?'active until ':'aktif sampai ')+formatJakarta(info.until):
         lang==='en'?'not registered/expired':'tidak terdaftar/kedaluwarsa'));
     return true;
   }
@@ -89,7 +98,7 @@ async function handleRental(ctx){
   if(cmd.name==='listsewa'){
     const rows=rentals.list();
     await reply('Group rentals:\n'+(rows.length?rows.map(x=>x.id+' — '+
-      new Date(x.until).toISOString().slice(0,10)).join('\n'):'-'));
+      formatJakarta(x.until)).join('\n'):'-'));
     return true;
   }
   const tokens=cmd.args;
@@ -97,17 +106,20 @@ async function handleRental(ctx){
   const id=rentalGroup(ctx,explicit?tokens[0]:null);
   if(!id){await reply('Use addsewa <group@g.us> 30 / delsewa <group@g.us>.');return true;}
   if(cmd.name==='addsewa'){
-    const days=Number(explicit?tokens[1]:tokens[0]);
+    const input=String(explicit?tokens[1]:tokens[0]||'').toLowerCase();
+    if(Object.hasOwn(PRICES,input)){const state=await rentals.setPlan(id,input);await reply('Sewa '+input+' (Rp'+PRICES[input].toLocaleString('id-ID')+') aktif sampai '+formatJakarta(state.until));return true;}
+    const days=Number(input);
     if(!Number.isInteger(days)||days<1||days>365){
       await reply('Usage: addsewa <group@g.us> <days 1–365>.');return true;
     }
     const state=await rentals.change(id,days);
     await reply((lang==='en'?'Rental extended until ':'Sewa diperpanjang sampai ')+
-      new Date(state.until).toISOString().slice(0,10));
+      formatJakarta(state.until));
   }else if(cmd.name==='delsewa'){
     await rentals.change(id,0);
     await reply(lang==='en'?'Group rental removed.':'Sewa grup dihapus.');
   }
   return true;
 }
-module.exports={RENTAL_COMMANDS,RentalRegistry,handleRental,GROUP};
+async function expireRentals({rentals,socket,logger}){if(!rentals||!socket?.groupLeave)return;for(const {id,until} of rentals.expired().slice(0,30)){try{await socket.groupLeave(id);await rentals.clearExpired(id,until);logger?.info?.({id},'Rental expired; bot left group');}catch(err){logger?.warn?.({id,error:err.message},'Could not leave expired rental group; retrying');}}}
+module.exports={RENTAL_COMMANDS,RentalRegistry,handleRental,GROUP,PRICES,rentalExpiry,formatJakarta,expireRentals};
