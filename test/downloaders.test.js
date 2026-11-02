@@ -108,5 +108,5 @@ test('X downloader accepts public post URLs and rejects unrelated hosts',()=>{
     'https://x.com/i/status/1234567890123456789');
   assert.throws(()=>normalizeLink('https://example.com/example/status/1234567890123456789','xdl'));
   assert.throws(()=>normalizeLink('https://x.com/example/likes','xdl'));
-  assert.ok(downloadArgs('xdl','https://x.com/i/status/1234567890123456789').includes('--no-playlist'));
+  assert.ok(downloadArgs('xdl','https://x.com/i/status/1234567890123456789').includes('--playlist-end'));
 });
