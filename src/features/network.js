@@ -56,10 +56,6 @@ async function handleNetwork(ctx) {
       : 'YouTube search memerlukan YOUTUBE_API_KEY milikmu di .env (YouTube Data API resmi).');
     return true;
   }
-  if (economy && !owner) {
-    const can = await economy.consume(accountSender || sender,chat);
-    if (!can) { await reply(lang === 'en' ? 'Your daily API quota is used up. Use daily and buylimit, or ask the owner about premium.' : 'Limit harian habis. Gunakan daily lalu buylimit, atau hubungi owner untuk premium.'); return true; }
-  }
   try {
     if (['translate','terjemah'].includes(cmd.name)) {
       const target=cmd.args[0]?.toLowerCase();
