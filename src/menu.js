@@ -120,7 +120,7 @@ function menu(config, section = 'menu', profile = {}) {
   const english = profile.lang === 'en';
   const target = ALIASES[section] || section;
   const all = target === 'all';
-  const title = String(config.name || 'Beauté.').slice(0, 50);
+  const title = 'Beauté.';
   const entries = [
     ...SECTIONS,
     { id: 'downloads', icon: '⬇', idTitle: 'DOWNLOADER', enTitle: 'DOWNLOADS', commands: DOWNLOAD_GUIDE },
