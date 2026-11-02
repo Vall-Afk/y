@@ -163,10 +163,10 @@ function menu(config, section = 'menu', profile = {}) {
       'Hanya tautan publik • perlu yt-dlp • maksimal 12 MB.');
   }
   if (all || target === 'premium') {
-    pieces.push('\n╔═══ ★ PREMIUM EXCLUSIVE ★ ═══╗');
-    pieces.push((english ? '✧ Unlimited supported API quota + one shared child bot slot'
-      : '✧ Kuota API tanpa batas + satu slot Jadibot bersama'));
-    pieces.push(PREMIUM.map(x => '┃ ★ ' + x).join('\n'));
+    pieces.push('\n╔═══ ✧ JADIBOT GRATIS ✧ ═══╗');
+    pieces.push((english ? '✧ Free Jadibot; one shared child bot slot'
+      : '✧ Jadibot gratis; satu slot bersama'));
+    pieces.push(PREMIUM.map(x => '┃ ✧ ' + x).join('\n'));
     pieces.push('╚══════════════════════╝');
   }
   if (all || target === 'owner') {
@@ -199,7 +199,7 @@ function menu(config, section = 'menu', profile = {}) {
           '\n ' + (english ? 'See:' : 'Lihat:') + ' ' +
           (Object.keys(ALIASES).find(k => ALIASES[k] === g.id) || 'menu')),
         '\n╔═══ ★ PREMIUM EXCLUSIVE ★ ═══╗',
-        ...PREMIUM.map(x => '★ ' + x),
+        ...PREMIUM.map(x => '✧ ' + x),
         '\n♛ ' + (english ? 'OWNER COMMANDS: menuowner' : 'PERINTAH OWNER: menuowner'),
         '\n' + (english ? 'More categories: menugroup · menustore · menupremium'
           : 'Menu lengkap: menugroup · menustore · menupremium')
