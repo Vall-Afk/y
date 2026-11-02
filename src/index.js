@@ -121,6 +121,17 @@ async function main() {
       });
       socket = sock;
       sock.ev.on('creds.update', saveCreds);
+      if (!state.creds.registered && process.env.PAIRING_NUMBER) {
+        const phone = process.env.PAIRING_NUMBER.replace(/[^0-9]/g, '');
+        if (!/^\\d{8,15}$/.test(phone)) throw new Error('PAIRING_NUMBER must be 8-15 digits including country code.');
+        const requestPairing = async () => {
+          try {
+            const code = await sock.requestPairingCode(phone);
+            console.log('\\nBEAUTÉ PAIRING CODE: ' + code + '\\nWhatsApp > Perangkat tertaut > Tautkan perangkat > Tautkan dengan nomor telepon.\\n');
+          } catch (err) { logger.error({error:err.message},'Pairing code request failed'); }
+        };
+        setTimeout(() => { if (socket === sock && !stopping) void requestPairing(); }, 3000);
+      }
       sock.ev.on('connection.update', ({ qr, connection, lastDisconnect }) => {
         if (socket !== sock || stopping) return;
         if (qr) {
