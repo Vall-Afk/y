@@ -6,6 +6,7 @@ const { ACADEMIC_COMMANDS, handleAcademic } = require('./features/academic');
 const { AI_COMMANDS, handleAI } = require('./features/ai-google');
 const { STATS_COMMANDS, handleStats } = require('./features/advanced-inference');
 const { BROADCAST_COMMANDS, handleBroadcast } = require('./features/consent-broadcast');
+const { STUDY_COMMANDS, handleStudy } = require('./features/study-tools');
 const { textSticker, memeSticker } = require('./features/sticker-tools');
 const { GROUP_COMMANDS, handleGroup } = require('./features/groups');
 const { TOOL_COMMANDS, handleTools } = require('./features/tools');
@@ -36,7 +37,7 @@ const MENU_COMMANDS = new Set(Object.keys(ALIASES));
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
   'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
-  ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS, ...ACADEMIC_COMMANDS, ...AI_COMMANDS, ...STATS_COMMANDS, ...BROADCAST_COMMANDS,
+  ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS, ...ACADEMIC_COMMANDS, ...AI_COMMANDS, ...STATS_COMMANDS, ...BROADCAST_COMMANDS, ...STUDY_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
   ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
@@ -205,6 +206,7 @@ function createRouter(config, store, logger, {
         return handleModeration({...ctx,cmd:{...cmd,name:alias}});
       }
       if (LEGACY_UTILITY_COMMANDS.has(cmd.name) && await handleLegacyUtilities(ctx)) return;
+      if (STUDY_COMMANDS.has(cmd.name) && await handleStudy(ctx)) return;
       if (BROADCAST_COMMANDS.has(cmd.name) && await handleBroadcast(ctx)) return;
       if (STATS_COMMANDS.has(cmd.name) && await handleStats(ctx)) return;
       if (AI_COMMANDS.has(cmd.name) && await handleAI(ctx)) return;
