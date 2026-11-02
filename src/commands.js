@@ -1,6 +1,7 @@
 'use strict';
 const { jid, isGroup, getText, getCommand, getSender, roleFromMeta, isInvite } = require('./util');
 const { convertMedia } = require('./media');
+const { SCIENCE_COMMANDS, handleScience } = require('./features/advanced-science');
 const { textSticker, memeSticker } = require('./features/sticker-tools');
 const { GROUP_COMMANDS, handleGroup } = require('./features/groups');
 const { TOOL_COMMANDS, handleTools } = require('./features/tools');
@@ -31,7 +32,7 @@ const MENU_COMMANDS = new Set(Object.keys(ALIASES));
 const BASE_COMMANDS = new Set(['ping','status','infobot','owner','mode','self','public','afk',
   'sticker','s','toimg','ttp','smeme','react','setcmd','delcmd','source','script','sc','credits','thanks','donate','dashboard','bahasa','language','lang','listbahasa','languages','listlanguages']);
 const ALL_COMMANDS = new Set([
-  ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS,
+  ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
   ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
@@ -200,6 +201,7 @@ function createRouter(config, store, logger, {
         return handleModeration({...ctx,cmd:{...cmd,name:alias}});
       }
       if (LEGACY_UTILITY_COMMANDS.has(cmd.name) && await handleLegacyUtilities(ctx)) return;
+      if (SCIENCE_COMMANDS.has(cmd.name) && await handleScience(ctx)) return;
       if (TOOL_COMMANDS.has(cmd.name) && await handleTools(ctx)) return;
       if (ECONOMY_COMMANDS.has(cmd.name) && await handleEconomy(ctx)) return;
       if (GAME_COMMANDS.has(cmd.name) && await handleGames(ctx)) return;
