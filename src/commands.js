@@ -94,6 +94,24 @@ function createRouter(config, store, logger, {
     if (!cmd && !linkViolation && (!group || !moderation ||
       !(moderation.get(chat).antispam || Object.keys(moderation.get(chat).responses).length))) return;
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
+    const replyCatalog = async (body) => {
+      const lines = String(body).split('\n');
+      const chunks = [];
+      let current = '';
+      for (const line of lines) {
+        const next = current ? current + '\n' + line : line;
+        if (next.length > 3400 && current) {
+          chunks.push(current);
+          current = line;
+        } else current = next;
+      }
+      if (current) chunks.push(current);
+      for (let i = 0; i < chunks.length; i++) {
+        await sock.sendMessage(chat, { text: chunks.length > 1
+          ? '*Beauté • Katalog (' + (i + 1) + '/' + chunks.length + ')*\n' + chunks[i]
+          : chunks[i] }, { quoted: message });
+      }
+    };
     let rolePromise;
     const roles = async () => {
       if (!group) return { senderAdmin: false, botAdmin: false, metadata: null };
@@ -129,7 +147,7 @@ function createRouter(config, store, logger, {
       if (MENU_COMMANDS.has(cmd.name)) {
         const temporary = ['id','en'].includes(cmd.args[0]?.toLowerCase()) ? cmd.args[0].toLowerCase() : lang;
         const info = economy?.get?.(accountSender) || {};
-        return reply(menu(config, cmd.name, {
+        return replyCatalog(menu(config, cmd.name, {
           lang: temporary, owner, premium: owner || info.premium === true,
           balance: info.balance
         }));
