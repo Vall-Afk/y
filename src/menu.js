@@ -128,6 +128,11 @@ function menu(config, section = 'menu', profile = {}) {
     { id: 'premium', icon: '✧', idTitle: 'JADIBOT GRATIS', enTitle: 'FREE JADIBOT', commands: PREMIUM },
     { id: 'owner', icon: '♛', idTitle: 'PERINTAH OWNER', enTitle: 'OWNER COMMANDS', commands: OWNER }
   ];
+  for (const group of (profile.commandGroups || [])) {
+    const known = new Set(entries.flatMap(g => g.commands.map(c => c.split(' ')[0].toLowerCase())));
+    const missing = (group.commands || []).filter(c => !known.has(c));
+    if (missing.length) entries.push({ id: group.id, icon: '✦', idTitle: group.title, enTitle: group.title, commands: missing });
+  }
   const selected = all ? entries : entries.filter(g => g.id === target);
   const count = selected.reduce((sum, g) => sum + g.commands.length, 0);
   const lines = [
