@@ -17,7 +17,7 @@ const SECTIONS = Object.freeze([
       'setwelcome <teks>', 'setleft <teks>', 'delsetwelcome', 'delsetleft',
       'antispam on|off', 'warn @user', 'unwarn @user', 'listwarn',
       'rules', 'setrules <teks>', 'addresponse key | reply',
-      'listresponse', 'setcmd keyword | reply', 'delcmd keyword', 'setopen 08:00', 'setclose 22:00', 'listschedule', 'checksewa',
+      'listresponse', 'setcmd keyword | reply', 'delcmd keyword', 'setopen 08:00', 'setclose 22:00', 'listschedule', 'checksewa', 'hargasewa',
       'tagall [teks]', 'hidetag [teks]', 'kick @user', 'add 62xxx', 'promote @user',
       'demote @user', 'open', 'close', 'linkgc', 'revoke', 'setnamegc <nama>', 'setdesc <teks>',
       'setppgc (reply gambar)', 'delppgc']
@@ -101,7 +101,7 @@ const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekja
 const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard',
   'autoread on|off', 'autobio on|off', 'autorespond on|off', 'anticall on|off',
   'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium',
-  'addsewa <group@g.us> 30', 'delsewa <group@g.us>', 'listsewa', 'backup (private DM)',
+  'addsewa <group@g.us> bulan|minggu', 'joinsewa https://chat.whatsapp.com/KODE bulan|minggu', 'delsewa <group@g.us>', 'listsewa', 'backup (private DM)',
   'join <invite link> (DM)', 'leavegc (group)', 'setnamebot <teks>',
   'setbiobot <teks>', 'setppbot (reply gambar)', 'delppbot']);
 const ALIASES = Object.freeze({
