@@ -1,13 +1,13 @@
 <div align="center">
 
 # ✦ Beauté. ✦
-### WhatsApp Multi-Device Bot — Legacy × Modern
+### WhatsApp Multi-Device Bot — Beauté. Edition
 
 **Legacy Complete Roadmap · Version 1.5.0 (staged migration)**
 
-**Tanpa prefix · Free & Premium · Bahasa Indonesia & English · Jadibot 1 Sesi**
+**Tanpa prefix · Fitur gratis · Sewa grup terjangkau · Jadibot gratis (1 slot)**
 
-[**🔗 LINK SCRIPT BEAUTÉ.**](https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern) · [**GitHub Repository**](https://github.com/Vall-Afk/y) · [**Status Migrasi**](FEATURES.md) · [**Audit 428 Perintah**](LEGACY_COMMAND_MATRIX.md)
+[**Panduan Fitur**](FEATURES.md) · [**Audit 428 Perintah**](LEGACY_COMMAND_MATRIX.md)
 
 </div>
 
@@ -24,7 +24,7 @@
 | GitHub | **[@Vall-Afk](https://github.com/Vall-Afk)** |
 | Instagram | **[@v4lonenonly](https://www.instagram.com/v4lonenonly/)** |
 | Nama bot | **Beauté.** |
-| Source / Script | **https://github.com/Vall-Afk/y** |
+| Distribusi kode sumber | Melalui owner, dengan ketentuan lisensi pihak ketiga |
 
 ### ♡ Thanks To
 - **Tritunggal Mahakudus**
@@ -36,16 +36,13 @@
 
 ---
 
-## 📦 Link Script
+## 📦 Distribusi dan lisensi kode sumber
 
-**GitHub:** https://github.com/Vall-Afk/y
+Kode sumber versi Beauté. ditawarkan melalui owner. Ketik **owner** di bot untuk informasi harga dan lisensi. Tautan unduh tidak dibagikan melalui perintah `script` / `sc` / `source`.
 
-**Versi pengembangan Beauté. (fitur terbaru):**
-https://github.com/Vall-Afk/y/tree/feature/beaute-legacy-modern
+**Atribusi:** Beauté. adalah pengembangan dengan implementasi dan identitas sendiri di atas basis proyek terdahulu. Kontribusi dan pemberitahuan hak cipta pihak lain, termasuk Haruka-Md / ZeeoneOfc bila berlaku, tidak boleh dihapus atau diklaim sebagai karya asli Vall. Periksa lisensi masing-masing dependensi dan komponen sebelum penjualan/distribusi.
 
-**Buka / unduh source melalui GitHub** menggunakan tautan di atas (menu **Code → Download ZIP**) atau Git clone. Branch default v9.1 berisi source lama dan **belum** otomatis menerima perubahan di branch pengembangan. Gunakan branch yang tertulis di atas jika ingin menjalankan Beauté. versi ini.
-
-> **Penting:** Legacy Complete adalah *roadmap migrasi*, belum berarti 428 command lama sudah sepenuhnya berfungsi. Periksa daftar yang sudah aktif di FEATURES.md, hasil audit di LEGACY_AUDIT.md, serta [matriks status 428 perintah](LEGACY_COMMAND_MATRIX.md).
+**Catatan:** Repository publik tetap dapat diakses selama pengaturan visibilitas GitHub belum diubah. Menyembunyikan link di bot bukan proteksi kode sumber.
 
 ## ⚙️ Persyaratan / Requirements
 
@@ -109,69 +106,10 @@ npm.cmd start
 
 Jika ada perubahan lokal yang belum disimpan, selesaikan terlebih dahulu agar git pull tidak berbenturan. Jangan pernah menghapus **.env**, **data/auth**, atau database di **data/** untuk sekadar update. Folder tersebut berisi login serta data pengguna. Pastikan tidak ada proses bot lain yang membuka sesi yang sama.
 
-## ✨ Menu dan fitur Free vs Premium
+## ✨ Akses gratis dan layanan sewa grup
 
-Ketik **menu** melalui chat ke Beauté. Menu menampilkan **FITUR GRATIS / FREE FEATURES**, **PREMIUM EXCLUSIVE**, dan **KHUSUS OWNER / OWNER ONLY** dengan pemisahan jelas.
+Semua perintah pengguna yang tersedia gratis, termasuk Jadibot (satu slot bersama). Izin owner/admin dan persyaratan API eksternal tetap berlaku. **Sewa grup** adalah layanan terpisah: Rp10.000 per 7 hari atau Rp30.000 per bulan kalender; masa sewa berakhir pukul 00.00 WIB pada tanggal jatuh tempo. Gunakan `hargasewa`, `paymethod`, dan `owner`. Owner memverifikasi pembayaran sebelum mengaktifkan `joinsewa`.
 
-| FREE — Gratis | PREMIUM — Berbayar/akses admin |
-|---|---|
-| Menu, status, owner, ganti bahasa, AFK | **Jadibot via pairing code** |
-| Manajemen grup dan welcome/left untuk admin | **Jadibot via QR** |
-| Daftar toko grup: list, addlist, update, dellist | **1 slot Jadibot tambahan GLOBAL** untuk semua premium |
-| Status pesanan proses/done di grup | **Kuota command network yang didukung tanpa batas harian** |
-| Tools, hitungan, konverter stiker & TTP/SMEME | Sesi terpisah dari akun bot utama |
-| RPG, game, ekonomi virtual, daily, balance | Premium dapat dikelola HANYA oleh owner bot |
-| Wiki, cuaca, GitHub / Gitclone (kuota network free berlaku) | Perpanjangan dengan addpremium oleh owner |
-
-**Free**: fitur lookup/API publik tertentu memiliki kuota harian (saat ini 20 + tambahan limit yang dibeli menggunakan koin virtual). **Premium**: tidak dikenai kuota harian tersebut pada command yang sudah menerapkan batas itu. Pengaturan grup hanya boleh diubah admin grup; perintah owner seperti addpremium tidak pernah otomatis menjadi hak semua pengguna premium.
-
-**Semua perintah tidak perlu prefix**. Contoh: **menu**, **ping**, **inventory**, **daily**, **calc 10+5*2**. Bentuk lama **!menu** tetap berlaku. Bot hanya mengenali *kata pertama yang cocok persis*, bukan percakapan yang kebetulan mengandung kata menu.
-
-### 📚 Perintah cepat
-
-~~~text
-menu                  → menu utama (Free / Premium / Owner)
-menugroup             → fitur grup
-menustore             → katalog toko dan status pesanan
-menumedia             → stiker dan media
-menurpg               → RPG
-menupremium           → Jadibot Premium
-menutools             → utilitas dan kalkulator
-language en           → gunakan English
-bahasa id             → kembali ke Bahasa Indonesia
-listbahasa            → pilihan bahasa
-~~~
-
-### 🛒 Migrasi fitur Store dari source lama
-
-Di grup, **admin grup** dapat menjalankan:
-
-~~~text
-addlist harga | Burger 20k
-update harga | Burger 22k
-dellist harga
-list
-list harga
-setproses ⏳ Pesanan {order} sedang disiapkan untuk {user}
-setdone ✅ Pesanan {order} selesai untuk {user}
-delsetproses
-delsetdone
-~~~
-
-Anggota boleh membaca daftar toko lewat **list** atau **list harga**, tetapi tidak boleh mengubah isinya. Untuk status order, **balas pesan pesanan** lalu admin mengetik **proses** atau **done**. Template mendukung **{order}**, **{user}**, dan **{group}**, dibatasi panjangnya, serta disimpan per grup.
-
-### 🌐 Bahasa Inggris / English Language
-
-~~~text
-language en
-menu
-status
-menugroup
-inventory
-wiki Earth
-~~~
-
-**English:** Send **language en** to switch the bot's menu and supported replies into English; send **bahasa id** to switch back. Your selection is saved per user, even after restarting the process. You can also preview the English main menu with **menu en**. Keywords are stable (some command names remain Indonesian for compatibility). Menus, core commands, main group operations, store, economy, tools, AFK and common RPG/game responses have English support; some inherited messages, third-party errors and external content may remain untranslated during subsequent phases.
 
 ## 💎 Jadibot Premium — maks. SATU sesi tambahan
 
