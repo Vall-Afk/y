@@ -68,7 +68,7 @@ test('validates target number and owner', async t => {
   const h = await fixture(t);
   assert.equal(validPhone('628123456789'), true);
   assert.equal(validPhone('+628123456789'), false);
-  await assert.rejects(h.manager.start(stranger, phone), /premium/);
+  assert.equal(h.manager.eligible(stranger), true);
   await assert.rejects(h.manager.start(user, '6287721373781'), /bot utama/);
   await assert.rejects(h.manager.start(user, '0001111'), /jadibot/);
   assert.equal(h.sockets.length, 0);
@@ -106,7 +106,7 @@ test('pairing is private and limited to one concurrent slot', async t => {
   assert.equal(h.manager.slot, null);
   assert.equal(await fs.stat(h.manager.metadataFile).catch(() => null), null);
 });
-test('stop only by slot owner or primary owner, and premium expiry suspends', async t => {
+test('stop only by slot owner or primary owner, and free session stays available', async t => {
   const h = await fixture(t);
   await h.manager.start(user, phone);
   await assert.rejects(h.manager.stop(stranger), /pemilik sesi/);
@@ -114,9 +114,9 @@ test('stop only by slot owner or primary owner, and premium expiry suspends', as
   const sock = h.sockets[0];
   sock.ev.emit('messages.upsert', { type: 'notify', messages: [{ key: { remoteJid: stranger }, message: { conversation: 'ping' } }] });
   await tick();
-  assert.equal(h.manager.slot.status, 'premium-habis');
-  assert.equal(sock.ended, true);
-  assert.equal(h.received.length, 0);
+  assert.notEqual(h.manager.slot.status, 'premium-habis');
+  assert.equal(sock.ended, false);
+  assert.equal(h.received.length, 1);
   assert.match(await h.manager.stop(primary), /dihapus/);
 });
 test('restores linked credentials, keeps maximum slot, and preserves auth on shutdown', async t => {
@@ -173,7 +173,7 @@ test('no-prefix router delegates jadibot only in direct chat to manager', async 
   assert.equal(actions.at(-1).type, 'stop');
 });
 
-test('premium cancellation immediately suspends an already linked child session', async t => { const h=await fixture(t); await h.manager.start(user,phone); const sock=h.sockets[0]; h.creds.registered=true; sock.ev.emit('connection.update',{connection:'open'}); await tick(); h.setPremium(false); await h.manager.refreshMembership(user); assert.equal(h.manager.slot.status,'premium-habis'); assert.equal(sock.ended,true); await h.manager.stop(primary); });
+test('premium cancellation does not suspend free Jadibot', async t => { const h=await fixture(t); await h.manager.start(user,phone); const sock=h.sockets[0]; h.creds.registered=true; sock.ev.emit('connection.update',{connection:'open'}); await tick(); h.setPremium(false); await h.manager.refreshMembership(user); assert.equal(h.manager.slot.status,'online'); assert.equal(sock.ended,false); await h.manager.stop(primary); });
 
 test('stop frees the only slot even when remote WhatsApp logout never resolves', async t => { const h=await fixture(t); await h.manager.start(user,phone); h.manager.logoutTimeoutMs=20; h.sockets[0].logout=() => new Promise(() => {}); const result=await h.manager.stop(user); assert.match(result,/slot|Slot/); assert.equal(h.manager.slot,null); });
 
