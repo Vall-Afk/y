@@ -87,7 +87,8 @@ const DOWNLOAD_GUIDE = Object.freeze([
   'igvideo <Instagram URL>', 'igreels <Instagram URL>'
 ]);
 const ACADEMIC = Object.freeze([
-  'statadv 10 20 30 40', 'regresi 1,2;2,4;3,6', 'mathadv sqrt 81',
+  'statadv 10 20 30 40', 'ujit 2,3,4,5 | 3', 'chisquare 10,20,30 | 15,20,25',
+  'covariance 1,2,3 | 2,4,6', 'bayes 0.01 0.95 0.05', 'regresi 1,2;2,4;3,6', 'mathadv sqrt 81',
   'keuangan 1000000 0.05 12', 'investasi 0.04 1.2 0.10',
   'npv 0.1 -1000 400 400 400', 'irr -1000 600 600', 'portofolio 0.6 0.1 0.08 0.2 0.1 0.3',
   'peluang binomial 10 3 0.5', 'anova 1,2,3;4,5,6',
