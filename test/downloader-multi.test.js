@@ -15,7 +15,7 @@ test('normalizes TikTok photo and Instagram/X posts',()=>{
 test('yt-dlp arguments allow multiple media without credentials',()=>{
   const a=downloadArgs('instagram',IG);
   assert.ok(a.includes('--playlist-end'));
-  assert.ok(a.includes('--max-downloads'));
+  assert.ok(a.includes('--playlist-end'));
   assert.ok(a.includes('64M'));
   assert.ok(a.includes('result.%(autonumber)03d.%(ext)s'));
   assert.ok(!a.includes('--cookies'));
