@@ -1,0 +1,24 @@
+name: Beauté downloader tests
+on:
+  pull_request:
+    paths:
+      - 'src/features/downloaders.js'
+      - 'src/features/downloader-multi.js'
+      - 'test/downloaders.test.js'
+      - 'test/downloader-multi.test.js'
+      - '.github/workflows/downloaders-ci.yml'
+  push:
+    branches:
+      - feature/beaute-multimedia-download-20261102
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: npm run check
+      - run: npm test
