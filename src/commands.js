@@ -149,7 +149,7 @@ function createRouter(config, store, logger, {
         const info = economy?.get?.(accountSender) || {};
         return replyCatalog(menu(config, cmd.name, {
           lang: temporary, owner, premium: owner || info.premium === true,
-          balance: info.balance
+          balance: info.balance, commandGroups: [{ id: 'registry', title: 'REGISTERED', commands: Array.from(ALL_COMMANDS) }]
         }));
       }
       if (cmd.name === 'ping') return reply('Pong! ' + config.name);
