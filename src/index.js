@@ -16,7 +16,7 @@ const { Away } = require('./features/afk');
 const { SubBotManager } = require('./subbot');
 const { GroupCatalog } = require('./features/catalog');
 const { ModerationStore, runGroupSchedules } = require('./features/moderation');
-const { RentalRegistry } = require('./features/rental');
+const { RentalRegistry, expireRentals } = require('./features/rental');
 const { BackupService } = require('./features/backup');
 const { AnonymousHub } = require('./features/anonymous');
 const { MediaLibrary } = require('./features/media-library');
@@ -173,10 +173,13 @@ async function main() {
     if (stopping || scheduleRunning) return;
     scheduleRunning = true;
     (async () => {
+      if (connected && socket) await expireRentals({rentals,socket,logger});
       if (connected && socket) await runGroupSchedules({
         moderation, socket, logger, inProgress:mainScheduleInProgress
       });
       const child = subbot.slot?.socket;
+      if (child && subbot.slot?.status === 'online')
+        await expireRentals({rentals:childRentals,socket:child,logger});
       if (child && subbot.slot?.status === 'online')
         await runGroupSchedules({ moderation:childModeration, socket:child, logger,
           inProgress:childScheduleInProgress });
