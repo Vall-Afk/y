@@ -146,6 +146,43 @@ async function downloadPublicMedia({
     running--;
   }
 }
+async function downloadViaSaveAPI({command,url}) {
+  const key=process.env.SAVEAPI_KEY;
+  if (!key) throw new Error('SAVEAPI_KEY is not configured.');
+  const source=normalizeLink(url,command);
+  const endpoint=new URL('https://api.saveapi.org/v1/download');
+  endpoint.searchParams.set('url',source);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),25000);
+  let payload;
+  try {
+    const response=await fetch(endpoint,{headers:{Authorization:'Bearer '+key},signal:controller.signal});
+    payload=await response.json();
+    if (!response.ok || !payload.success)
+      throw new Error('SaveAPI: '+(payload.error?.code || response.status));
+  } finally {clearTimeout(timer);}
+  const audio=AUDIO.has(command);
+  const options=[...(payload.medias || []),...(payload.music?[payload.music]:[])];
+  const media=options.find(m=>m.type===(audio?'audio':'video') && typeof m.url==='string');
+  if (!media) throw new Error('No matching media format returned by SaveAPI.');
+  const fileUrl=new URL(media.url);
+  if (fileUrl.protocol!=='https:' || fileUrl.username || fileUrl.password || fileUrl.port)
+    throw new Error('Invalid media URL from provider.');
+  const address=await fetch(fileUrl,{signal:AbortSignal.timeout(30000),redirect:'error'});
+  if (!address.ok) throw new Error('Media CDN returned '+address.status);
+  const declared=Number(address.headers.get('content-length')||0);
+  if (declared>MAX_BYTES) throw new Error('Media exceeds 12 MB.');
+  const chunks=[];let total=0;
+  for await (const chunk of address.body) {
+    total+=chunk.length;
+    if(total>MAX_BYTES) throw new Error('Media exceeds 12 MB.');
+    chunks.push(chunk);
+  }
+  if (!total) throw new Error('Empty media.');
+  const ext=audio?'mp3':'mp4';
+  return {buffer:Buffer.concat(chunks),audio,mimetype:audio?'audio/mpeg':'video/mp4',
+    name:'beaute.'+ext,source};
+}
 async function handleDownload(ctx,download=downloadPublicMedia){
   const {cmd,reply,sock,chat,message,lang,economy,accountSender,owner}=ctx;
   if(!DOWNLOAD_COMMANDS.has(cmd.name))return false;
@@ -156,7 +193,7 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       const allowed=await economy.consume(accountSender,chat);
       if(!allowed){await reply(lang==='en'?'Daily download quota exceeded.':'Limit download harian habis.');return true;}
     }
-    const media=await download({command:cmd.name,url});
+    const media=await (process.env.SAVEAPI_KEY ? downloadViaSaveAPI({command:cmd.name,url}) : download({command:cmd.name,url}));
     if(media.audio){
       await sock.sendMessage(chat,{audio:media.buffer,mimetype:media.mimetype,
         fileName:media.name,ptt:false},{quoted:message});
@@ -174,4 +211,4 @@ async function handleDownload(ctx,download=downloadPublicMedia){
   return true;
 }
 module.exports={DOWNLOAD_COMMANDS,normalizeLink,downloadArgs,runDownloader,
-  downloadPublicMedia,handleDownload};
+  downloadPublicMedia,downloadViaSaveAPI,handleDownload};
