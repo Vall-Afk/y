@@ -53,40 +53,43 @@ test('language preference survives restart and remains per account', async t => 
   await assert.rejects(restored.setLanguage(member,'fr'), /Invalid language/);
   await assert.rejects(restored.setLanguage('__proto__','en'), /Invalid language/);
 });
-test('premium and free panels are distinct, and category commands remain visible', () => {
+test('complete menu displays free Jadibot and all categories without truncation', () => {
   const full = menu(config,'menu',{lang:'en', premium:false, balance:120});
-  assert.match(full,/FREE FEATURES/);
-  assert.match(full,/PREMIUM EXCLUSIVE/);
-  assert.match(full,/OWNER/);
-  assert.match(full,/jadibot qr/);
-  assert.match(full,/promote/);
-  assert.match(full,/tictactoe/);
-  assert.match(full,/gitclone/);
-  assert.match(full,/calc/);
-  assert.match(full,/sticker/);
-  assert.ok(full.indexOf('FREE FEATURES') < full.indexOf('PREMIUM EXCLUSIVE'));
-  assert.ok(full.length <= 3700,'menu too long for WhatsApp');
+  assert.match(full,/FREE JADIBOT/);
+  assert.match(full,/OWNER COMMANDS/);
+  for (const name of ['jadibot qr','promote','tictactoe','gitclone','calc','sticker']) {
+    assert.ok(full.includes(name), name);
+  }
+  assert.ok(full.length > 3700);
+  assert.match(full,/Beauté/);
+  assert.doesNotMatch(full,/BeautÃ/);
   const id = menu(config,'menu',{lang:'id',premium:true});
-  assert.match(id,/FITUR GRATIS/);
-  assert.match(id,/PREMIUM EXCLUSIVE/);
+  assert.match(id,/JADIBOT GRATIS/);
   assert.match(menu(config,'menustore'),/addlist/);
   assert.match(menu(config,'menupremium',{lang:'en'}),/jadibot qr/);
 });
-test('English commands save language and translate menu, status and basic economy', async t => {
+test('English language persists and menu is delivered in multiple complete messages', async t => {
   const h=await fixture(t);
   await h.router.handle(h.socket,message(member,'language en'));
   assert.equal(h.store.language(member),'en');
   assert.match(h.calls.at(-1).payload.text,/Language saved/);
+  const start = h.calls.length;
   await h.router.handle(h.socket,message(member,'menu'));
-  assert.match(h.calls.at(-1).payload.text,/FREE FEATURES/);
+  const parts = h.calls.slice(start).map(c => c.payload.text);
+  assert.ok(parts.length > 1);
+  assert.match(parts.join('\n'),/FREE JADIBOT/);
+  assert.match(parts.join('\n'),/REGISTERED/);
+  assert.doesNotMatch(parts.join('\n'),/autoblok212/);
+  assert.ok(parts.every(part => part.length <= 3500));
   await h.router.handle(h.socket,message(member,'status'));
   assert.match(h.calls.at(-1).payload.text,/seconds/);
   await h.router.handle(h.socket,message(member,'listbahasa'));
   assert.match(h.calls.at(-1).payload.text,/Available languages/);
   await h.router.handle(h.socket,message(member,'language id'));
   assert.equal(h.store.language(member),'id');
+  const startId = h.calls.length;
   await h.router.handle(h.socket,message(member,'menu'));
-  assert.match(h.calls.at(-1).payload.text,/FITUR GRATIS/);
+  assert.match(h.calls.slice(startId).map(c => c.payload.text).join('\n'),/JADIBOT GRATIS/);
 });
 test('group store is persistent and ordinary members cannot change it', async t => {
   const h=await fixture(t);
