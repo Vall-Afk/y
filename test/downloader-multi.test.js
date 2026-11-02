@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs/promises'),path=require('node:path');
 const {Readable}=require('node:stream');
-const {normalizeLink,downloadArgs,downloadPublicMedia,downloadViaSaveAPI,handleDownload}=require('../src/features/downloaders');
+const {normalizeLink,downloadArgs,downloadPublicMedia,downloadViaGalleryDL,downloadViaSaveAPI,handleDownload}=require('../src/features/downloaders');
 const IG='https://www.instagram.com/p/AbCdEf123/';
 const TT='https://www.tiktok.com/@creator/photo/1234567890123456789';
 const X='https://x.com/example/status/1234567890123456789';
@@ -79,4 +79,17 @@ test('SaveAPI returns all slides but rejects non-allowlisted CDN hosts',async()=
     if(oldKey===undefined)delete process.env.SAVEAPI_KEY;else process.env.SAVEAPI_KEY=oldKey;
     if(oldHosts===undefined)delete process.env.SAVEAPI_CDN_HOSTS;else process.env.SAVEAPI_CDN_HOSTS=oldHosts;
   }
+});
+
+test('gallery-dl optional backend collects photo items and cleans temporary directory',async()=>{
+  let cwd,argv;
+  const out=await downloadViaGalleryDL({command:'tiktok',url:TT,run:async(_binary,args,opts)=>{
+    argv=args;cwd=opts.cwd;
+    await fs.writeFile(path.join(cwd,'02.jpg'),Buffer.from('slide2'));
+    await fs.writeFile(path.join(cwd,'01.webp'),Buffer.from('slide1'));
+  }});
+  assert.ok(argv.includes('--config-ignore'));
+  assert.ok(argv.includes('--range'));
+  assert.deepEqual(out.items.map(x=>x.buffer.toString()),['slide1','slide2']);
+  assert.equal(await fs.stat(cwd).catch(()=>null),null);
 });
