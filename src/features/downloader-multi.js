@@ -102,6 +102,35 @@ async function downloadPublicMedia({command,url,binary=process.env.YTDLP_PATH||(
     return {items,source};
   }finally{if(dir)await fs.rm(dir,{recursive:true,force:true}).catch(()=>{});running--;}
 }
+
+async function downloadViaGalleryDL({command,url,binary=process.env.GALLERYDL_PATH||(process.platform==='win32'?'gallery-dl.exe':'gallery-dl'),run=runDownloader}){
+  const source=normalizeLink(url,command);
+  if(AUDIO.has(command)||command.startsWith('yt'))throw Error('gallery-dl is for public post media, not audio/YouTube.');
+  if(running>=1)throw Error('Downloader busy; try again later.');
+  running++;let dir;
+  try{
+    dir=await fs.mkdtemp(path.join(os.tmpdir(),'beaute-gallery-'));
+    const args=['--config-ignore','--no-input','--no-postprocessors','--no-colors',
+      '--directory',dir,'--range','1-'+MAX_ITEMS,'--filesize-max','64M','--',source];
+    await run(binary,args,{cwd:dir});
+    const names=(await fs.readdir(dir)).sort(natural);
+    const chosen=names.filter(n=>/^[^\/\\]+$/u.test(n)&&MIME[path.extname(n).toLowerCase()]);
+    if(!chosen.length||chosen.length>MAX_ITEMS)throw Error('No supported gallery media or more than 20 items.');
+    const items=[];let total=0;
+    for(const name of chosen){
+      const ext=path.extname(name).toLowerCase(), stat=await fs.lstat(path.join(dir,name));
+      if(!stat.isFile()||!stat.size||stat.size>MAX_BYTES)throw Error('Invalid or oversized gallery media.');
+      total+=stat.size;if(total>MAX_TOTAL_BYTES)throw Error('Gallery media exceeds 160 MB.');
+      items.push({buffer:await fs.readFile(path.join(dir,name)),mimetype:MIME[ext],name,
+        audio:AUDIO_EXT.has(ext),image:IMAGE_EXT.has(ext),source});
+    }
+    return {items,source};
+  }finally{if(dir)await fs.rm(dir,{recursive:true,force:true}).catch(()=>{});running--;}
+}
+function preferGallery(command,source){
+  return /\/photo\//.test(source)||/instagram\.com\/p\//.test(source)||command==='twitter'||command==='xdl';
+}
+
 function cdnAllowed(u){
   if(u.protocol!=='https:'||u.username||u.password||u.port)return false;
   const allow=(process.env.SAVEAPI_CDN_HOSTS||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
@@ -149,13 +178,20 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       const ok=await economy.consume(accountSender,chat);
       if(!ok){await reply(lang==='en'?'Daily download quota exceeded.':'Limit download harian habis.');return true;}
     }
-    let result;
-    try{result=await download({command:cmd.name,url});}
-    catch(primary){
-      if(download!==downloadPublicMedia||!process.env.SAVEAPI_KEY||!process.env.SAVEAPI_CDN_HOSTS)throw primary;
-      try{result=await downloadViaSaveAPI({command:cmd.name,url});}
-      catch(fallback){throw Error('yt-dlp: '+primary.message+'; SaveAPI: '+fallback.message);}
+    let result, primary;
+    const source=normalizeLink(url,cmd.name);
+    if(download===downloadPublicMedia&&preferGallery(cmd.name,source)){
+      try{result=await downloadViaGalleryDL({command:cmd.name,url});}catch(err){primary=err;}
     }
+    if(!result){
+      try{result=await download({command:cmd.name,url});}
+      catch(err){primary=err;}
+    }
+    if(!result&&download===downloadPublicMedia&&process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS){
+      try{result=await downloadViaSaveAPI({command:cmd.name,url});}
+      catch(err){primary=Error((primary?.message||'Downloader failed')+'; SaveAPI: '+err.message);}
+    }
+    if(!result)throw primary||Error('Download unavailable.');
     const items=Array.isArray(result?.items)?result.items:[result];
     if(!items.length||items.length>MAX_ITEMS)throw Error('Invalid media item count.');
     for(let i=0;i<items.length;i++){
@@ -169,4 +205,4 @@ async function handleDownload(ctx,download=downloadPublicMedia){
   }catch(err){await reply((lang==='en'?'Download unavailable: ':'Download gagal: ')+String(err.message).slice(0,170));}
   return true;
 }
-module.exports={DOWNLOAD_COMMANDS,normalizeLink,downloadArgs,runDownloader,downloadPublicMedia,downloadViaSaveAPI,handleDownload};
+module.exports={DOWNLOAD_COMMANDS,normalizeLink,downloadArgs,runDownloader,downloadPublicMedia,downloadViaGalleryDL,downloadViaSaveAPI,handleDownload};
