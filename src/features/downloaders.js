@@ -8,15 +8,16 @@ const path = require('node:path');
 const {spawn} = require('node:child_process');
 const DOWNLOAD_COMMANDS = new Set([
   'tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo',
-  'igreels','ytmp3','ytmp4'
+  'igreels','ytmp3','ytmp4','twitter','xdl'
 ]);
 const MAX_BYTES = 12 * 1024 * 1024, MAX_RUNTIME = 90000;
-const VIDEO = new Set(['tiktok','tiktoknowm','instagram','igphoto','igvideo','igreels','ytmp4']);
+const VIDEO = new Set(['tiktok','tiktoknowm','instagram','igphoto','igvideo','igreels','ytmp4','twitter','xdl']);
 const AUDIO = new Set(['tiktokaudio','ytmp3']);
 const ALLOWED_HOSTS = new Set([
   'youtube.com','www.youtube.com','m.youtube.com','youtu.be',
   'www.tiktok.com','tiktok.com','vm.tiktok.com','vt.tiktok.com',
-  'instagram.com','www.instagram.com'
+  'instagram.com','www.instagram.com',
+  'x.com','www.x.com','twitter.com','www.twitter.com'
 ]);
 const ID = /^[A-Za-z0-9_-]{11}$/;
 function normalizeLink(input, command) {
@@ -44,6 +45,13 @@ function normalizeLink(input, command) {
     const match = /^\/(p|reel|tv)\/([A-Za-z0-9_-]{5,40})\/?$/.exec(pathname);
     if (!match) throw new Error('Only public Instagram posts or reels are supported.');
     return 'https://www.instagram.com/' + match[1] + '/' + match[2] + '/';
+  }
+  if (command === 'twitter' || command === 'xdl') {
+    if (!['x.com','www.x.com','twitter.com','www.twitter.com'].includes(host))
+      throw new Error('X command needs an X/Twitter URL.');
+    const match = /^\/(?:[A-Za-z0-9_]{1,15})\/status\/(\d{10,25})\/?$/.exec(pathname);
+    if (!match) throw new Error('Only public X/Twitter posts are supported.');
+    return 'https://x.com/i/status/' + match[1];
   }
   if (!['tiktok.com','www.tiktok.com','vm.tiktok.com','vt.tiktok.com'].includes(host))
     throw new Error('TikTok command needs a TikTok URL.');
