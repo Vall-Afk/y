@@ -121,19 +121,19 @@ async function main() {
       });
       socket = sock;
       sock.ev.on('creds.update', saveCreds);
-      if (!state.creds.registered && process.env.PAIRING_NUMBER) {
-        const phone = process.env.PAIRING_NUMBER.replace(/[^0-9]/g, '');
-        if (!/^[0-9]{8,15}$/.test(phone)) throw new Error('PAIRING_NUMBER must be 8-15 digits including country code.');
-        const requestPairing = async () => {
-          try {
-            const code = await sock.requestPairingCode(phone);
-            console.log('\\nBEAUTÉ PAIRING CODE: ' + code + '\\nWhatsApp > Perangkat tertaut > Tautkan perangkat > Tautkan dengan nomor telepon.\\n');
-          } catch (err) { logger.error({error:err.message},'Pairing code request failed'); }
-        };
-        setTimeout(() => { if (socket === sock && !stopping) void requestPairing(); }, 3000);
+      const pairingNumber = process.env.PAIRING_NUMBER?.replace(/[^0-9]/g, '') || '';
+      if (pairingNumber && !/^[0-9]{8,15}$/.test(pairingNumber)) {
+        throw new Error('PAIRING_NUMBER must be 8-15 digits including country code.');
       }
+      let pairingRequested = false;
       sock.ev.on('connection.update', ({ qr, connection, lastDisconnect }) => {
         if (socket !== sock || stopping) return;
+        if (qr && pairingNumber && !state.creds.registered && !pairingRequested) {
+          pairingRequested = true;
+          void sock.requestPairingCode(pairingNumber).then(code => {
+            if (socket === sock && !stopping) console.log('\\nBEAUTÉ PAIRING CODE: ' + code + '\\n');
+          }).catch(err => logger.error({ error: err.message }, 'Pairing code request failed'));
+        }
         if (qr) {
           console.log('\n' + config.name + ' | WhatsApp > Perangkat tertaut > Tautkan perangkat > Scan QR:\n');
           qrcode.generate(qr, { small: true });
