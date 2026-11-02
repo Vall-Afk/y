@@ -100,3 +100,13 @@ test('handler rejects unsafe links before calling downloader or charging API quo
   assert.equal(consumed,0);assert.equal(called,0);
   assert.match(sent.at(-1).text,/Download unavailable/);
 });
+
+test('X downloader accepts public post URLs and rejects unrelated hosts',()=>{
+  assert.equal(normalizeLink('https://x.com/example/status/1234567890123456789?s=20','xdl'),
+    'https://x.com/i/status/1234567890123456789');
+  assert.equal(normalizeLink('https://twitter.com/example/status/1234567890123456789','twitter'),
+    'https://x.com/i/status/1234567890123456789');
+  assert.throws(()=>normalizeLink('https://example.com/example/status/1234567890123456789','xdl'));
+  assert.throws(()=>normalizeLink('https://x.com/example/likes','xdl'));
+  assert.ok(downloadArgs('xdl','https://x.com/i/status/1234567890123456789').includes('--no-playlist'));
+});
