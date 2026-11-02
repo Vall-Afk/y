@@ -9,7 +9,7 @@ const SECTIONS = Object.freeze([
     id: 'tools', icon: '⚙', idTitle: 'TOOLS', enTitle: 'TOOLS',
     commands: ['calc 10+5*2', 'tambah 10 5', 'kurang 10 5', 'kali 10 5', 'bagi 10 5',
       'jeda 2', 'nowa 628xxx', 'getquoted', 'say <teks>', 'reverse <teks>', 'count <teks>', 'pilih a | b', 'roll [max]',
-      'coin', 'password [8-64]', 'waktu', 'runtime']
+      'coin', 'password [8-64]', 'waktu', 'runtime', 'cekdrive', 'cekbandwidth']
   },
   {
     id: 'group', icon: '♧', idTitle: 'MANAJEMEN GRUP', enTitle: 'GROUP MANAGEMENT',
@@ -80,6 +80,12 @@ const SECTIONS = Object.freeze([
       'instagram <Instagram URL>']
   }
 ]);
+const DOWNLOAD_GUIDE = Object.freeze([
+  'ytmp3 <YouTube URL>', 'ytmp4 <YouTube URL>',
+  'tiktok <TikTok URL>', 'tiktoknowm <TikTok URL>', 'tiktokaudio <TikTok URL>',
+  'instagram <Instagram URL>', 'igphoto <Instagram URL>',
+  'igvideo <Instagram URL>', 'igreels <Instagram URL>'
+]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
 const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard',
   'autoread on|off', 'autobio on|off', 'autorespond on|off', 'anticall on|off',
@@ -95,7 +101,7 @@ const ALIASES = Object.freeze({
   menutextpro: 'textfx', menutextfx: 'textfx',
   menustorage: 'storage', menulibrary: 'storage',
   menutools: 'tools', menugame: 'game', menurpg: 'rpg',
-  menuekonomi: 'economy', menudownload: 'search',
+  menuekonomi: 'economy', menudownload: 'downloads',
   menupremium: 'premium', menuowner: 'owner',
   menubahasa: 'language'
 });
@@ -131,6 +137,13 @@ function menu(config, section = 'menu', profile = {}) {
   if (free.length) {
     pieces.push('\n╔═══ ' + (english ? 'FREE FEATURES' : 'FITUR GRATIS') + ' ═══╗');
     pieces.push(...free.map(groupText));
+  }
+  if (target === 'downloads') {
+    pieces.push('\\n╭─── ⬇ ' + (english ? 'MEDIA DOWNLOADS' : 'UNDUH MEDIA') + ' ───╮');
+    pieces.push(DOWNLOAD_GUIDE.map(x => '│ • ' + x).join('\\n'));
+    pieces.push('╰────────────────────╯');
+    pieces.push(english ? 'Public links only • yt-dlp required • max 12 MB.' :
+      'Hanya tautan publik • perlu yt-dlp • maksimal 12 MB.');
   }
   if (all || target === 'premium') {
     pieces.push('\n╔═══ ★ PREMIUM EXCLUSIVE ★ ═══╗');
