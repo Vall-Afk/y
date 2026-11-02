@@ -113,7 +113,7 @@ const ALIASES = Object.freeze({
   menustorage: 'storage', menulibrary: 'storage',
   menutools: 'tools', menugame: 'game', menurpg: 'rpg',
   menuekonomi: 'economy', menudownload: 'downloads',
-  menupremium: 'premium', menuowner: 'owner',
+  menupremium: 'premium', menujadibot: 'premium', menuowner: 'owner',
   menubahasa: 'language'
 });
 function menu(config, section = 'menu', profile = {}) {
@@ -180,12 +180,12 @@ function menu(config, section = 'menu', profile = {}) {
   }
   if (all) {
     pieces.push('\n' + (english
-      ? 'Tip: send "menugroup", "menustore", or "menupremium" for category details.'
-      : 'Tip: ketik menugroup, menustore, atau menupremium untuk detail kategori.'));
+      ? 'Tip: send "menugroup", "menustore", or "menujadibot" for category details.'
+      : 'Tip: ketik menugroup, menustore, atau menujadibot untuk detail kategori.'));
   }
   pieces.push('\n' + (english
-    ? '✧ No prefix required • Old ! commands still work.'
-    : '✧ Tanpa prefix • Perintah ! tetap bisa.'));
+    ? '✧ Prefix: ' + config.prefix + ' • No-prefix commands may be enabled.'
+    : '✧ Prefix: ' + config.prefix + ' • Tanpa prefix jika diaktifkan.'));
   const result = pieces.join('\n');
   if (result.length > 3700) {
     // Avoid truncated category menus: a compact main menu lists categories with
@@ -198,11 +198,11 @@ function menu(config, section = 'menu', profile = {}) {
             : g.commands.slice(0, 4)).join(' · ') +
           '\n ' + (english ? 'See:' : 'Lihat:') + ' ' +
           (Object.keys(ALIASES).find(k => ALIASES[k] === g.id) || 'menu')),
-        '\n╔═══ ★ PREMIUM EXCLUSIVE ★ ═══╗',
+        '\n╔═══ ✧ JADIBOT GRATIS ✧ ═══╗',
         ...PREMIUM.map(x => '✧ ' + x),
         '\n♛ ' + (english ? 'OWNER COMMANDS: menuowner' : 'PERINTAH OWNER: menuowner'),
-        '\n' + (english ? 'More categories: menugroup · menustore · menupremium'
-          : 'Menu lengkap: menugroup · menustore · menupremium')
+        '\n' + (english ? 'More categories: menugroup · menustore · menujadibot'
+          : 'Menu lengkap: menugroup · menustore · menujadibot')
       ].join('\n').slice(0, 3700);
     }
   }
