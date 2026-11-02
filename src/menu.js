@@ -84,7 +84,7 @@ const DOWNLOAD_GUIDE = Object.freeze([
   'ytmp3 <YouTube URL>', 'ytmp4 <YouTube URL>',
   'tiktok <TikTok URL>', 'tiktoknowm <TikTok URL>', 'tiktokaudio <TikTok URL>',
   'instagram <Instagram URL>', 'igphoto <Instagram URL>',
-  'igvideo <Instagram URL>', 'igreels <Instagram URL>'
+  'igvideo <Instagram URL>', 'igreels <Instagram URL>', 'twitter <X post URL>', 'xdl <X post URL>'
 ]);
 const ACADEMIC = Object.freeze([
   'statadv 10 20 30 40', 'ujit 2,3,4,5 | 3', 'chisquare 10,20,30 | 15,20,25',
