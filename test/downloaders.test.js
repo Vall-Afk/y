@@ -31,11 +31,11 @@ test('command args constrain size duration, avoid playlist/auth/config, and do n
   assert.ok(args.includes('--ignore-config'));
   assert.ok(args.includes('--no-plugin-dirs'));
   assert.ok(args.includes('--no-remote-components'));
-  assert.ok(args.includes('--max-downloads'));
+  assert.ok(args.includes('--playlist-end'));
   assert.ok(args.includes('default,-generic'));
   assert.ok(args.includes('--no-playlist'));
   assert.ok(args.includes('--max-filesize'));
-  assert.ok(args.includes('12M'));
+  assert.ok(args.includes('64M'));
   assert.ok(args.includes('--match-filters'));
   assert.ok(args.includes('--no-exec'));
   assert.ok(args.includes('--audio-format'));
@@ -50,7 +50,7 @@ test('command args constrain size duration, avoid playlist/auth/config, and do n
   assert.equal(calls[0].options.shell,false);
   assert.equal(calls[0].options.cwd,'/tmp/workspace');
 });
-test('download outputs only one bounded file from sandboxed temporary directory',async()=>{
+test('download outputs a bounded file from sandboxed temporary directory',async()=>{
   let dir,argv;
   const result=await downloadPublicMedia({
     command:'ytmp4',url:'https://youtu.be/abcdefghijk',
@@ -58,12 +58,12 @@ test('download outputs only one bounded file from sandboxed temporary directory'
     run:async(_bin,args,options)=>{
       dir=options.cwd;argv=args;
       assert.ok(dir.includes('beaute-download-'));
-      assert.ok(args.includes('result.%(ext)s'));
-      await fs.writeFile(path.join(dir,'result.mp4'),Buffer.from('fake-mp4-data'));
+      assert.ok(args.includes('result.%(autonumber)03d.%(ext)s'));
+      await fs.writeFile(path.join(dir,'result.001.mp4'),Buffer.from('fake-mp4-data'));
     }
   });
-  assert.equal(result.buffer.toString(),'fake-mp4-data');
-  assert.equal(result.mimetype,'video/mp4');
+  assert.equal(result.items[0].buffer.toString(),'fake-mp4-data');
+  assert.equal(result.items[0].mimetype,'video/mp4');
   assert.equal(await fs.stat(dir).catch(()=>null),null,'temporary directory removed');
   assert.equal(argv.at(-1),'https://www.youtube.com/watch?v=abcdefghijk');
 });
@@ -73,17 +73,17 @@ test('download errors clean temp files and reject suspicious output symlinks',as
     command:'tiktok',url:'https://www.tiktok.com/@creator/video/1234567890123456789',
     run:async(_binary,_args,opts)=>{
       dir=opts.cwd;
-      await fs.writeFile(path.join(dir,'result.mp4'),Buffer.alloc(12*1024*1024+1));
+      await fs.writeFile(path.join(dir,'result.001.mp4'),Buffer.alloc(64*1024*1024+1));
     }
-  }),/12 MB/);
+  }),/64 MB/);
   assert.equal(await fs.stat(dir).catch(()=>null),null);
   await assert.rejects(downloadPublicMedia({
     command:'ytmp3',url:'https://youtu.be/abcdefghijk',
     run:async(_binary,_args,opts)=>{
       dir=opts.cwd;
-      await fs.writeFile(path.join(dir,'result.exe'),Buffer.from('bad'));
+      await fs.writeFile(path.join(dir,'result.001.exe'),Buffer.from('bad'));
     }
-  }),/single downloadable/);
+  }),/No media/);
   assert.equal(await fs.stat(dir).catch(()=>null),null);
 });
 test('handler rejects unsafe links before calling downloader or charging API quota',async()=>{
@@ -108,5 +108,5 @@ test('X downloader accepts public post URLs and rejects unrelated hosts',()=>{
     'https://x.com/i/status/1234567890123456789');
   assert.throws(()=>normalizeLink('https://example.com/example/status/1234567890123456789','xdl'));
   assert.throws(()=>normalizeLink('https://x.com/example/likes','xdl'));
-  assert.ok(downloadArgs('xdl','https://x.com/i/status/1234567890123456789').includes('--no-playlist'));
+  assert.ok(downloadArgs('xdl','https://x.com/i/status/1234567890123456789').includes('--playlist-end'));
 });

@@ -229,11 +229,17 @@ Send `anonymous` to read privacy rules, then `start` in the **private chat** to 
 
 Group administrators can **explicitly** save selected quoted media using `addstik name`, `addimg name`, `addvn name`, and `addvid name`. Everyone in the same group can use `liststik`, `listimg`, `listvn`, `listvid` and fetch via `getstik name`, `getimg name`, `getvn name`, or `getvid name`. Only group admins can delete using `delstik`, `delimg`, `delvn`, `delvid`. **Do not store media without the creator's consent.** Limits: max 15 items of each type/group, max 30MB/group, per file up to 1MB stickers, 3MB audio/images, 8MB videos. Saved files remain on your computer under data/saved-media or data/jadibot/saved-media, excluded from chat backups and from Git. Backup or delete these files separately as needed.
 
-### Optional public-media downloaders (yt-dlp)
+### Beauté multi-media downloaders (Instagram / TikTok / X)
 
-Legacy keywords `ytmp3`, `ytmp4`, `tiktok`, `tiktoknowm`, `tiktokaudio`, `instagram`, `igphoto`, `igvideo`, `igreels` now have an **optional executable-based implementation** for **single public media**. This uses the external, independently maintained `yt-dlp` utility (https://github.com/yt-dlp/yt-dlp), which is **not bundled with Beauté.** Install the official standalone executable yourself and put it on `PATH`, or set `YTDLP_PATH=C:\\path\\to\\yt-dlp.exe` in `.env`. For `ytmp3` and `tiktokaudio`, FFmpeg must also be available. `npm.cmd install` does not install yt-dlp automatically. Only HTTPS YouTube, TikTok and Instagram **individual public post/video** URLs are accepted; no playlists, private content, cookies, credentials, paywalls, DRM, or generic URL downloads. 12 MB output ceiling, 3-minute max source duration when metadata exists, 90-second process timeout, 1 simultaneous download. Inability to download due to changing platform extractor behavior will be reported as an error.
+The downloader commands `instagram`, `igphoto`, `igvideo`, `igreels`, `tiktok`, `tiktoknowm`, `tiktokaudio`, `twitter`, `xdl`, `ytmp3`, and `ytmp4` preserve the original command names. A single **public post URL** can send multiple photos/videos in slide order where the platform extractor makes them available. Up to **20 files**, **64 MiB per file** and **160 MiB per post** are allowed; one job runs at a time and temporary files are deleted.
 
-Use these commands **only for media you created, own, or are permitted to download/re-share**, and comply with the source platform's terms. A public page is not automatic redistribution permission. The alias `tiktoknowm` does **not** guarantee watermark removal; it currently uses the same source-preserving pipeline as `tiktok`.
+- Required for yt-dlp fallback: the independent `yt-dlp` executable on `PATH`, or `YTDLP_PATH` in `.env`.
+- Recommended for Instagram photo carousels, TikTok photo mode and X image attachments: install the independent Python utility `gallery-dl` on `PATH`, or configure `GALLERYDL_PATH`. It is optional; if unavailable, the bot tries yt-dlp instead.
+- Optional SaveAPI fallback: set `SAVEAPI_KEY` and `SAVEAPI_CDN_HOSTS` to a **comma-separated, exact host allowlist** of CDN hosts you have verified belong to the provider. Without the allowlist, SaveAPI media URL fetching is disabled to prevent untrusted URL access. Do not add private network hosts or broad wildcards.
+- `ffmpeg` is needed for merging some video streams and audio conversion. Install it separately if unavailable.
+
+Public source access is not guaranteed: platform changes, unsupported carousels, rate limits, login requirements and unavailable formats may cause downloads to fail. No credentials, cookies, private posts, profile feeds, arbitrary URLs or DRM circumvention are supported. `tiktoknowm` prefers clean available sources but **does not erase embedded watermarks**. Save or share only content you have rights to use.
+
 
 ### Profile and group join/leave (authorization required)
 
