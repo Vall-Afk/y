@@ -36,7 +36,7 @@ test('rental registry rejects invalid JIDs, days and corrupt JSON',async t=>{
   await fs.writeFile(path.join(h.dir,'rentals.json'),'{oops');
   await assert.rejects(new RentalRegistry(path.join(h.dir,'rentals.json')).init(),/not overwritten/);
 });
-test('optional rent enforcement does not affect private chat, owner or status lookup',async t=>{
+test('free group commands work regardless of rental status',async t=>{
   const h=await fixture(t);
   const config=loadConfig({OWNER_NUMBER:'6287721373781',REQUIRE_SEWA:'true'});
   const calls=[],sock={user:{id:'6289999999999@s.whatsapp.net'},
@@ -48,7 +48,7 @@ test('optional rent enforcement does not affect private chat, owner or status lo
     message:{conversation:command}
   });
   await router.handle(sock,message(member,'ping',true));
-  assert.match(calls.at(-1).text,/Sewa grup belum aktif/);
+  assert.match(calls.at(-1).text,/Pong!/);
   await router.handle(sock,message(member,'checksewa',true));
   assert.match(calls.at(-1).text,/tidak terdaftar/);
   await router.handle(sock,message(owner,'ping',true));
