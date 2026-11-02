@@ -86,6 +86,13 @@ const DOWNLOAD_GUIDE = Object.freeze([
   'instagram <Instagram URL>', 'igphoto <Instagram URL>',
   'igvideo <Instagram URL>', 'igreels <Instagram URL>'
 ]);
+const ACADEMIC = Object.freeze([
+  'statadv 10 20 30 40', 'regresi 1,2;2,4;3,6', 'mathadv sqrt 81',
+  'keuangan 1000000 0.05 12', 'investasi 0.04 1.2 0.10',
+  'peluang binomial 10 3 0.5', 'anova 1,2,3;4,5,6',
+  'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027',
+  'alkitab Matius 1:1', 'vulgata Ioannes III:XVI'
+]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
 const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard',
   'autoread on|off', 'autobio on|off', 'autorespond on|off', 'anticall on|off',
@@ -137,6 +144,12 @@ function menu(config, section = 'menu', profile = {}) {
   if (free.length) {
     pieces.push('\n╔═══ ' + (english ? 'FREE FEATURES' : 'FITUR GRATIS') + ' ═══╗');
     pieces.push(...free.map(groupText));
+  }
+  if (target === 'academic') {
+    pieces.push('\\n╭─── 📚 AKADEMIK & KALENDER ───╮');
+    pieces.push(ACADEMIC.map(x => '│ • ' + x).join('\\n'));
+    pieces.push('╰────────────────────────╯');
+    pieces.push('Kitab Suci: referensi tersedia; teks ayat belum terintegrasi.');
   }
   if (target === 'downloads') {
     pieces.push('\\n╭─── ⬇ ' + (english ? 'MEDIA DOWNLOADS' : 'UNDUH MEDIA') + ' ───╮');
