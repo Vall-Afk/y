@@ -117,95 +117,45 @@ const ALIASES = Object.freeze({
   menubahasa: 'language'
 });
 function menu(config, section = 'menu', profile = {}) {
-  const lang = profile.lang === 'en' ? 'en' : 'id';
-  const english = lang === 'en';
-  const all = (ALIASES[section] || section) === 'all';
+  const english = profile.lang === 'en';
   const target = ALIASES[section] || section;
-  const member = profile.owner ? (english ? 'OWNER' : 'OWNER')
-    : profile.premium ? 'PREMIUM' : 'FREE';
+  const all = target === 'all';
   const title = String(config.name || 'Beauté.').slice(0, 50);
-  const header = [
-    '╭━━━━━━━━━━━━━━━━━━╮',
-    '    ✧ *' + title + '* ✧',
-    '    WhatsApp • Legacy × Modern',
-    '╰━━━━━━━━━━━━━━━━━━╯',
-    '  ♡ ' + (english ? 'Creator' : 'Kreator') + ': *' + config.ownerName + '*',
-    '  ◇ GitHub: *Vall-Afk*',
-    '  ✦ IG: *@' + config.ownerInstagram + '*',
-    '  🌐 ' + (english ? 'Language' : 'Bahasa') + ': *' + lang.toUpperCase() + '*',
-    '  ✧ ' + (english ? 'Your tier' : 'Statusmu') + ': *' + member + '*'
+  const entries = [
+    ...SECTIONS,
+    { id: 'downloads', icon: '⬇', idTitle: 'DOWNLOADER', enTitle: 'DOWNLOADS', commands: DOWNLOAD_GUIDE },
+    { id: 'academic', icon: '📚', idTitle: 'MATEMATIKA • STATISTIKA • KATOLIK • ALKITAB', enTitle: 'ACADEMIC • CATHOLIC • BIBLE', commands: ACADEMIC },
+    { id: 'premium', icon: '✧', idTitle: 'JADIBOT GRATIS', enTitle: 'FREE JADIBOT', commands: PREMIUM },
+    { id: 'owner', icon: '♛', idTitle: 'PERINTAH OWNER', enTitle: 'OWNER COMMANDS', commands: OWNER }
+  ];
+  const selected = all ? entries : entries.filter(g => g.id === target);
+  const count = selected.reduce((sum, g) => sum + g.commands.length, 0);
+  const lines = [
+    '╭── ✧ *' + title + '* ──╮',
+    '│ WhatsApp Command Catalog',
+    '╰────────────────────╯',
+    '♡ Creator: *' + config.ownerName + '*',
+    '◇ GitHub: *Vall-Afk*',
+    '✦ IG: *@' + config.ownerInstagram + '*',
+    '✧ Status: *' + (profile.owner ? 'OWNER' : profile.premium ? 'PREMIUM' : 'FREE') + '*',
+    '◈ Katalog: *' + count + ' entri*'
   ];
   if (typeof profile.balance === 'number' && Number.isFinite(profile.balance)) {
-    header.push('  ◈ ' + (english ? 'Coins' : 'Koin') + ': ' + profile.balance.toLocaleString(english ? 'en-US' : 'id-ID'));
+    lines.push('◈ Koin: ' + profile.balance.toLocaleString(english ? 'en-US' : 'id-ID'));
   }
-  const sep = '\n┏━━━ ✦ ';
-  function groupText(group) {
-    return sep + group.icon + ' ' + (english ? group.enTitle : group.idTitle) +
-      ' ━━━┓\n' + group.commands.map(x => '┃ ◦ ' + x).join('\n') + '\n┗━━━━━━━━━━━━┛';
-  }
-  const free = SECTIONS.filter(g => all || g.id === target);
-  const pieces = [...header];
-  if (free.length) {
-    pieces.push('\n╔═══ ' + (english ? 'FREE FEATURES' : 'FITUR GRATIS') + ' ═══╗');
-    pieces.push(...free.map(groupText));
-  }
-  if (target === 'academic') {
-    pieces.push('\\n╭─── 📚 AKADEMIK & KALENDER ───╮');
-    pieces.push(ACADEMIC.map(x => '│ • ' + x).join('\\n'));
-    pieces.push('╰────────────────────────╯');
-    pieces.push('Kitab Suci: referensi tersedia; teks ayat belum terintegrasi.');
-  }
-  if (target === 'downloads') {
-    pieces.push('\\n╭─── ⬇ ' + (english ? 'MEDIA DOWNLOADS' : 'UNDUH MEDIA') + ' ───╮');
-    pieces.push(DOWNLOAD_GUIDE.map(x => '│ • ' + x).join('\\n'));
-    pieces.push('╰────────────────────╯');
-    pieces.push(english ? 'Public links only • yt-dlp required • max 12 MB.' :
-      'Hanya tautan publik • perlu yt-dlp • maksimal 12 MB.');
-  }
-  if (all || target === 'premium') {
-    pieces.push('\n╔═══ ✧ JADIBOT GRATIS ✧ ═══╗');
-    pieces.push((english ? '✧ Free Jadibot; one shared child bot slot'
-      : '✧ Jadibot gratis; satu slot bersama'));
-    pieces.push(PREMIUM.map(x => '┃ ✧ ' + x).join('\n'));
-    pieces.push('╚══════════════════════╝');
-  }
-  if (all || target === 'owner') {
-    pieces.push('\n╔═══ ♛ ' + (english ? 'OWNER ONLY' : 'KHUSUS OWNER') + ' ═══╗');
-    pieces.push(OWNER.map(x => '┃ ♛ ' + x).join('\n'));
-    pieces.push('╚═══════════════════╝');
-  }
-  if (target === 'language') {
-    pieces.push('\n🌐 ' + (english ? 'Choose:' : 'Pilih:') +
-      '\n ◦ bahasa id\n ◦ language en\n ◦ listbahasa');
-  }
-  if (all) {
-    pieces.push('\n' + (english
-      ? 'Tip: send "menugroup", "menustore", or "menujadibot" for category details.'
-      : 'Tip: ketik menugroup, menustore, atau menujadibot untuk detail kategori.'));
-  }
-  pieces.push('\n' + (english
-    ? '✧ Prefix: ' + config.prefix + ' • No-prefix commands may be enabled.'
-    : '✧ Prefix: ' + config.prefix + ' • Tanpa prefix jika diaktifkan.'));
-  const result = pieces.join('\n');
-  if (result.length > 3700) {
-    // Avoid truncated category menus: a compact main menu lists categories with
-    // a preview, while the category commands remain available individually.
-    if (all) {
-      return [...header, '\n╔═══ ' + (english ? 'FREE FEATURES' : 'FITUR GRATIS') + ' ═══╗',
-        ...SECTIONS.map(g => g.icon + ' *' + (english ? g.enTitle : g.idTitle) +
-          '*\n ' + (g.id === 'group'
-            ? ['groupinfo', 'antilink', 'promote', 'tagall']
-            : g.commands.slice(0, 4)).join(' · ') +
-          '\n ' + (english ? 'See:' : 'Lihat:') + ' ' +
-          (Object.keys(ALIASES).find(k => ALIASES[k] === g.id) || 'menu')),
-        '\n╔═══ ✧ JADIBOT GRATIS ✧ ═══╗',
-        ...PREMIUM.map(x => '✧ ' + x),
-        '\n♛ ' + (english ? 'OWNER COMMANDS: menuowner' : 'PERINTAH OWNER: menuowner'),
-        '\n' + (english ? 'More categories: menugroup · menustore · menujadibot'
-          : 'Menu lengkap: menugroup · menustore · menujadibot')
-      ].join('\n').slice(0, 3700);
+  let number = 0;
+  for (const group of selected) {
+    lines.push('', '━━ ' + group.icon + ' *' + (english ? group.enTitle : group.idTitle) + '* ━━');
+    for (const command of group.commands) {
+      number += 1;
+      lines.push(String(number).padStart(3, '0') + '. ' + command);
     }
   }
-  return result;
+  if (target === 'language') lines.push('', '🌐 bahasa id | language en | listbahasa');
+  if (!selected.length && target !== 'language') lines.push('', 'Kategori tidak ditemukan. Ketik menu.');
+  lines.push('', '✧ Prefix: ' + config.prefix + ' • Beauté by Vall');
+  // WhatsApp accepts longer text messages. Never replace the catalog with
+  // a four-command preview: all registered catalog entries must be visible.
+  return lines.join('\n');
 }
 module.exports = { menu, SECTIONS, PREMIUM, OWNER, ALIASES };
