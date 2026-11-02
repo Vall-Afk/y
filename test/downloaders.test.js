@@ -31,7 +31,7 @@ test('command args constrain size duration, avoid playlist/auth/config, and do n
   assert.ok(args.includes('--ignore-config'));
   assert.ok(args.includes('--no-plugin-dirs'));
   assert.ok(args.includes('--no-remote-components'));
-  assert.ok(args.includes('--max-downloads'));
+  assert.ok(args.includes('--playlist-end'));
   assert.ok(args.includes('default,-generic'));
   assert.ok(args.includes('--no-playlist'));
   assert.ok(args.includes('--max-filesize'));
