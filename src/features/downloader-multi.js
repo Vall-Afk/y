@@ -52,7 +52,7 @@ function downloadArgs(command,url){
   if(!DOWNLOAD_COMMANDS.has(command))throw Error('Unsupported downloader command.');
   const args=['--ignore-config','--no-plugin-dirs','--no-remote-components','--ies','default,-generic','--no-cache-dir','--no-warnings','--no-progress','--no-playlist',
     '--match-filters','!is_live & duration <=? 600','--no-write-subs','--no-write-thumbnail','--no-write-info-json','--no-mtime','--no-exec',
-    '--no-overwrites','--max-filesize','64M','--max-downloads',String(MAX_ITEMS),'--playlist-end',String(MAX_ITEMS),
+    '--no-overwrites','--max-filesize','64M','--playlist-end',String(MAX_ITEMS),
     '--socket-timeout','10','--retries','1','--fragment-retries','1','-o','result.%(autonumber)03d.%(ext)s'];
   // A source post can contain many entries; do not enable account or feed downloads.
   if(!command.startsWith('yt'))args.splice(args.indexOf('--no-playlist'),1);
