@@ -111,13 +111,6 @@ function createRouter(config, store, logger, {
       }
       if (await inspectModeration(ctx, spamDetector)) return;
       if (!cmd) return;
-      if (group && config.requireRental && !owner &&
-          !['menu','help','allmenu','owner','ceksewa','checksewa','sewa'].includes(cmd.name) &&
-          !rentals?.get(chat)?.active) {
-        return reply(lang === 'en' ?
-          'This group has no active rental. Contact the bot owner.' :
-          'Sewa grup belum aktif. Hubungi owner bot.');
-      }
       const prev = recent.get(sender) || 0;
       const current = now();
       if (!owner && current - prev < 1800) return;
