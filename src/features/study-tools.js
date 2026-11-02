@@ -1,0 +1,11 @@
+'use strict';
+const STUDY_COMMANDS=new Set(['zscore','ci95','sharpe','obligasi','kuisstat']);
+function nums(a,n){if(a.length!==n)throw Error('Jumlah argumen: '+n);const x=a.map(Number);if(x.some(v=>!Number.isFinite(v)))throw Error('Semua argumen harus angka');return x;}
+function fmt(x){if(!Number.isFinite(x))throw Error('Hasil tidak terdefinisi');return Number(x.toPrecision(9)).toString();}
+const questions=[
+{q:'Apa arti p-value?',a:'Peluang mendapatkan hasil setidaknya seekstrem observasi jika H0 benar.',tip:'Bukan peluang H0 benar.'},
+{q:'Apa asumsi penting OLS?',a:'Linearitas parameter, eksogenitas, dan syarat identifikasi.',tip:'Normalitas residual tidak wajib untuk ketakbiasan OLS.'},
+{q:'Apa makna durasi Macaulay?',a:'Rata-rata tertimbang waktu penerimaan arus kas obligasi.',tip:'Bobot berasal dari present value arus kas.'}
+];
+async function handleStudy({cmd,reply}){if(!STUDY_COMMANDS.has(cmd.name))return false;try{const a=cmd.args;let out;if(cmd.name==='zscore'){const [x,mu,sd]=nums(a,3);if(sd<=0)throw Error('SD harus positif');out='Z = '+fmt((x-mu)/sd);}else if(cmd.name==='ci95'){const [mean,sd,n]=nums(a,3);if(sd<=0||!Number.isInteger(n)||n<30)throw Error('Gunakan n >= 30; untuk sampel kecil gunakan distribusi t');out='CI 95% aproksimasi normal = ['+fmt(mean-1.96*sd/Math.sqrt(n))+', '+fmt(mean+1.96*sd/Math.sqrt(n))+']';}else if(cmd.name==='sharpe'){const [r,rf,sd]=nums(a,3);if(sd<=0)throw Error('Volatilitas harus positif');out='Sharpe ratio = '+fmt((r-rf)/sd)+' (return, risk-free, dan SD harus satu periode)';}else if(cmd.name==='obligasi'){const [face,coupon,yieldRate,years]=nums(a,4);if(face<=0||coupon<0||yieldRate<=-1||!Number.isInteger(years)||years<1||years>100)throw Error('Parameter obligasi tidak valid');let price=0,weighted=0;for(let t=1;t<=years;t++){const cash=face*coupon+(t===years?face:0),pv=cash/(1+yieldRate)**t;price+=pv;weighted+=t*pv;}out='Harga obligasi = '+fmt(price)+'; Durasi Macaulay = '+fmt(weighted/price)+' tahun (kupon tahunan)';}else{const index=a.length?Number(a[0])-1:0;if(!Number.isInteger(index)||index<0||index>=questions.length)throw Error('kuisstat 1|2|3');const q=questions[index];out='📚 Kuis '+(index+1)+': '+q.q+'\nJawaban: '+q.a+'\nCatatan: '+q.tip;}await reply(out);}catch(e){await reply('⚠ '+e.message);}return true;}
+module.exports={STUDY_COMMANDS,handleStudy};
