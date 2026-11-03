@@ -34,11 +34,21 @@ test('returns every mixed slide in order and cleans temporary files',async()=>{
   assert.deepEqual(result.items.map(x=>x.mimetype),['image/webp','video/mp4','image/jpeg']);
   assert.equal(await fs.stat(dir).catch(()=>null),null);
 });
-test('rejects symlinks, unrelated extensions and oversized media',async()=>{
+test('rejects symlinks, unrelated extensions and oversized media',async(t)=>{
   let dir;
+  let symlinkUnavailable=false;
   await assert.rejects(downloadPublicMedia({command:'tiktok',url:TT,run:async(_b,_a,o)=>{
-    dir=o.cwd;await fs.symlink(__filename,path.join(dir,'result.001.jpg'));
-  }}),/invalid/i);
+    dir=o.cwd;
+    try { await fs.symlink(__filename,path.join(dir,'result.001.jpg')); }
+    catch (err) {
+      if (process.platform==='win32' && ['EPERM','EACCES','ENOTSUP'].includes(err.code)) {
+        symlinkUnavailable=true;
+        return;
+      }
+      throw err;
+    }
+  }}),symlinkUnavailable ? /No media/i : /invalid/i);
+  if (symlinkUnavailable) t.diagnostic('Windows denied symlink creation; security rejection tested on symlink-capable platforms.');
   assert.equal(await fs.stat(dir).catch(()=>null),null);
   await assert.rejects(downloadPublicMedia({command:'tiktok',url:TT,run:async(_b,_a,o)=>{
     dir=o.cwd;await fs.writeFile(path.join(dir,'result.001.exe'),Buffer.from('x'));
