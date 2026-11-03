@@ -106,6 +106,26 @@ npm.cmd start
 
 Jika ada perubahan lokal yang belum disimpan, selesaikan terlebih dahulu agar git pull tidak berbenturan. Jangan pernah menghapus **.env**, **data/auth**, atau database di **data/** untuk sekadar update. Folder tersebut berisi login serta data pengguna. Pastikan tidak ada proses bot lain yang membuka sesi yang sama.
 
+## 🌐 HTTPS gratis untuk status Beauté (Cloudflare)
+
+Halaman status Beauté tersedia pada `http://127.0.0.1:3000/` (atau port dari `PORT` di `.env`). Dashboard ini **hanya baca**: status WhatsApp dan uptime, tanpa kontrol admin, QR, login, atau data rahasia. Web server tetap bind ke loopback `127.0.0.1`.
+
+1. Perbarui branch `rebuild/beaute-secure-20261101`, dan jalankan `npm.cmd start` pada PowerShell pertama.
+2. Pada **PowerShell kedua**, dari folder repo jalankan:
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-cloudflare-https.ps1
+~~~
+
+3. Masukkan alamat **email pribadimu** saat diminta. Hanya email itu yang boleh menerima kode OTP Cloudflare.
+4. Script memeriksa `/healthz`, memasang `cloudflared` resmi melalui `winget` bila perlu, dan memulai protected Quick Tunnel. Salin URL `https://...trycloudflare.com` dari output; buka dari device mana pun dan verifikasi dengan OTP email.
+
+Quick Tunnel gratis, tanpa akun Cloudflare ataupun domain sendiri. Link **berubah setiap kali tunnel dibuat ulang** dan tidak berfungsi bila laptop, bot, atau tunnel berhenti. Tunnel ini untuk penggunaan sementara dan tidak memiliki jaminan uptime. Tidak perlu membuka port router. Script mewajibkan cloudflared versi yang mendukung `--allowed-mail`.
+
+**Keamanan:** Jangan mengekspos API/panel lain seperti port 8787 tanpa audit. Status page tidak menyediakan akses ke `.env`, `data/auth`, QR atau kredensial. Jangan berbagi file sensitif. Untuk alamat permanen, opsi lain adalah Tailscale Funnel (`*.ts.net`) dengan proteksi login di aplikasi, atau Cloudflare Named Tunnel dengan domain yang dimiliki.
+
+Sumber: [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) dan [Protected Quick Tunnels](https://developers.cloudflare.com/changelog/post/2026-10-02-protected-quick-tunnels/).
+
 ## ✨ Akses gratis dan layanan sewa grup
 
 Semua perintah pengguna yang tersedia gratis, termasuk Jadibot (satu slot bersama). Izin owner/admin dan persyaratan API eksternal tetap berlaku. **Sewa grup** adalah layanan terpisah: Rp10.000 per 7 hari atau Rp30.000 per bulan kalender; masa sewa berakhir pukul 00.00 WIB pada tanggal jatuh tempo. Gunakan `hargasewa`, `paymethod`, dan `owner`. Owner memverifikasi pembayaran sebelum mengaktifkan `joinsewa`.
