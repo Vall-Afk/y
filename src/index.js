@@ -22,6 +22,7 @@ const { AnonymousHub } = require('./features/anonymous');
 const { MediaLibrary } = require('./features/media-library');
 const { OwnerPreferences, rejectIncomingCalls, bioText } = require('./features/owner-automation');
 const { isGroup } = require('./util');
+const { renderStatusPage } = require('./status-page');
 async function main() {
   const config = loadConfig();
   const logger = pino({ level: config.logLevel, redact: ['*.key','*.token','*.auth','*.password'] });
@@ -105,9 +106,24 @@ async function main() {
   await subbot.init();
   const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub(), library, ownerPreferences });
   const health = http.createServer((req, res) => {
-    if (req.url !== '/healthz') { res.writeHead(404).end(); return; }
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    res.end(JSON.stringify({ alive: true, connected }) + '\n');
+    const headers = {
+      'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer', 'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"
+    };
+    if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, headers).end(); return; }
+    if (req.url === '/') {
+      const body = renderStatusPage({ connected, uptimeSeconds: process.uptime() });
+      res.writeHead(200, { ...headers, 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(req.method === 'HEAD' ? undefined : body);
+      return;
+    }
+    if (req.url === '/healthz') {
+      res.writeHead(200, { ...headers, 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ alive: true, connected }) + '\n');
+      return;
+    }
+    res.writeHead(404, headers).end();
   });
   await new Promise(resolve => health.listen(config.port, '127.0.0.1', resolve));
   async function connect() {
