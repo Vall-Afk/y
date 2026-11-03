@@ -1,0 +1,413 @@
+'use strict';
+// A single, free secondary WhatsApp connection. Credentials never leave
+// data/jadibot/auth; only the requester receives the pairing code in private chat.
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { randomUUID } = require('node:crypto');
+const { jid } = require('./util');
+const QRCode = require('qrcode');
+
+function validPhone(phone) { return typeof phone === 'string' && /^[1-9]\d{7,14}$/.test(phone); }
+function validRequester(value) {
+  return typeof value === 'string' && /^[1-9]\d{4,19}@(s\.whatsapp\.net|lid)$/.test(jid(value));
+}
+class SubBotManager {
+  constructor({
+    config, economy, logger, makeSocket, authState, browsers, disconnectReason,
+    onMessage, onParticipants, notify, notifyQr = null, qrEncoder = QRCode.toBuffer, languageFor = () => 'id', getPrimaryId = () => '',
+    now = () => Date.now(), schedule = setTimeout, cancel = clearTimeout, logoutTimeoutMs = 5000
+  }) {
+    this.config = config;
+    this.economy = economy;
+    this.logger = logger;
+    this.makeSocket = makeSocket;
+    this.authState = authState;
+    this.browsers = browsers;
+    this.disconnectReason = disconnectReason;
+    this.onMessage = onMessage;
+    this.onParticipants = onParticipants;
+    this.notify = notify;
+    this.notifyQr = notifyQr;
+    this.languageFor = languageFor;
+    this.qrEncoder = qrEncoder;
+    this.getPrimaryId = getPrimaryId;
+    this.now = now;
+    this.schedule = schedule;
+    this.cancel = cancel;
+    this.logoutTimeoutMs = logoutTimeoutMs;
+    this.dir = path.join(config.dataDir, 'jadibot');
+    this.authDir = path.join(this.dir, 'auth');
+    this.metadataFile = path.join(this.dir, 'session.json');
+    this.slot = null;
+    this.pending = Promise.resolve();
+    this.shuttingDown = false;
+  }
+  serial(task) {
+    const result = this.pending.then(task);
+    this.pending = result.catch(() => {});
+    return result;
+  }
+  eligible(owner) {
+    return validRequester(jid(owner));
+  }
+  expiry(owner) {
+    return Infinity;
+  }
+  async writeMetadata(slot) {
+    const metadata = { owner: slot.owner, phone: slot.phone, createdAt: slot.createdAt, linked: Boolean(slot.linked), method: slot.method };
+    const temp = this.metadataFile + '.' + randomUUID() + '.tmp';
+    try {
+      await fs.writeFile(temp, JSON.stringify(metadata) + '\n', { flag: 'wx', mode: 0o600 });
+      await fs.rename(temp, this.metadataFile);
+    } finally { await fs.rm(temp, { force: true }).catch(() => {}); }
+  }
+  async init() {
+    await fs.mkdir(this.dir, { recursive: true, mode: 0o700 });
+    let data;
+    try {
+      const text = await fs.readFile(this.metadataFile, 'utf8');
+      if (text.length > 4096) throw new Error('Metadata terlalu besar.');
+      data = JSON.parse(text);
+      if (!validRequester(data.owner) || !validPhone(data.phone) ||
+          !Number.isFinite(data.createdAt) || typeof data.linked !== 'boolean' ||
+          (data.method !== undefined && !['pairing','qr'].includes(data.method))) {
+        throw new Error('Format metadata invalid.');
+      }
+    } catch (err) {
+      if (err.code === 'ENOENT') return;
+      throw new Error('Metadata jadibot tidak valid. Tidak aman menghapus sesi otomatis: ' + err.message);
+    }
+    const slot = this.newSlot(data);
+    this.slot = slot;
+    if (!slot.linked) {
+      slot.status = 'menunggu-pairing';
+      return;
+    }
+    
+    try { await this.launch(slot); }
+    catch (err) {
+      slot.status = 'error';
+      this.logger.warn({ error: err.message }, 'Failed to restore secondary session');
+    }
+  }
+  newSlot(meta) {
+    return {
+      owner: jid(meta.owner), phone: meta.phone,
+      createdAt: meta.createdAt, linked: Boolean(meta.linked), method: meta.method || 'pairing',
+      status: 'menyiapkan', socket: null, timer: null, expiryTimer: null,
+      retries: 0, pairingAttempts: 0, pairingInFlight: false, lastQr: '', qrInFlight: false
+    };
+  }
+  language(owner) {
+    try { return this.languageFor(jid(owner)) === 'en' ? 'en' : 'id'; }
+    catch { return 'id'; }
+  }
+  describe(requester, isMainOwner = false) {
+    const s = this.slot;
+    const en = this.language(requester) === 'en';
+    if (!s) return en ? 'Jadibot: no active session. One slot available.' :
+      'Jadibot: belum ada sesi. Slot tersedia (maksimal 1).';
+    if (jid(requester) !== s.owner && !isMainOwner)
+      return en ? 'Jadibot: the only slot is occupied by another user.' :
+        'Jadibot: slot sedang dipakai oleh pengguna lain.';
+    const status = en ? ({
+      menyiapkan:'connecting', pairing:'pairing', qr:'awaiting QR scan',
+      online:'online', reconnecting:'reconnecting', terputus:'disconnected',
+      'premium-habis':'premium expired', error:'error', menghentikan:'stopping',
+      'menunggu-pairing':'awaiting pairing'
+    }[s.status] || s.status) : s.status;
+    return 'Jadibot: ' + status +
+      '\n' + (en ? 'Number: ' : 'Nomor: ') + (s.method === 'qr' && s.phone === '10000000' ? 'QR' : s.phone) +
+      '\n' + (en ? 'Renter: ' : 'Pengguna: ') + s.owner.split('@')[0] +
+      '\n' + (en ? 'Method: ' : 'Metode: ') + (s.method === 'qr' ? 'QR' : 'pairing') +
+      '\n' + (en ? 'Create/resume: ' : 'Buat/lanjut: ') +
+      (s.method === 'qr' ? 'jadibot qr' : 'jadibot ' + s.phone) +
+      '\n' + (en ? 'Stop: ' : 'Hentikan: ') + 'stopjadibot';
+  }
+  async inform(slot, message) {
+    if (this.slot !== slot || this.shuttingDown) return;
+    try { await this.notify(slot.owner, message); }
+    catch (err) { this.logger.warn({ error: err.message }, 'Cannot notify jadibot owner'); }
+  }
+  clearTimers(slot) {
+    if (slot.timer) this.cancel(slot.timer);
+    if (slot.expiryTimer) this.cancel(slot.expiryTimer);
+    slot.timer = null;
+    slot.expiryTimer = null;
+  }
+  watchExpiry(slot) {
+    if (slot.expiryTimer) this.cancel(slot.expiryTimer);
+    if (this.slot !== slot || this.shuttingDown || slot.status === 'premium-habis') return;
+    return; // Jadibot is free: no membership expiry.
+    const until = this.expiry(slot.owner);
+    if (!(until > this.now())) {
+      void this.suspend(slot);
+      return;
+    }
+    const delay = Math.max(1, Math.min(60000, until - this.now()));
+    slot.expiryTimer = this.schedule(() => {
+      slot.expiryTimer = null;
+      if (this.slot !== slot || this.shuttingDown) return;
+      if (!this.eligible(slot.owner)) void this.suspend(slot);
+      else this.watchExpiry(slot);
+    }, delay);
+    slot.expiryTimer?.unref?.();
+  }
+  async suspend(slot) {
+    if (this.slot !== slot || slot.status === 'premium-habis') return;
+    this.clearTimers(slot);
+    slot.status = 'premium-habis';
+    const socket = slot.socket;
+    slot.socket = null;
+    try { socket?.end?.(new Error('Premium jadibot expired')); }
+    catch {}
+    await this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot paused: premium expired. Renew premium and send jadibot again to resume.' : 'Sesi jadibot dihentikan sementara karena premium habis. Perpanjang premium lalu gunakan jadibot ' + slot.phone + ' untuk melanjutkan.');
+  }
+  async ensureCleanAuth() {
+    try {
+      const entries = await fs.readdir(this.authDir);
+      if (entries.length) throw new Error('Ada sesi jadibot lama tanpa metadata. Hubungi owner untuk pemeriksaan, jangan hapus data/auth utama.');
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+    }
+  }
+  start(owner, phone, primaryId, method = 'pairing') {
+    return this.serial(async () => {
+      owner = jid(owner);
+      if (!validRequester(owner)) throw new Error('Identitas pengirim tidak valid.');
+      
+      if (!['pairing','qr'].includes(method)) throw new Error('Metode jadibot tidak dikenal.');
+      if (method === 'qr' && !this.notifyQr) throw new Error('Pengiriman QR tidak tersedia.');
+      if (method === 'qr' && !phone) phone = this.slot?.owner === owner ? this.slot.phone : '10000000';
+      if (!validPhone(phone)) throw new Error(this.language(owner) === 'en' ? 'Use: jadibot 628xxxxxxxxxx or jadibot qr.' : 'Gunakan: jadibot 628xxxxxxxxxx atau jadibot qr.');
+      const main = jid(primaryId || this.getPrimaryId());
+      if (method === 'pairing' && (phone === this.config.ownerNumber || jid(phone + '@s.whatsapp.net') === main)) {
+        throw new Error('Jangan tautkan akun bot utama sebagai jadibot.');
+      }
+      if (this.slot) {
+        if (this.slot.owner !== owner || (method === 'pairing' && this.slot.phone !== phone))
+          throw new Error(this.language(owner) === 'en' ? 'Jadibot slot is occupied. Only one additional session is allowed.' : 'Slot jadibot sedang digunakan. Maksimal satu sesi tambahan.');
+        if (['online', 'menyiapkan', 'pairing', 'qr', 'reconnecting'].includes(this.slot.status))
+          return this.language(owner) === 'en' ? 'Jadibot is already running. Use cekjadibot.' : 'Sesi jadibot sudah ' + this.slot.status + '. Gunakan cekjadibot.';
+        
+        if (this.slot.method !== method) {
+          this.slot.method = method;
+          this.slot.linked = false;
+          await this.writeMetadata(this.slot);
+        }
+        this.clearTimers(this.slot);
+        const stale = this.slot.socket;
+        this.slot.socket = null;
+        try { stale?.end?.(new Error('Restart jadibot session')); } catch {}
+        this.slot.status = 'menyiapkan';
+        this.slot.retries = 0;
+        this.slot.pairingAttempts = 0;
+        await this.launch(this.slot);
+        return this.language(owner) === 'en' ? 'Trying to reconnect Jadibot. Check your private chat for a fresh code if necessary.' : 'Mencoba menyambungkan kembali sesi jadibot. Periksa chat pribadi untuk kode baru jika diperlukan.';
+      }
+      await this.ensureCleanAuth();
+      const slot = this.newSlot({ owner, phone, createdAt: this.now(), linked: false, method });
+      this.slot = slot;
+      try {
+        await this.writeMetadata(slot);
+        await this.launch(slot);
+      } catch (err) {
+        this.clearTimers(slot);
+        try { slot.socket?.end?.(new Error('Pairing init failed')); } catch {}
+        slot.socket = null;
+        slot.status = 'error';
+        // Keep metadata and auth for explicit owner-controlled cleanup.
+        throw err;
+      }
+      if (this.language(owner) === 'en') return 'Jadibot is being prepared (' + method + '). ' +
+        (method === 'qr' ? 'A QR image will arrive in your private chat.' : 'A pairing code will arrive in your private chat.') +
+        ' One additional session maximum.';
+      return 'Sesi jadibot disiapkan (' + method + '). ' +
+        (method === 'qr' ? 'QR akan dikirim melalui chat pribadi; pindai menggunakan WhatsApp akun kedua.' : 'Kode pairing akan dikirim melalui chat pribadi.') +
+        ' Maksimal 1 sesi tambahan.';
+    });
+  }
+  async launch(slot) {
+    if (this.slot !== slot || this.shuttingDown || !this.eligible(slot.owner)) return;
+    this.clearTimers(slot);
+    const previousSocket = slot.socket;
+    slot.socket = null;
+    try { previousSocket?.end?.(new Error('Jadibot reconnect')); } catch {}
+    await fs.mkdir(this.authDir, { recursive: true, mode: 0o700 });
+    const { state, saveCreds } = await this.authState(this.authDir);
+    if (this.slot !== slot || this.shuttingDown) return;
+    const socket = this.makeSocket({
+      auth: state, logger: this.logger, browser: this.browsers.ubuntu(this.config.name + '-Jadibot'),
+      printQRInTerminal: false, markOnlineOnConnect: false, syncFullHistory: false
+    });
+    slot.socket = socket;
+    slot.status = 'menyiapkan';
+    slot.pairingInFlight = false;
+    slot.qrInFlight = false;
+    slot.lastQr = '';
+    this.watchExpiry(slot);
+    socket.ev.on('creds.update', async () => {
+      if (this.slot !== slot || slot.socket !== socket) return;
+      try { await saveCreds(); }
+      catch (err) { this.logger.error({ error: err.message }, 'Cannot persist jadibot credentials'); }
+    });
+    const pair = async () => {
+      if (this.slot !== slot || slot.socket !== socket || slot.pairingInFlight || slot.status === 'pairing' ||
+          state.creds.registered || slot.pairingAttempts >= 3 || !this.eligible(slot.owner)) return;
+      slot.pairingInFlight = true;
+      slot.pairingAttempts++;
+      try {
+        const code = await socket.requestPairingCode(slot.phone);
+        if (this.slot !== slot || slot.socket !== socket) return;
+        if (!code || !/^[a-z0-9-]{6,24}$/i.test(code)) throw new Error('Kode pairing tidak valid.');
+        slot.status = 'pairing';
+        if (this.language(slot.owner) === 'en') {
+          await this.inform(slot, '*Beauté. Jadibot*\nPairing code: *' + code + '*\nOpen WhatsApp on the secondary number → Linked devices → Link a device → Link with phone number. Keep this code private.');
+        } else await this.inform(slot,
+          '*Beauté. Jadibot*\nKode pairing: *' + code +
+          '*\nBuka WhatsApp nomor ' + slot.phone +
+          ' → Perangkat tertaut → Tautkan perangkat → Tautkan dengan nomor telepon.\n' +
+          'Masukkan kode di atas. Jangan kirimkan kode ini kepada orang lain.');
+      } catch (err) {
+        this.logger.warn({ error: err.message }, 'Jadibot pairing error');
+        if (this.slot === slot && slot.socket === socket) {
+          slot.status = 'error';
+          await this.inform(slot, 'Permintaan kode jadibot gagal. Coba stopjadibot, lalu jadibot <nomor> kembali.');
+        }
+      } finally { slot.pairingInFlight = false; }
+    };
+    const sendQr = async qr => {
+      if (this.slot !== slot || slot.socket !== socket || this.shuttingDown ||
+          slot.method !== 'qr' || state.creds.registered || !this.eligible(slot.owner) ||
+          typeof qr !== 'string' || qr.length > 8192 ||
+          slot.qrInFlight || slot.lastQr === qr) return;
+      slot.qrInFlight = true;
+      slot.lastQr = qr;
+      try {
+        const png = await this.qrEncoder(qr, { type: 'png', width: 360, margin: 2, errorCorrectionLevel: 'M' });
+        if (!Buffer.isBuffer(png) || png.length > 1024 * 1024) throw new Error('QR image invalid.');
+        if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
+        await this.notifyQr(slot.owner, png,
+          this.language(slot.owner) === 'en' ? 'Beauté. Jadibot QR. On your second WhatsApp account open Linked devices → Link a device and scan this QR. Do not share it.' :
+          'Beauté. Jadibot QR. Pindai dari WhatsApp akun kedua → Perangkat tertaut → Tautkan perangkat. QR dapat kedaluwarsa; jangan bagikan.');
+        slot.status = 'qr';
+      } catch (err) {
+        this.logger.warn({ error: err.message }, 'Jadibot QR delivery failed');
+        if (this.slot === slot && slot.socket === socket) {
+          slot.status = 'error';
+          slot.lastQr = '';
+          await this.inform(slot, 'Gagal mengirim QR Jadibot. Gunakan cekjadibot atau ulangi jadibot qr.');
+        }
+      } finally { slot.qrInFlight = false; }
+    };
+    socket.ev.on('connection.update', update => {
+      if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
+      if (!state.creds.registered) {
+        if (slot.method === 'qr' && update.qr) void sendQr(update.qr);
+        else if (slot.method === 'pairing' && (update.connection === 'connecting' || update.qr)) void pair();
+      }
+      if (update.connection === 'open') {
+        slot.status = 'online';
+        slot.retries = 0;
+        slot.linked = true;
+        if (slot.method === 'qr') {
+          const actual = jid(socket.user?.id || '').split('@')[0].split(':')[0];
+          if (validPhone(actual)) slot.phone = actual;
+        }
+        void this.serial(async () => {
+          if (this.slot === slot) await this.writeMetadata(slot);
+        }).catch(err => this.logger.error({ error: err.message }, 'Failed to persist jadibot metadata'));
+        void this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot connected! Use cekjadibot to check the status.' : 'Jadibot tersambung! Nomor: ' + slot.phone + '. Gunakan cekjadibot untuk melihat status.');
+      }
+      if (update.connection === 'close') {
+        slot.socket = null;
+        const reason = update.lastDisconnect?.error?.output?.statusCode;
+        if ([this.disconnectReason.loggedOut, this.disconnectReason.badSession].includes(reason)) {
+          this.clearTimers(slot);
+          slot.status = 'terputus';
+          void this.inform(slot, this.language(slot.owner) === 'en' ? 'Jadibot disconnected from WhatsApp. Use stopjadibot, then start Jadibot again.' : 'Jadibot terputus dari WhatsApp. Gunakan stopjadibot kemudian jadibot ' + slot.phone + '.');
+          return;
+        }
+        if (!this.eligible(slot.owner)) { void this.suspend(slot); return; }
+        slot.status = 'reconnecting';
+        if (slot.timer) this.cancel(slot.timer);
+        const delay = Math.min(60000, 2000 * 2 ** Math.min(slot.retries++, 5));
+        slot.timer = this.schedule(() => {
+          slot.timer = null;
+          if (this.slot !== slot || this.shuttingDown) return;
+          void this.launch(slot).catch(err => {
+            slot.status = 'error';
+            this.logger.warn({ error: err.message }, 'Jadibot reconnect failed');
+          });
+        }, delay);
+        slot.timer?.unref?.();
+      }
+    });
+    socket.ev.on('messages.upsert', async event => {
+      if (this.slot !== slot || slot.socket !== socket || this.shuttingDown) return;
+      if (event.type !== 'notify') return;
+      if (!this.eligible(slot.owner)) { await this.suspend(slot); return; }
+      for (const message of event.messages || []) {
+        if (this.slot !== slot || slot.socket !== socket) break;
+        try { await this.onMessage(socket, message); }
+        catch (err) { this.logger.warn({ error: err.message }, 'Jadibot command failed'); }
+      }
+    });
+    socket.ev.on('group-participants.update', async event => {
+      if (this.slot !== slot || slot.socket !== socket || this.shuttingDown || !this.eligible(slot.owner)) return;
+      try { await this.onParticipants(socket, event); }
+      catch (err) { this.logger.warn({ error: err.message }, 'Jadibot group event failed'); }
+    });
+  }
+  async refreshMembership(user) {
+    const slot = this.slot;
+    if (!slot || slot.owner !== jid(user) || this.eligible(slot.owner)) return;
+    await this.suspend(slot);
+  }
+  stop(requester, force = false) {
+    return this.serial(async () => {
+      const slot = this.slot;
+      if (!slot) return this.language(requester) === 'en' ? 'There is no active Jadibot session.' : 'Tidak ada sesi jadibot aktif.';
+      if (!force && jid(requester) !== slot.owner && jid(requester) !== this.config.ownerJid)
+        throw new Error(this.language(requester) === 'en' ? 'Only the renter or main owner can stop this Jadibot.' : 'Hanya pemilik sesi atau owner utama yang dapat menghentikan jadibot.');
+      slot.status = 'menghentikan';
+      this.clearTimers(slot);
+      const socket = slot.socket;
+      slot.socket = null;
+      let timeout = null;
+      try {
+        if (socket?.logout) await Promise.race([
+          Promise.resolve().then(() => socket.logout()),
+          new Promise((_, reject) => {
+            timeout = this.schedule(() => reject(new Error('Jadibot logout timeout')), this.logoutTimeoutMs);
+          })
+        ]);
+      } catch (err) {
+        this.logger.warn({ error: err.message }, 'Jadibot logout failed; will remove local auth');
+      } finally {
+        if (timeout) this.cancel(timeout);
+      }
+      try { socket?.end?.(new Error('Stopped by user')); }
+      catch {}
+      await fs.rm(this.authDir, { recursive: true, force: true });
+      await fs.rm(this.metadataFile, { force: true });
+      this.slot = null;
+      return this.language(requester) === 'en' ? 'Jadibot stopped, local session removed and the slot is available.' : 'Jadibot dihentikan dan sesi lokalnya dihapus. Slot kini tersedia.';
+    });
+  }
+  async shutdown() {
+    this.shuttingDown = true;
+    const slot = this.slot;
+    if (!slot) return;
+    this.clearTimers(slot);
+    const socket = slot.socket;
+    slot.socket = null;
+    try { socket?.end?.(new Error('App shutdown')); }
+    catch {}
+    // Drain pending metadata writes before process shutdown; otherwise a fast
+    // restart may read linked=false even though the child already connected.
+    await this.pending;
+    // Credentials deliberately retained so the one session can resume later.
+  }
+}
+module.exports = { SubBotManager, validPhone, validRequester };

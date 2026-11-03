@@ -1,19 +1,10 @@
-FROM node:lts-buster
-
-RUN apt-get update && \
-  apt-get install -y \
-  ffmpeg \
-  imagemagick \
-  webp && \
-  apt-get upgrade -y && \
-  rm -rf /var/lib/apt/lists/*
-
-COPY package.json .
-
-RUN npm install && npm install pm2 -g 
-
-COPY . .
-
-EXPOSE 5000
-
-CMD ["npm", "start"]
+FROM node:22-bookworm-slim
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm install --omit=dev --no-audit --no-fund
+COPY src/ ./src/
+RUN mkdir -p /app/data && chown -R node:node /app
+USER node
+EXPOSE 3000
+CMD ["node", "src/index.js"]
