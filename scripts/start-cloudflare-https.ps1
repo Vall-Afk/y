@@ -73,7 +73,7 @@ $versionOutput = (& $exe --version 2>&1 | Out-String)
 if ($versionOutput -notmatch '(\d{4})\.(\d{1,2})\.(\d{1,2})') {
     throw "Versi cloudflared tidak dapat dibaca. Update terlebih dahulu."
 }
-$version = New-Object System.Version([int]$Matches[1],[int]$Matches[2],[int]$Matches[3])
+$version = [version]::Parse($Matches[1] + '.' + $Matches[2] + '.' + $Matches[3])
 if ($version -lt [version]'2026.10.2') {
     throw "Cloudflared $version terlalu lama untuk --allowed-mail. Jalankan: winget upgrade --id Cloudflare.cloudflared"
 }
