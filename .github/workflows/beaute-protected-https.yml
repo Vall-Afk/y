@@ -1,0 +1,30 @@
+name: Beauté protected HTTPS checks
+on:
+  push:
+    branches: ['feature/beaute-protected-https-*']
+  pull_request:
+    paths:
+      - 'src/status-page.js'
+      - 'src/index.js'
+      - 'scripts/start-cloudflare-https.ps1'
+      - 'test/status-page.test.js'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JS and dashboard tests
+        run: |
+          node --check src/index.js
+          node --check src/status-page.js
+          node --test test/status-page.test.js
+      - name: Parse Windows PowerShell script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile('scripts/start-cloudflare-https.ps1', [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | Out-String | Write-Error; exit 1 }
