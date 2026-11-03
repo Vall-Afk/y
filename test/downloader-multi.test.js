@@ -37,7 +37,7 @@ test('returns every mixed slide in order and cleans temporary files',async()=>{
 test('rejects symlinks, unrelated extensions and oversized media',async(t)=>{
   let dir;
   let symlinkUnavailable=false;
-  await assert.rejects(downloadPublicMedia({command:'tiktok',url:TT,run:async(_b,_a,o)=>{
+  const symlinkAttempt=downloadPublicMedia({command:'tiktok',url:TT,run:async(_b,_a,o)=>{
     dir=o.cwd;
     try { await fs.symlink(__filename,path.join(dir,'result.001.jpg')); }
     catch (err) {
@@ -47,7 +47,11 @@ test('rejects symlinks, unrelated extensions and oversized media',async(t)=>{
       }
       throw err;
     }
-  }}),symlinkUnavailable ? /No media/i : /invalid/i);
+  }});
+  await assert.rejects(symlinkAttempt,err=>{
+    assert.match(String(err.message),symlinkUnavailable ? /No media/i : /invalid/i);
+    return true;
+  });
   if (symlinkUnavailable) t.diagnostic('Windows denied symlink creation; security rejection tested on symlink-capable platforms.');
   assert.equal(await fs.stat(dir).catch(()=>null),null);
   await assert.rejects(downloadPublicMedia({command:'tiktok',url:TT,run:async(_b,_a,o)=>{
