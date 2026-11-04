@@ -4,7 +4,7 @@ These commands are registered by the engagement module. Optional providers are d
 
 ## Commands
 
-- `.roast saya` / `.puji saya`: self-directed, mild response. A user can grant 30-day consent with `.roast izin` or `.puji izin`; they can optionally share a short bio with `.roast bio <about>`. Another member can be tagged only after they opted in. `.roast cabut` removes consent and the temporary bio. The bot does not scrape profile photos or private chat history.
+- `.roast saya` / `.puji saya`: self-directed, mild response. A user can grant in-process consent with `.roast izin` or `.puji izin`; they can optionally share a short bio with `.roast bio <about>`. Another member can be tagged only after they opted in. `.roast cabut` removes consent and the temporary bio. The bot does not scrape profile photos or private chat history.
 - `.tarot` / `.ramalan`: entertainment only; not factual predictions.
 - `.zodiak DD/MM`: Western sun-sign lookup.
 - `.cekhoax`: reply to a claim. Uses Google Custom Search when both CSE variables exist, otherwise DuckDuckGo Instant Answer. Results are leads, not a truth verdict; the bot labels claims unverified.
