@@ -31,7 +31,7 @@ async function fixture(options={}){
   const base='http://127.0.0.1:'+server.address().port;
   async function request(path,method='GET',body,cookie){
     const headers={};
-    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';}
+    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';headers['cf-connecting-ip']='192.0.2.'+(server.address().port%254+1);}
     if(cookie)headers.cookie=cookie;
     return fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
   }
