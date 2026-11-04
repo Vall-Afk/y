@@ -29,9 +29,10 @@ async function fixture(options={}){
   const server=http.createServer(handler);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const base='http://127.0.0.1:'+server.address().port;
+  const testIp='test-'+crypto.randomUUID();
   async function request(path,method='GET',body,cookie){
     const headers={};
-    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';headers['cf-connecting-ip']='test-'+crypto.randomUUID();}
+    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';headers['cf-connecting-ip']=testIp;}
     if(cookie)headers.cookie=cookie;
     return fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
   }
