@@ -43,6 +43,7 @@ const { COMMANDS: SCHOLAR_COMMANDS, handle: handleSCHOLAR } = require('./feature
 const { COMMANDS: DOCAN_COMMANDS, handle: handleDOCAN } = require('./features/document-analyzer');
 const { COMMANDS: RESILIENCE_COMMANDS, handle: handleRESILIENCE } = require('./features/resilience-manager');
 const { COMMANDS: ANTIRAID_COMMANDS, handle: handleANTIRAID } = require('./features/smart-group-security');
+const { COMMANDS: ENGAGEMENT_COMMANDS, handle: handleEngagement, observeGroup, inspectToxic } = require('./features/engagement-ai');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
 const MENU_COMMANDS = new Set(Object.keys(ALIASES));
@@ -52,7 +53,7 @@ const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS, ...ACADEMIC_COMMANDS, ...AI_COMMANDS, ...STATS_COMMANDS, ...BROADCAST_COMMANDS, ...STUDY_COMMANDS, ...UTIL_COMMANDS, ...WEB_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
-  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...SAVEAPI_COMMANDS, ...LITURGIA_COMMANDS, ...STATLAB_COMMANDS, ...BIBLEPAR_COMMANDS, ...SCHOLAR_COMMANDS, ...DOCAN_COMMANDS, ...RESILIENCE_COMMANDS, ...ANTIRAID_COMMANDS, ...HEALTH_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
+  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...SAVEAPI_COMMANDS, ...LITURGIA_COMMANDS, ...STATLAB_COMMANDS, ...BIBLEPAR_COMMANDS, ...SCHOLAR_COMMANDS, ...DOCAN_COMMANDS, ...RESILIENCE_COMMANDS, ...ANTIRAID_COMMANDS, ...HEALTH_COMMANDS, ...ENGAGEMENT_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
@@ -75,10 +76,12 @@ function createRouter(config, store, logger, {
       await sock.readMessages([message.key]).catch(err =>
         logger.warn?.({error:err.message},'Auto-read failed'));
     }
-    const text = getText(message);
+    const voiceOnly = Boolean(message.message?.audioMessage);
+    const text = getText(message) || (voiceOnly ? config.prefix + 'tanyavoice' : '');
     if (!text || (store.mode === 'private' && !owner)) return;
     const group = isGroup(chat);
     const cmd = getCommand(text, config.prefix, ALL_COMMANDS);
+    if (isGroup(chat) && !cmd) observeGroup(chat, accountSender, text);
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
     if (cmd?.name !== 'afk') {
@@ -100,8 +103,7 @@ function createRouter(config, store, logger, {
           logger.warn?.({error:err.message},'Auto-response failed'));
       }
     }
-    if (!cmd && !linkViolation && (!group || !moderation ||
-      !(moderation.get(chat).antispam || Object.keys(moderation.get(chat).responses).length))) return;
+    // Continue non-command group messages so opt-in summary and anti-toxic observers can run.
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
     const replyCatalog = async (body) => {
       const lines = String(body).split('\n');
@@ -138,6 +140,7 @@ function createRouter(config, store, logger, {
         }
       }
       if (await inspectModeration(ctx, spamDetector)) return;
+      if (group && !cmd && await inspectToxic(ctx)) return;
       if (!cmd) return;
       const prev = recent.get(sender) || 0;
       const current = now();
@@ -222,6 +225,7 @@ function createRouter(config, store, logger, {
       if (SAVEAPI_COMMANDS.has(cmd.name) && await handleSaveAPI(ctx)) return;
       if (LITURGIA_COMMANDS.has(cmd.name) && await handleLiturgia(ctx)) return;
       if (HEALTH_COMMANDS.has(cmd.name) && await handleHealth(ctx)) return;
+      if (ENGAGEMENT_COMMANDS.has(cmd.name) && await handleEngagement(ctx)) return;
       if (STATLAB_COMMANDS.has(cmd.name) && await handleSTATLAB(ctx)) return;
       if (BIBLEPAR_COMMANDS.has(cmd.name) && await handleBIBLEPAR(ctx)) return;
       if (SCHOLAR_COMMANDS.has(cmd.name) && await handleSCHOLAR(ctx)) return;
