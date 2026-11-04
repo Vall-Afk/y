@@ -39,7 +39,7 @@ async function main(){
   const confirm=await readHidden('Ulangi password: ');
   if(password!==confirm)throw Error('Password tidak cocok.');
   const salt=crypto.randomBytes(16).toString('hex');
-  const hash=crypto.scryptSync(password,salt,64,{N:16384,r:8,p:1,maxmem:64*1024*1024}).toString('hex');
+  const hash=crypto.scryptSync(password,Buffer.from(salt,'hex'),64,{N:16384,r:8,p:1,maxmem:64*1024*1024}).toString('hex');
   const secret=crypto.randomBytes(48).toString('base64url');
   const values={DASHBOARD_PASSWORD_HASH:'scrypt$'+salt+'$'+hash,DASHBOARD_SESSION_SECRET:secret};
   for(const [key,value] of Object.entries(values)){
