@@ -94,7 +94,7 @@ const ACADEMIC = Object.freeze([
   'keuangan 1000000 0.05 12', 'investasi 0.04 1.2 0.10',
   'npv 0.1 -1000 400 400 400', 'irr -1000 600 600', 'portofolio 0.6 0.1 0.08 0.2 0.1 0.3',
   'peluang binomial 10 3 0.5', 'anova 1,2,3;4,5,6',
-  'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027',
+  'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027', 'liturgi hariini', 'liturgi 1962 2026-10-25', 'liturgi modern latin 2026-11-22', 'liturgi bandingkan 2026-10-25',
   'alkitab Matius 1:1', 'vulgata Ioannes III:XVI', 'google <pencarian>', 'ai <pertanyaan>'
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
