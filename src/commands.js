@@ -43,7 +43,7 @@ const { COMMANDS: SCHOLAR_COMMANDS, handle: handleSCHOLAR } = require('./feature
 const { COMMANDS: DOCAN_COMMANDS, handle: handleDOCAN } = require('./features/document-analyzer');
 const { COMMANDS: RESILIENCE_COMMANDS, handle: handleRESILIENCE } = require('./features/resilience-manager');
 const { COMMANDS: ANTIRAID_COMMANDS, handle: handleANTIRAID } = require('./features/smart-group-security');
-const { COMMANDS: ENGAGEMENT_COMMANDS, handle: handleEngagement } = require('./features/engagement-ai');
+const { COMMANDS: ENGAGEMENT_COMMANDS, handle: handleEngagement, observeGroup } = require('./features/engagement-ai');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
 const MENU_COMMANDS = new Set(Object.keys(ALIASES));
@@ -80,6 +80,7 @@ function createRouter(config, store, logger, {
     if (!text || (store.mode === 'private' && !owner)) return;
     const group = isGroup(chat);
     const cmd = getCommand(text, config.prefix, ALL_COMMANDS);
+    if (isGroup(chat) && !cmd) observeGroup(chat, accountSender, text);
     const settings = group ? store.group(chat) : {};
     const linkViolation = (settings.antilink && isInvite(text)) || (settings.antiwame && waMeLink(text));
     if (cmd?.name !== 'afk') {
