@@ -43,7 +43,7 @@ const { COMMANDS: SCHOLAR_COMMANDS, handle: handleSCHOLAR } = require('./feature
 const { COMMANDS: DOCAN_COMMANDS, handle: handleDOCAN } = require('./features/document-analyzer');
 const { COMMANDS: RESILIENCE_COMMANDS, handle: handleRESILIENCE } = require('./features/resilience-manager');
 const { COMMANDS: ANTIRAID_COMMANDS, handle: handleANTIRAID } = require('./features/smart-group-security');
-const { COMMANDS: ENGAGEMENT_COMMANDS, handle: handleEngagement, observeGroup } = require('./features/engagement-ai');
+const { COMMANDS: ENGAGEMENT_COMMANDS, handle: handleEngagement, observeGroup, inspectToxic } = require('./features/engagement-ai');
 const JADIBOT_COMMANDS = new Set(['jadibot','subbot','cekjadibot','statusjadibot','stopjadibot','listjadibot']);
 
 const MENU_COMMANDS = new Set(Object.keys(ALIASES));
@@ -76,7 +76,8 @@ function createRouter(config, store, logger, {
       await sock.readMessages([message.key]).catch(err =>
         logger.warn?.({error:err.message},'Auto-read failed'));
     }
-    const text = getText(message);
+    const voiceOnly = Boolean(message.message?.audioMessage);
+    const text = getText(message) || (voiceOnly ? config.prefix + 'tanyavoice' : '');
     if (!text || (store.mode === 'private' && !owner)) return;
     const group = isGroup(chat);
     const cmd = getCommand(text, config.prefix, ALL_COMMANDS);
@@ -140,6 +141,7 @@ function createRouter(config, store, logger, {
         }
       }
       if (await inspectModeration(ctx, spamDetector)) return;
+      if (group && !cmd && await inspectToxic(ctx)) return;
       if (!cmd) return;
       const prev = recent.get(sender) || 0;
       const current = now();
