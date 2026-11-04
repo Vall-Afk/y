@@ -69,7 +69,9 @@ async function handleLiturgia(ctx,{clock=()=>new Date()}={}){
   const dateArg=args.find(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
   const yearArg=args.find(x=>/^\d{4}$/.test(x));
   if(yearArg&&!dateArg){const y=Number(yearArg),f=feasts(y);return ctx.reply('Beauté · Tahun '+y+'\nPaskah: '+iso(f.easter)+'\nRabu Abu: '+iso(f.ash)+'\nPentakosta: '+iso(f.pentecost)+'\nAdven I: '+iso(f.advent)+'\nKristus Raja (modern): '+iso(f.christModern)+'\nKristus Raja (1962): '+iso(f.christ1962)+'\nKalender umum parsial; cek ordo lokal.');}
-  const date=dateArg?parseDate(dateArg):parseDate(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(clock()));
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(clock());
+  const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
+  const date=dateArg?parseDate(dateArg):parseDate(p.year+'-'+p.month+'-'+p.day);
   if(compare)return ctx.reply(format(calculate(date,'modern',lang))+'\n\n'+format(calculate(date,'1962',lang)));
   return ctx.reply(format(calculate(date,rite,lang)));
  }catch(e){await ctx.reply('Liturgia: '+String(e.message).slice(0,140));}
