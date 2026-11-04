@@ -7,7 +7,7 @@ const {createDashboardHandler}=require('../src/dashboard');
 
 function credentials(password='correct horse battery staple'){
   const salt=crypto.randomBytes(16).toString('hex');
-  const hash=crypto.scryptSync(password,salt,64,{N:16384,r:8,p:1,maxmem:64*1024*1024}).toString('hex');
+  const hash=crypto.scryptSync(password,Buffer.from(salt,'hex'),64,{N:16384,r:8,p:1,maxmem:64*1024*1024}).toString('hex');
   return {password,passwordHash:'scrypt$'+salt+'$'+hash,sessionSecret:crypto.randomBytes(48).toString('base64url')};
 }
 async function fixture(options={}){
@@ -69,7 +69,7 @@ test('dashboard API denies unauthenticated status and preferences',async()=>{
     const status=await f.request('/api/status');
     assert.equal(status.status,401);
     const change=await f.request('/api/preferences','POST',{key:'autobio',enabled:true});
-    assert.equal(change.status,403);
+    assert.equal(change.status,401);
   }finally{await f.close();}
 });
 
