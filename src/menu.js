@@ -103,7 +103,7 @@ const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard
   'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium',
   'addsewa <group@g.us> bulan|minggu', 'joinsewa https://chat.whatsapp.com/KODE bulan|minggu', 'delsewa <group@g.us>', 'listsewa', 'backup (private DM)',
   'join <invite link> (DM)', 'leavegc (group)', 'setnamebot <teks>',
-  'setbiobot <teks>', 'setppbot (reply gambar)', 'delppbot']);
+  'setbiobot <teks>', 'setppbot (reply gambar)', 'delppbot', 'saveapibalance (DM owner)', 'saveapiusage (DM owner)']);
 const ALIASES = Object.freeze({
   menu: 'all', help: 'all', allmenu: 'all',
   menugroup: 'group', menugrup: 'group',
