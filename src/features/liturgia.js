@@ -41,7 +41,7 @@ function calculate(date,rite='modern',lang='id'){
   [f.pentecost,title('Minggu Pentakosta','Pentecost Sunday','Dominica Pentecostes')],
   [f.christModern,CHRIST_KING_MODERN],
   [f.christ1962,CHRIST_KING_1962]
- ].filter(([d,n])=>iso(d)===key&&(!traditional?n!==CHRIST_KING_MODERN:n!==CHRIST_KING_1962));
+ ].filter(([d,n])=>iso(d)===key&&(traditional?n!==CHRIST_KING_MODERN:n!==CHRIST_KING_1962));
  let found=special[0]?.[1]||null;
  if(!found){const entry=celebrations.find(x=>x.month===date.getUTCMonth()+1&&x.day===date.getUTCDate());if(entry&&(traditional?entry.traditional:entry.modern))found=entry.name;}
  let season='Masa Biasa',color='Hijau';
