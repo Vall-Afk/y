@@ -1,0 +1,14 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const stats=require('../src/features/statistics-lab');
+const bible=require('../src/features/bible-parallel');
+const scholar=require('../src/features/liturgia-scholar');
+const security=require('../src/features/smart-group-security');
+const health=require('../src/features/resilience-manager');
+const doc=require('../src/features/document-analyzer');
+test('descriptive statistics and ANOVA are deterministic',()=>{const s=stats.describe([1,2,3,4]);assert.equal(s.mean,2.5);assert.equal(s.variance,5/3);const a=stats.anova([[1,2,3],[4,5,6]]);assert.equal(a.dfb,1);assert.equal(a.dfw,4);assert.equal(a.F,13.5);});
+test('bible reference parser rejects malformed input',()=>{assert.deepEqual(bible.parse(['Yohanes','1:1']),{book:'John',chapter:1,verse:1});assert.throws(()=>bible.parse(['Yohanes','0:1']),/valid/);});
+test('scholar provides a tri-lingual Christ the King entry',()=>{assert.match(scholar.topics.christusrex.la,/Iesu Christi Regis/);});
+test('antiraid requires group admin and detects repeated messages',async()=>{let out='';const ctx={cmd:{name:'antiraid',args:['on']},group:true,chat:'test@g.us',owner:false,roles:async()=>({senderAdmin:true}),reply:async s=>{out=s;}};await security.handle(ctx);assert.match(out,/on/);for(let i=0;i<7;i++)assert.equal(security.inspect('test@g.us','member',1000+i),false);assert.equal(security.inspect('test@g.us','member',1008),true);});
+test('owner diagnostics and update checks do not expose credentials',async()=>{let out='';await health.handle({cmd:{name:'repair',args:[]},owner:true,group:false,reply:async s=>{out=s;}});assert.match(out,/dinonaktifkan/);});
+test('document analyzer explicitly declines unconfigured parsing',async()=>{let out='';await doc.handle({cmd:{name:'analisispdf',args:[]},reply:async s=>{out=s;}});assert.match(out,/belum aktif/);});

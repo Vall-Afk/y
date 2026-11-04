@@ -1,0 +1,6 @@
+'use strict';
+const COMMANDS=new Set(['bibleparallel']);
+const BOOKS={matius:'Matthew',markus:'Mark',lukas:'Luke',yohanes:'John',kejadian:'Genesis',mazmur:'Psalms',wahyu:'Revelation'};
+function parse(args){const s=args.join(' ').trim(),m=/^(.+?)\s+(\d{1,3}):(\d{1,3})$/.exec(s);if(!m)throw Error('Contoh: .bibleparallel Yohanes 1:1');const chapter=Number(m[2]),verse=Number(m[3]);if(chapter<1||verse<1||chapter>150||verse>176)throw Error('Referensi tidak valid.');return {book:BOOKS[m[1].toLowerCase()]||m[1],chapter,verse};}
+async function handle(ctx){if(!COMMANDS.has(ctx.cmd.name))return false;try{const r=parse(ctx.cmd.args),ref=r.book+' '+r.chapter+':'+r.verse,url='https://bible-api.com/'+encodeURIComponent(ref)+'?translation=kjv';const res=await (ctx.fetcher||fetch)(url,{signal:AbortSignal.timeout(8000),headers:{accept:'application/json'}});if(!res.ok)throw Error('KJV tidak tersedia ('+res.status+').');const data=await res.json();if(typeof data.text!=='string'||!data.text.trim()||data.text.length>3000)throw Error('Ayat tidak ditemukan.');await ctx.reply('Beauté · Bible Parallel\n'+ref+'\nKJV: '+data.text.trim()+'\nVulgata: sumber teks belum dikonfigurasi.\nLAI: teks berlisensi, belum dikonfigurasi.\nTidak menampilkan terjemahan rekaan.');}catch(e){await ctx.reply('Bible Parallel: '+e.message);}return true;}
+module.exports={COMMANDS,handle,parse};
