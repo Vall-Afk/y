@@ -85,14 +85,24 @@ function clearSessionCookie(req){
   const secure=req.socket.encrypted||String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'||String(req.headers['cf-visitor']||'').includes('"scheme":"https"');
   return SESSION_COOKIE+'=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'+(secure?'; Secure':'');
 }
-function getSession(req){
+function sessionIdFromToken(token,secret){
+  if(typeof token!=='string')return null;
+  const parts=token.split('.');
+  if(parts.length!==2||!/^[A-Za-z0-9_-]{40,60}$/.test(parts[0]))return null;
+  const expected=crypto.createHmac('sha256',secret).update(parts[0]).digest();
+  let supplied;try{supplied=Buffer.from(parts[1],'base64url');}catch{return null;}
+  if(supplied.length!==expected.length||!crypto.timingSafeEqual(supplied,expected))return null;
+  return parts[0];
+}
+function getSession(req,secret){
   const token=parseCookies(req.headers.cookie||'')[SESSION_COOKIE];
-  if(!token)return null;
-  const session=sessions.get(token);
+  const id=sessionIdFromToken(token,secret);
+  if(!id)return null;
+  const session=sessions.get(id);
   if(!session)return null;
-  if(Date.now()>session.expires){sessions.delete(token);return null;}
+  if(Date.now()>session.expires){sessions.delete(id);return null;}
   session.expires=Date.now()+SESSION_TTL;
-  return {token,session};
+  return {id,token,session};
 }
 function roseBackground(){
   const parts=[];
@@ -133,7 +143,7 @@ function renderDashboardPage(){
 }
 function createDashboardHandler({passwordHash=process.env.DASHBOARD_PASSWORD_HASH,sessionSecret=process.env.DASHBOARD_SESSION_SECRET,getStatus,ownerPreferences,reconnect,onPreferenceChange,logger}={}){
   const configured=Boolean(parsePasswordHash(passwordHash)&&typeof sessionSecret==='string'&&Buffer.byteLength(sessionSecret)>=32);
-  function auth(req){return getSession(req);}
+  function auth(req){return getSession(req,sessionSecret);}
   function locked(res){send(res,503,'Dashboard locked. Run npm run dashboard:setup and restart Beauté.','text/plain; charset=utf-8');}
   async function handler(req,res){
     try{
@@ -152,13 +162,15 @@ function createDashboardHandler({passwordHash=process.env.DASHBOARD_PASSWORD_HAS
         const password=typeof body.password==='string'?body.password:'';
         if(!await verifyPassword(password,passwordHash)){entry.count++;loginAttempts.set(ip,entry);json(res,401,{error:'Password incorrect.'});return;}
         loginAttempts.delete(ip);
-        const token=crypto.randomBytes(32).toString('base64url');
-        sessions.set(token,{created:now,expires:now+SESSION_TTL});
+        const id=crypto.randomBytes(32).toString('base64url');
+        const signature=crypto.createHmac('sha256',sessionSecret).update(id).digest('base64url');
+        const token=id+'.'+signature;
+        sessions.set(id,{created:now,expires:now+SESSION_TTL});
         while(sessions.size>8)sessions.delete(sessions.keys().next().value);
         json(res,200,{ok:true},{'Set-Cookie':makeSessionCookie(req,token)});return;
       }
       if(req.method==='POST'&&url.pathname==='/api/logout'){
-        const current=auth(req);if(current)sessions.delete(current.token);
+        const current=auth(req);if(current)sessions.delete(current.id);
         json(res,200,{ok:true},{'Set-Cookie':clearSessionCookie(req)});return;
       }
       if(req.method==='GET'&&(url.pathname==='/api/status'||url.pathname==='/healthz')){
