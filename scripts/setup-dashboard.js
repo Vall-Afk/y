@@ -1,15 +1,13 @@
 'use strict';
 const fs=require('node:fs/promises');
 const crypto=require('node:crypto');
-const readline=require('node:readline');
 
 function readHidden(label){
   return new Promise((resolve,reject)=>{
     const input=process.stdin,output=process.stdout;
     output.write(label);
     if(!input.isTTY||typeof input.setRawMode!=='function'){
-      const rl=readline.createInterface({input,output,terminal:true});
-      rl.question('(Terminal tidak mendukung input tersembunyi; pastikan layar tidak direkam) ',answer=>{rl.close();resolve(answer);});
+      reject(new Error('Jalankan setup dari terminal interaktif agar password tidak ditampilkan.'));
       return;
     }
     let value='';
