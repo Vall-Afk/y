@@ -103,8 +103,7 @@ function createRouter(config, store, logger, {
           logger.warn?.({error:err.message},'Auto-response failed'));
       }
     }
-    if (!cmd && !linkViolation && (!group || !moderation ||
-      !(moderation.get(chat).antispam || Object.keys(moderation.get(chat).responses).length))) return;
+    // Continue non-command group messages so opt-in summary and anti-toxic observers can run.
     const reply = (body) => sock.sendMessage(chat, { text: String(body).slice(0, 3800) }, { quoted: message });
     const replyCatalog = async (body) => {
       const lines = String(body).split('\n');
