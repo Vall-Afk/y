@@ -31,7 +31,7 @@ async function fixture(options={}){
   const base='http://127.0.0.1:'+server.address().port;
   async function request(path,method='GET',body,cookie){
     const headers={};
-    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';headers['cf-connecting-ip']='192.0.2.'+(server.address().port%254+1);}
+    if(method==='POST'){headers.origin=base;headers['sec-fetch-site']='same-origin';headers['content-type']='application/json';headers['cf-connecting-ip']='test-'+crypto.randomUUID();}
     if(cookie)headers.cookie=cookie;
     return fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
   }
@@ -151,6 +151,7 @@ test('dashboard preference changes persist to disk and survive process restart',
   const f=await fixture({ownerPreferences});
   try{
     const login=await f.request('/api/login','POST',{password:f.creds.password});
+    assert.equal(login.status,200,'dashboard login must succeed: '+await login.clone().text());
     const cookie=cookieFrom(login);
     const pref=await f.request('/api/preferences','POST',{key:'autobio',enabled:true},cookie);
     assert.equal(pref.status,200);
