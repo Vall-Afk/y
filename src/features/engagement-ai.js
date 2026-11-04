@@ -79,4 +79,4 @@ async function handle(ctx){
  if(name==='tanyavoice'){if(!audioTarget(ctx.message))return ctx.reply('Kirim voice note langsung, atau balas voice note dengan .tanyavoice.');try{const transcript=await transcribeAudio(ctx);await ctx.reply('Beauté · Transkrip\\n'+transcript);try{const answer=await askAI('Jawab pertanyaan atau permintaan berikut dengan ringkas dalam bahasa Indonesia. Jika bukan pertanyaan, ringkas maksudnya.\\n'+transcript,ctx.fetcher||fetch);await ctx.reply('Beauté AI\\n'+answer);await speak(ctx,answer).catch(()=>{});}catch(e){await ctx.reply('Transkrip berhasil. AI belum tersedia: '+safeText(e.message,120));}}catch(e){await ctx.reply('Voice Note: '+safeText(e.message,240));}return true;}
  return false;
 }
-module.exports={COMMANDS,handle,card,zodiac,factCheckGuidance,rate,observeGroup,groupOptIn,groupHistory,askAI,inspectToxic,transcribeAudio,factSearch};
+module.exports={COMMANDS,handle,card,zodiac,factCheckGuidance,rate,observeGroup,groupOptIn,groupHistory,askAI,inspectToxic,transcribeAudio,factSearch,generateImage,makeSticker,extractToxic,menfessConsent,profileConsent,toxicGroups};
