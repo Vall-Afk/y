@@ -32,6 +32,7 @@ const { LIB_COMMANDS, handleLibrary } = require('./features/media-library');
 const { DOWNLOAD_COMMANDS, handleDownload } = require('./features/downloaders');
 const { SAVEAPI_COMMANDS, handleSaveAPI } = require('./features/saveapi-account');
 const { LITURGIA_COMMANDS, handleLiturgia } = require('./features/liturgia');
+const { HEALTH_COMMANDS, handleHealth } = require('./features/bot-health');
 const { PROFILE_COMMANDS, handleProfile } = require('./features/profile');
 const { LEGACY_UTILITY_COMMANDS, handleLegacyUtilities } = require('./features/legacy-utilities');
 const { OWNER_AUTOMATION_COMMANDS, handleOwnerAutomation, autoRespondText } = require('./features/owner-automation');
@@ -45,12 +46,12 @@ const ALL_COMMANDS = new Set([
   ...MENU_COMMANDS, ...BASE_COMMANDS, ...GROUP_COMMANDS, ...TOOL_COMMANDS, ...SCIENCE_COMMANDS, ...ACADEMIC_COMMANDS, ...AI_COMMANDS, ...STATS_COMMANDS, ...BROADCAST_COMMANDS, ...STUDY_COMMANDS, ...UTIL_COMMANDS, ...WEB_COMMANDS,
   ...ECONOMY_COMMANDS, ...GAME_COMMANDS, ...RPG_COMMANDS, ...NET_COMMANDS,
   ...JADIBOT_COMMANDS, ...CATALOG_COMMANDS, ...MOD_COMMANDS, ...IMAGE_COMMANDS,
-  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...SAVEAPI_COMMANDS, ...LITURGIA_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
+  ...MEDIA_COMMANDS, ...STICKERWM_COMMANDS, ...RENTAL_COMMANDS, ...BACKUP_COMMANDS, ...ANON_COMMANDS, ...TEXTFX_COMMANDS, ...LIB_COMMANDS, ...DOWNLOAD_COMMANDS, ...SAVEAPI_COMMANDS, ...LITURGIA_COMMANDS, ...HEALTH_COMMANDS, ...PROFILE_COMMANDS, ...LEGACY_UTILITY_COMMANDS, ...OWNER_AUTOMATION_COMMANDS
 ]);
 
 function waMeLink(text) { return /(?:https?:\/\/)?(?:wa\.me\/\d{7,15}|api\.whatsapp\.com\/send\?phone=\d{7,15})/i.test(text); }
 function createRouter(config, store, logger, {
-  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), library = null, ownerPreferences = null, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
+  now = () => Date.now(), convert = convertMedia, economy = null, games = new GameHub(now), rpg = null, afk = new Away(now), subbot = null, catalog = null, moderation = null, rentals = null, backup = null, anonymous = new AnonymousHub(now), library = null, ownerPreferences = null, connected = () => false, spamDetector = new SpamDetector(now), fetcher = globalThis.fetch
 } = {}) {
   const recent = new Map();
   const autoReplyRecent = new Map();
@@ -121,7 +122,7 @@ function createRouter(config, store, logger, {
         ({ ...roleFromMeta(metadata, sender, sock.user?.id), metadata }));
       return rolePromise;
     };
-    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, library, ownerPreferences, fetcher, lang, t };
+    const ctx = { config, store, logger, sock, message, sender, accountSender, owner, text, cmd, chat, group, reply, roles, economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous, library, ownerPreferences, connected, fetcher, lang, t };
     try {
       if (group && linkViolation) {
         const role = await roles();
@@ -214,6 +215,7 @@ function createRouter(config, store, logger, {
       if (LIB_COMMANDS.has(cmd.name) && await handleLibrary(ctx)) return;
       if (SAVEAPI_COMMANDS.has(cmd.name) && await handleSaveAPI(ctx)) return;
       if (LITURGIA_COMMANDS.has(cmd.name) && await handleLiturgia(ctx)) return;
+      if (HEALTH_COMMANDS.has(cmd.name) && await handleHealth(ctx)) return;
       if (DOWNLOAD_COMMANDS.has(cmd.name) && await handleDownload(ctx)) return;
       if (PROFILE_COMMANDS.has(cmd.name) && await handleProfile(ctx)) return;
       if (OWNER_AUTOMATION_COMMANDS.has(cmd.name) && await handleOwnerAutomation(ctx)) return;

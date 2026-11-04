@@ -1,6 +1,7 @@
 'use strict';
 // Beauté public-post multi-media downloader. No cookies, credentials, shell, plugins or DRM bypass.
 const fs=require('node:fs/promises');
+const {recordDownload,notifyRepeatedFailure}=require('./bot-health');
 const os=require('node:os');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
@@ -181,6 +182,10 @@ async function downloadViaSaveAPI({command,url,request=fetch}){
   return {items,source,saveApiRemaining:remaining};
 }
 let lowCreditNotified=false;
+const mediaCache=new Map();
+const CACHE_TTL=5*60*1000,CACHE_LIMIT=48*1024*1024;
+function cacheGet(key){const x=mediaCache.get(key);if(!x)return null;if(Date.now()>x.expires){mediaCache.delete(key);return null;}return x.result;}
+function cachePut(key,result){const items=result.items||[];const bytes=items.reduce((n,m)=>n+(m.buffer?.length||0),0);if(!bytes||bytes>CACHE_LIMIT)return;mediaCache.clear();mediaCache.set(key,{result,expires:Date.now()+CACHE_TTL});}
 async function handleDownload(ctx,download=downloadPublicMedia){
   const {cmd,reply,sock,chat,message,lang,economy,accountSender,owner}=ctx;
   if(!DOWNLOAD_COMMANDS.has(cmd.name))return false;
@@ -193,14 +198,11 @@ async function handleDownload(ctx,download=downloadPublicMedia){
     }
     let result, primary;
     const source=normalizeLink(url,cmd.name);
-    // SaveAPI first for public social posts; YouTube stays on yt-dlp.
-    const saveApiFirst=download===downloadPublicMedia&&
-      ['tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo','igreels','twitter','xdl','pinterestdl','pindl'].includes(cmd.name)&&
-      Boolean(process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS);
-    if(saveApiFirst){
-      try{result=await downloadViaSaveAPI({command:cmd.name,url});}
-      catch(err){primary=err;}
-    }
+    const cacheKey=cmd.name+'|'+source;
+    result=cacheGet(cacheKey);
+    const social=['tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo','igreels','twitter','xdl','pinterestdl','pindl'].includes(cmd.name);
+    const saveEnabled=download===downloadPublicMedia&&social&&Boolean(process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS);
+    // Try free downloaders first. Only spend SaveAPI credits when they fail.
     if(!result&&download===downloadPublicMedia&&preferGallery(cmd.name,source)){
       try{result=await downloadViaGalleryDL({command:cmd.name,url});}catch(err){primary=err;}
     }
@@ -208,10 +210,11 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       try{result=await download({command:cmd.name,url});}
       catch(err){primary=err;}
     }
-    if(!result&&!saveApiFirst&&download===downloadPublicMedia&&process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS){
+    if(!result&&saveEnabled){
       try{result=await downloadViaSaveAPI({command:cmd.name,url});}
       catch(err){primary=Error((primary?.message||'Downloader failed')+'; SaveAPI: '+err.message);}
     }
+    if(result)cachePut(cacheKey,result);
     if(!result)throw primary||Error('Download unavailable.');
     const items=Array.isArray(result?.items)?result.items:[result];
     if(!items.length||items.length>MAX_ITEMS)throw Error('Invalid media item count.');
@@ -223,6 +226,7 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       else if(m.mimetype==='video/mp4')await sock.sendMessage(chat,{video:m.buffer,mimetype:m.mimetype,caption},{quoted:message});
       else await sock.sendMessage(chat,{document:m.buffer,mimetype:m.mimetype,fileName:m.name,caption},{quoted:message});
     }
+    recordDownload(true);
     if(result.saveApiRemaining!==null&&result.saveApiRemaining!==undefined){
       if(result.saveApiRemaining>=100)lowCreditNotified=false;
       else if(!lowCreditNotified){
@@ -234,7 +238,7 @@ async function handleDownload(ctx,download=downloadPublicMedia){
         }
       }
     }
-  }catch(err){await reply((lang==='en'?'Download unavailable: ':'Download gagal: ')+String(err.message).slice(0,170));}
+  }catch(err){recordDownload(false,err.message);await notifyRepeatedFailure(ctx);await reply((lang==='en'?'Download unavailable: ':'Download gagal: ')+String(err.message).slice(0,170));}
   return true;
 }
 module.exports={DOWNLOAD_COMMANDS,normalizeLink,downloadArgs,runDownloader,downloadPublicMedia,downloadViaGalleryDL,downloadViaSaveAPI,handleDownload};
