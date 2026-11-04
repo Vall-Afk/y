@@ -3,7 +3,11 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const http=require('node:http');
+const fs=require('node:fs/promises');
+const os=require('node:os');
+const path=require('node:path');
 const {createDashboardHandler}=require('../src/dashboard');
+const {OwnerPreferences}=require('../src/features/owner-automation');
 
 function credentials(password='correct horse battery staple'){
   const salt=crypto.randomBytes(16).toString('hex');
@@ -137,4 +141,27 @@ test('login throttles repeated bad passwords',async()=>{
     assert.equal(blocked.status,429);
     assert.equal(blocked.headers.get('retry-after'),'900');
   }finally{await f.close();}
+});
+
+test('dashboard preference changes persist to disk and survive process restart',async()=>{
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'beaute-dashboard-prefs-'));
+  const file=path.join(dir,'owner-automation.json');
+  const ownerPreferences=new OwnerPreferences(file);
+  await ownerPreferences.init();
+  const f=await fixture({ownerPreferences});
+  try{
+    const login=await f.request('/api/login','POST',{password:f.creds.password});
+    const cookie=cookieFrom(login);
+    const pref=await f.request('/api/preferences','POST',{key:'autobio',enabled:true},cookie);
+    assert.equal(pref.status,200);
+    const saved=JSON.parse(await fs.readFile(file,'utf8'));
+    assert.equal(saved.autobio,true);
+    const restarted=new OwnerPreferences(file);
+    await restarted.init();
+    assert.equal(restarted.get().autobio,true);
+    assert.equal(restarted.get().autoread,false);
+  }finally{
+    await f.close();
+    await fs.rm(dir,{recursive:true,force:true});
+  }
 });
