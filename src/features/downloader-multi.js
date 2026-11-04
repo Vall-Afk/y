@@ -157,6 +157,8 @@ async function downloadViaSaveAPI({command,url,request=fetch}){
   const found=raw.filter(m=>m&&typeof m.url==='string'&&(audio?m.type==='audio':['image','photo','video'].includes(m.type)));
   const unique=[...new Map(found.map(m=>[m.url,m])).values()];
   if(!unique.length||unique.length>MAX_ITEMS)throw Error('SaveAPI returned no supported media or too many items.');
+  const remainingHeader=response.headers?.get?.('X-Credits-Remaining');
+  const remaining=remainingHeader!==null&&remainingHeader!==undefined&&remainingHeader!==''&&Number.isFinite(Number(remainingHeader))?Number(remainingHeader):null;
   const items=[];let total=0;
   for(const [i,m] of unique.entries()){
     let u;try{u=new URL(m.url);}catch{throw Error('Invalid SaveAPI media URL.');}
@@ -176,8 +178,9 @@ async function downloadViaSaveAPI({command,url,request=fetch}){
     const ext=known[0];
     items.push({buffer:Buffer.concat(chunks),mimetype:type,name:'result.'+String(i+1).padStart(3,'0')+ext,audio:AUDIO_EXT.has(ext),image:IMAGE_EXT.has(ext),source});
   }
-  return {items,source};
+  return {items,source,saveApiRemaining:remaining};
 }
+let lowCreditNotified=false;
 async function handleDownload(ctx,download=downloadPublicMedia){
   const {cmd,reply,sock,chat,message,lang,economy,accountSender,owner}=ctx;
   if(!DOWNLOAD_COMMANDS.has(cmd.name))return false;
@@ -219,6 +222,17 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       else if(m.image||m.mimetype?.startsWith('image/'))await sock.sendMessage(chat,{image:m.buffer,mimetype:m.mimetype,caption},{quoted:message});
       else if(m.mimetype==='video/mp4')await sock.sendMessage(chat,{video:m.buffer,mimetype:m.mimetype,caption},{quoted:message});
       else await sock.sendMessage(chat,{document:m.buffer,mimetype:m.mimetype,fileName:m.name,caption},{quoted:message});
+    }
+    if(result.saveApiRemaining!==null&&result.saveApiRemaining!==undefined){
+      if(result.saveApiRemaining>=100)lowCreditNotified=false;
+      else if(!lowCreditNotified){
+        lowCreditNotified=true;
+        const notice='Beauté · PERINGATAN SAVEAPI: sisa '+result.saveApiRemaining+' kredit (di bawah 100). Periksa .saveapibalance melalui chat pribadi owner.';
+        if(ctx.config?.ownerJid){
+          try{await sock.sendMessage(ctx.config.ownerJid,{text:notice});}
+          catch(err){ctx.logger?.warn?.({error:err.message},'SaveAPI low-credit notification failed');lowCreditNotified=false;}
+        }
+      }
     }
   }catch(err){await reply((lang==='en'?'Download unavailable: ':'Download gagal: ')+String(err.message).slice(0,170));}
   return true;
