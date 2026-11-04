@@ -12,7 +12,8 @@
     "test": "node --test --test-concurrency=1",
     "check": "node scripts/check-syntax.js",
     "audit": "npm audit --omit=dev --audit-level=high",
-    "test:parallel": "node --test"
+    "test:parallel": "node --test",
+    "dashboard:setup": "node scripts/setup-dashboard.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "6.7.24",
