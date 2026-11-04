@@ -4,6 +4,13 @@ const fs=require('node:fs/promises'),path=require('node:path');
 const {EventEmitter}=require('node:events');
 const {normalizeLink,downloadArgs,downloadPublicMedia,handleDownload,runDownloader}=
   require('../src/features/downloaders');
+test('Pinterest downloader accepts canonical pins and short links only',()=>{
+  assert.equal(normalizeLink('https://www.pinterest.com/pin/123456789012345678/','pinterestdl'),
+    'https://www.pinterest.com/pin/123456789012345678/');
+  assert.equal(normalizeLink('https://pin.it/AbCdEf12','pindl'),'https://pin.it/AbCdEf12');
+  assert.throws(()=>normalizeLink('https://evil.example/pin/123456789012345678/','pindl'),/unsafe/);
+  assert.throws(()=>normalizeLink('https://www.pinterest.com/search/pins/?q=cats','pinterestdl'),/public Pinterest pin/);
+});
 test('downloaders validate public media URLs and strip tracking queries',()=>{
   assert.equal(normalizeLink('https://youtu.be/abcdefghijk?t=42','ytmp3'),
     'https://www.youtube.com/watch?v=abcdefghijk');

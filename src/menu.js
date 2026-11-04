@@ -84,7 +84,7 @@ const DOWNLOAD_GUIDE = Object.freeze([
   'ytmp3 <YouTube URL>', 'ytmp4 <YouTube URL>',
   'tiktok <TikTok URL>', 'tiktoknowm <TikTok URL>', 'tiktokaudio <TikTok URL>',
   'instagram <Instagram URL>', 'igphoto <Instagram URL>',
-  'igvideo <Instagram URL>', 'igreels <Instagram URL>', 'twitter <X post URL>', 'xdl <X post URL>'
+  'igvideo <Instagram URL>', 'igreels <Instagram URL>', 'twitter <X post URL>', 'xdl <X post URL>', 'pinterestdl <Pinterest pin URL>', 'pindl <Pinterest pin URL>'
 ]);
 const ACADEMIC = Object.freeze([
   'statadv 10 20 30 40', 'ujit 2,3,4,5 | 3', 'chisquare 10,20,30 | 15,20,25',
@@ -94,7 +94,7 @@ const ACADEMIC = Object.freeze([
   'keuangan 1000000 0.05 12', 'investasi 0.04 1.2 0.10',
   'npv 0.1 -1000 400 400 400', 'irr -1000 600 600', 'portofolio 0.6 0.1 0.08 0.2 0.1 0.3',
   'peluang binomial 10 3 0.5', 'anova 1,2,3;4,5,6',
-  'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027',
+  'multivariat 3 4', 'gregorian 2026-11-02', 'liturgi 2027', 'liturgi hariini', 'liturgi 1962 2026-10-25', 'liturgi modern latin 2026-11-22', 'liturgi bandingkan 2026-10-25',
   'alkitab Matius 1:1', 'vulgata Ioannes III:XVI', 'google <pencarian>', 'ai <pertanyaan>'
 ]);
 const PREMIUM = Object.freeze(['jadibot 628xxxx (pairing)', 'jadibot qr', 'cekjadibot', 'stopjadibot']);
@@ -103,7 +103,7 @@ const OWNER = Object.freeze(['mode public|private', 'self', 'public', 'dashboard
   'addpremium 62xxx 30', 'delpremium 62xxx', 'listpremium',
   'addsewa <group@g.us> bulan|minggu', 'joinsewa https://chat.whatsapp.com/KODE bulan|minggu', 'delsewa <group@g.us>', 'listsewa', 'backup (private DM)',
   'join <invite link> (DM)', 'leavegc (group)', 'setnamebot <teks>',
-  'setbiobot <teks>', 'setppbot (reply gambar)', 'delppbot']);
+  'setbiobot <teks>', 'setppbot (reply gambar)', 'delppbot', 'saveapibalance (DM owner)', 'saveapiusage (DM owner)']);
 const ALIASES = Object.freeze({
   menu: 'all', help: 'all', allmenu: 'all',
   menugroup: 'group', menugrup: 'group',

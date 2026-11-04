@@ -4,12 +4,12 @@ const fs=require('node:fs/promises');
 const os=require('node:os');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
-const DOWNLOAD_COMMANDS=new Set(['tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo','igreels','ytmp3','ytmp4','twitter','xdl']);
+const DOWNLOAD_COMMANDS=new Set(['tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo','igreels','ytmp3','ytmp4','twitter','xdl','pinterestdl','pindl']);
 const AUDIO=new Set(['tiktokaudio','ytmp3']);
 const MAX_BYTES=64*1024*1024, MAX_TOTAL_BYTES=160*1024*1024, MAX_ITEMS=20, MAX_RUNTIME=180000;
 const MIME={'.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp','.mp4':'video/mp4','.webm':'video/webm','.mkv':'video/x-matroska','.mp3':'audio/mpeg','.m4a':'audio/mp4','.ogg':'audio/ogg','.opus':'audio/ogg'};
 const VIDEO_EXT=new Set(['.mp4','.webm','.mkv']), IMAGE_EXT=new Set(['.jpg','.jpeg','.png','.webp']), AUDIO_EXT=new Set(['.mp3','.m4a','.ogg','.opus']);
-const HOSTS=new Set(['youtube.com','www.youtube.com','m.youtube.com','youtu.be','tiktok.com','www.tiktok.com','vm.tiktok.com','vt.tiktok.com','instagram.com','www.instagram.com','x.com','www.x.com','twitter.com','www.twitter.com']);
+const HOSTS=new Set(['youtube.com','www.youtube.com','m.youtube.com','youtu.be','tiktok.com','www.tiktok.com','vm.tiktok.com','vt.tiktok.com','instagram.com','www.instagram.com','x.com','www.x.com','twitter.com','www.twitter.com','pinterest.com','www.pinterest.com','pin.it']);
 const YT_ID=/^[A-Za-z0-9_-]{11}$/;
 function normalizeLink(input,command){
   if(!DOWNLOAD_COMMANDS.has(command))throw Error('Unsupported downloader command.');
@@ -37,6 +37,16 @@ function normalizeLink(input,command){
     const m=/^\/(?:[A-Za-z0-9_]{1,15}|i)\/status\/(\d{10,25})\/?$/.exec(p);
     if(!m)throw Error('Only single public X posts are supported.');
     return 'https://x.com/i/status/'+m[1];
+  }
+  if(command==='pinterestdl'||command==='pindl'){
+    if(!['pinterest.com','www.pinterest.com','pin.it'].includes(host))throw Error('Pinterest command needs a Pinterest URL.');
+    if(host==='pin.it'){
+      if(!/^\/[A-Za-z0-9_-]{4,40}\/?$/.test(p))throw Error('Invalid Pinterest short URL.');
+      return 'https://pin.it'+p;
+    }
+    const m=/^\/pin\/(\d{5,30})\/?$/.exec(p);
+    if(!m)throw Error('Only public Pinterest pin URLs are supported.');
+    return 'https://www.pinterest.com/pin/'+m[1]+'/';
   }
   if(!['tiktok.com','www.tiktok.com','vm.tiktok.com','vt.tiktok.com'].includes(host))throw Error('TikTok command needs a TikTok URL.');
   if(host==='vm.tiktok.com'||host==='vt.tiktok.com'){
@@ -128,7 +138,7 @@ async function downloadViaGalleryDL({command,url,binary=process.env.GALLERYDL_PA
   }finally{if(dir)await fs.rm(dir,{recursive:true,force:true}).catch(()=>{});running--;}
 }
 function preferGallery(command,source){
-  return /\/photo\//.test(source)||/instagram\.com\/p\//.test(source)||command==='twitter'||command==='xdl';
+  return /\/photo\//.test(source)||/instagram\.com\/p\//.test(source)||command==='twitter'||command==='xdl'||command==='pinterestdl'||command==='pindl';
 }
 
 function cdnAllowed(u){
@@ -147,6 +157,8 @@ async function downloadViaSaveAPI({command,url,request=fetch}){
   const found=raw.filter(m=>m&&typeof m.url==='string'&&(audio?m.type==='audio':['image','photo','video'].includes(m.type)));
   const unique=[...new Map(found.map(m=>[m.url,m])).values()];
   if(!unique.length||unique.length>MAX_ITEMS)throw Error('SaveAPI returned no supported media or too many items.');
+  const remainingHeader=response.headers?.get?.('X-Credits-Remaining');
+  const remaining=remainingHeader!==null&&remainingHeader!==undefined&&remainingHeader!==''&&Number.isFinite(Number(remainingHeader))?Number(remainingHeader):null;
   const items=[];let total=0;
   for(const [i,m] of unique.entries()){
     let u;try{u=new URL(m.url);}catch{throw Error('Invalid SaveAPI media URL.');}
@@ -166,8 +178,9 @@ async function downloadViaSaveAPI({command,url,request=fetch}){
     const ext=known[0];
     items.push({buffer:Buffer.concat(chunks),mimetype:type,name:'result.'+String(i+1).padStart(3,'0')+ext,audio:AUDIO_EXT.has(ext),image:IMAGE_EXT.has(ext),source});
   }
-  return {items,source};
+  return {items,source,saveApiRemaining:remaining};
 }
+let lowCreditNotified=false;
 async function handleDownload(ctx,download=downloadPublicMedia){
   const {cmd,reply,sock,chat,message,lang,economy,accountSender,owner}=ctx;
   if(!DOWNLOAD_COMMANDS.has(cmd.name))return false;
@@ -180,14 +193,22 @@ async function handleDownload(ctx,download=downloadPublicMedia){
     }
     let result, primary;
     const source=normalizeLink(url,cmd.name);
-    if(download===downloadPublicMedia&&preferGallery(cmd.name,source)){
+    // SaveAPI first for public social posts; YouTube stays on yt-dlp.
+    const saveApiFirst=download===downloadPublicMedia&&
+      ['tiktok','tiktoknowm','tiktokaudio','instagram','igphoto','igvideo','igreels','twitter','xdl','pinterestdl','pindl'].includes(cmd.name)&&
+      Boolean(process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS);
+    if(saveApiFirst){
+      try{result=await downloadViaSaveAPI({command:cmd.name,url});}
+      catch(err){primary=err;}
+    }
+    if(!result&&download===downloadPublicMedia&&preferGallery(cmd.name,source)){
       try{result=await downloadViaGalleryDL({command:cmd.name,url});}catch(err){primary=err;}
     }
     if(!result){
       try{result=await download({command:cmd.name,url});}
       catch(err){primary=err;}
     }
-    if(!result&&download===downloadPublicMedia&&process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS){
+    if(!result&&!saveApiFirst&&download===downloadPublicMedia&&process.env.SAVEAPI_KEY&&process.env.SAVEAPI_CDN_HOSTS){
       try{result=await downloadViaSaveAPI({command:cmd.name,url});}
       catch(err){primary=Error((primary?.message||'Downloader failed')+'; SaveAPI: '+err.message);}
     }
@@ -201,6 +222,17 @@ async function handleDownload(ctx,download=downloadPublicMedia){
       else if(m.image||m.mimetype?.startsWith('image/'))await sock.sendMessage(chat,{image:m.buffer,mimetype:m.mimetype,caption},{quoted:message});
       else if(m.mimetype==='video/mp4')await sock.sendMessage(chat,{video:m.buffer,mimetype:m.mimetype,caption},{quoted:message});
       else await sock.sendMessage(chat,{document:m.buffer,mimetype:m.mimetype,fileName:m.name,caption},{quoted:message});
+    }
+    if(result.saveApiRemaining!==null&&result.saveApiRemaining!==undefined){
+      if(result.saveApiRemaining>=100)lowCreditNotified=false;
+      else if(!lowCreditNotified){
+        lowCreditNotified=true;
+        const notice='Beauté · PERINGATAN SAVEAPI: sisa '+result.saveApiRemaining+' kredit (di bawah 100). Periksa .saveapibalance melalui chat pribadi owner.';
+        if(ctx.config?.ownerJid){
+          try{await sock.sendMessage(ctx.config.ownerJid,{text:notice});}
+          catch(err){ctx.logger?.warn?.({error:err.message},'SaveAPI low-credit notification failed');lowCreditNotified=false;}
+        }
+      }
     }
   }catch(err){await reply((lang==='en'?'Download unavailable: ':'Download gagal: ')+String(err.message).slice(0,170));}
   return true;
