@@ -1,0 +1,23 @@
+name: Beauté CI
+on:
+  push:
+    branches:
+      - feature/beaute-engagement-ai-20261104
+  pull_request:
+    branches:
+      - rebuild/beaute-secure-20261101
+      - feature/beaute-saveapi-social-downloader-20261104
+      - feature/beaute-liturgia-health-economy-20261104
+      - feature/beaute-scholar-lab-resilience-20261104
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
