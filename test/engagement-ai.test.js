@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {COMMANDS,handle,card,factCheckGuidance,rate}=require('../src/features/engagement-ai');
+test('all requested engagement commands are registered',()=>{for(const n of ['roast','puji','cekhoax','tarot','ramalan','zodiak','tanyavoice','simpulkan','drama','stikermeme','antitoxic','report','menfess'])assert.ok(COMMANDS.has(n),n);});
+test('tarot selection is deterministic per seed',()=>assert.equal(card('same'),card('same')));
+test('fact check does not invent verdict',()=>assert.match(factCheckGuidance('Sebuah klaim tanpa sumber'),/BELUM TERVERIFIKASI/));
+test('roast does not target a third party without consent',async()=>{let result='';await handle({cmd:{name:'roast',args:['@user']},accountSender:'x',reply:async s=>{result=s;}});assert.match(result,/persetujuan/);});
+test('menfess never sends unsolicited direct message',async()=>{let result='',sent=0;await handle({cmd:{name:'menfess',args:['628123456789','|','pesan']},accountSender:'x',sock:{sendMessage:async()=>sent++},reply:async s=>{result=s;}});assert.equal(sent,0);assert.match(result,/belum mengirim/);});
+test('report does not publish unreviewed issue',async()=>{let result='';await handle({cmd:{name:'report',args:['Downloader','Instagram','gagal','saat','menerima','reel']},accountSender:'test-report',reply:async s=>{result=s;}});assert.match(result,/belum dikirim/);});
+test('rate limiting blocks repeated calls',()=>{assert.equal(rate('unit-test',100,1000),true);assert.equal(rate('unit-test',100,1050),false);assert.equal(rate('unit-test',100,1100),true);});
