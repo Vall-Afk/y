@@ -2,6 +2,7 @@
 process.umask(0o077);
 const fs = require('node:fs/promises');
 const http = require('node:http');
+const os = require('node:os');
 const path = require('node:path');
 const pino = require('pino');
 const qrcode = require('qrcode-terminal');
@@ -22,7 +23,8 @@ const { AnonymousHub } = require('./features/anonymous');
 const { MediaLibrary } = require('./features/media-library');
 const { OwnerPreferences, rejectIncomingCalls, bioText } = require('./features/owner-automation');
 const { isGroup } = require('./util');
-const { renderStatusPage } = require('./status-page');
+const { createDashboardHandler } = require('./dashboard');
+const { state: downloaderHealth } = require('./features/bot-health');
 async function main() {
   const config = loadConfig();
   const logger = pino({ level: config.logLevel, redact: ['*.key','*.token','*.auth','*.password'] });
@@ -105,26 +107,43 @@ async function main() {
   });
   await subbot.init();
   const router = createRouter(config, store, logger, { economy, games, rpg, afk, subbot, catalog, moderation, rentals, backup, anonymous: new AnonymousHub(), library, ownerPreferences, connected: () => connected });
-  const health = http.createServer((req, res) => {
-    const headers = {
-      'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'no-referrer', 'X-Frame-Options': 'DENY',
-      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"
-    };
-    if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, headers).end(); return; }
-    if (req.url === '/') {
-      const body = renderStatusPage({ connected, uptimeSeconds: process.uptime() });
-      res.writeHead(200, { ...headers, 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(req.method === 'HEAD' ? undefined : body);
-      return;
-    }
-    if (req.url === '/healthz') {
-      res.writeHead(200, { ...headers, 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ alive: true, connected }) + '\n');
-      return;
-    }
-    res.writeHead(404, headers).end();
+  const dashboardHandler = createDashboardHandler({
+    getStatus: () => {
+      const memory = process.memoryUsage();
+      const mb = value => Number((value / 1048576).toFixed(1));
+      return {
+        botName: config.name,
+        connected,
+        uptimeSeconds: Math.floor(process.uptime()),
+        memory: { rssMb: mb(memory.rss), heapMb: mb(memory.heapUsed), freeMb: mb(os.freemem()) },
+        downloader: {
+          success: downloaderHealth.downloadOk,
+          failed: downloaderHealth.downloadFailed,
+          failures: downloaderHealth.failures,
+          lastAt: downloaderHealth.lastDownloadAt,
+          lastError: downloaderHealth.lastDownloadError
+        },
+        subbotStatus: subbot.slot?.status || 'inactive',
+        preferences: ownerPreferences.get()
+      };
+    },
+    ownerPreferences,
+    reconnect: async () => {
+      if (stopping) throw new Error('Bot is shutting down.');
+      if (socket) socket.end(new Error('Reconnect requested from dashboard'));
+      else if (!connecting) void connect().catch(err =>
+        logger.error({ error: err.message }, 'Dashboard reconnect failed'));
+    },
+    onPreferenceChange: async (key, enabled) => {
+      if (key === 'autobio' && enabled && socket &&
+          typeof socket.updateProfileStatus === 'function') {
+        try { await socket.updateProfileStatus(bioText(config)); }
+        catch (err) { logger.warn({ error: err.message }, 'Dashboard autobio update failed'); }
+      }
+    },
+    logger
   });
+  const health = http.createServer(dashboardHandler);
   await new Promise(resolve => health.listen(config.port, '127.0.0.1', resolve));
   async function connect() {
     if (stopping || connecting) return;
