@@ -60,3 +60,18 @@ test('legacy 3D numeric-leading command names route without treating numbers as 
     message:{conversation:'3dchrome HELLO'}});
   assert.ok(Buffer.isBuffer(sent.at(-1).image));
 });
+
+
+test('named maker materials render structural differences rather than only palette changes',async()=>{
+  const names=['game8bit','3dchrome','glass','firework','papercut','sketch','blood','neonlight'];
+  const svgs=names.map(name=>effectSvg(name,'Beauté').toString());
+  const signatures=['shape-rendering="crispEdges"','materialShadow','fill="none" stroke="#d5faff"','stroke="#fff4bc"','translate(16,18)','stroke-dasharray="6 3"','fill="#a90d2d"','fill="#29f6fa"'];
+  for(let i=0;i<names.length;i++){
+    assert.ok(svgs[i].includes(signatures[i]),names[i]+' missing material effect');
+    const image=await textEffect(names[i],'Beauté');
+    const meta=await sharp(image).metadata();
+    assert.equal(meta.format,'png');
+    assert.equal(meta.width,1024);
+    assert.equal(meta.height,512);
+  }
+});
