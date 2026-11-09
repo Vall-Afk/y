@@ -57,3 +57,21 @@ test('prefixless image studio Brat sticker sends only local output',async()=>{
   await router.handle(sock,{key:{remoteJid:user},message:{conversation:'qc'}});
   assert.match(sent.at(-1).text,/processing|gagal/i);
 });
+
+
+test('pixelate preserves non-square aspect ratios and supports adjustable pixel size',async()=>{
+  const src=await sharp({create:{width:600,height:200,channels:4,background:'#4389ca'}}).png().toBuffer();
+  for(const size of [2,12,48,64]){
+    const out=await imageTransform(src,'pixelate',[String(size)]);
+    const meta=await sharp(out).metadata();
+    assert.equal(meta.format,'jpeg');
+    assert.equal(meta.width,600);
+    assert.equal(meta.height,200);
+  }
+  const tall=await sharp({create:{width:120,height:400,channels:4,background:'#38c39a'}}).png().toBuffer();
+  const tallMeta=await sharp(await imageTransform(tall,'pixelate')).metadata();
+  assert.equal(tallMeta.width,120);
+  assert.equal(tallMeta.height,400);
+  await assert.rejects(imageTransform(src,'pixelate',['0']),/pixelate 2 to 64/);
+  await assert.rejects(imageTransform(src,'pixelate',['100']),/pixelate 2 to 64/);
+});

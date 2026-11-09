@@ -47,10 +47,24 @@ function imageTransform(buffer,command,args=[]){
     case 'mirror':image=image.flop();break;
     case 'enhance':image=image.normalize().sharpen();break;
     case 'pixelate':
-      return sharp(buffer,{limitInputPixels:20_000_000,animated:false})
-        .resize(64,64,{fit:'fill'}).toBuffer()
-        .then(small=>sharp(small).resize(512,512,{kernel:'nearest'})
-          .flatten({background:'#ffffff'}).jpeg({quality:83}).toBuffer());
+      return (async()=>{
+        const original=sharp(buffer,{limitInputPixels:20_000_000,animated:false}).rotate();
+        const meta=await original.metadata();
+        const w=meta.autoOrient?.width||meta.width;
+        const h=meta.autoOrient?.height||meta.height;
+        const scale=Math.min(1,2048/Math.max(w,h));
+        const width=Math.max(1,Math.round(w*scale));
+        const height=Math.max(1,Math.round(h*scale));
+        const pixelSize=args[0]===undefined?12:Number(args[0]);
+        if(!Number.isInteger(pixelSize)||pixelSize<2||pixelSize>64)
+          throw new Error('Use pixelate 2 to 64.');
+        const smallWidth=Math.max(1,Math.ceil(width/pixelSize));
+        const smallHeight=Math.max(1,Math.ceil(height/pixelSize));
+        const small=await original.resize(smallWidth,smallHeight,{fit:'fill',kernel:'nearest'})
+          .png().toBuffer();
+        return sharp(small).resize(width,height,{fit:'fill',kernel:'nearest'})
+          .flatten({background:'#ffffff'}).jpeg({quality:83}).toBuffer();
+      })();
     case 'resize':{
       const n=Number(args[0]);
       if (!Number.isInteger(n)||n<128||n>2048) throw new Error('Use resize 128 to 2048.');
