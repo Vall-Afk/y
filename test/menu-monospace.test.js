@@ -19,3 +19,14 @@ test('TextFX is hidden from menu and dynamic catalog but commands stay registere
   assert.ok(TEXTFX_COMMANDS.has('neon'));
   assert.equal(ALIASES.menutextpro,'textfx');
 });
+
+
+test('explicit maker submenu still works while full catalog keeps it hidden',()=>{
+  const full=menu(config,'menu');
+  const explicit=menu(config,'menutextpro');
+  assert.doesNotMatch(full,/EFEK TEKS|TEXT EFFECTS/);
+  assert.match(explicit,/EFEK TEKS/);
+  assert.match(explicit,/textfx neon Beauté/);
+  assert.ok(explicit.startsWith('```\n'));
+  assert.doesNotMatch(explicit,/Kategori tidak ditemukan/);
+});
