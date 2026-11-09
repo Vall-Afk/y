@@ -47,13 +47,6 @@ const SECTIONS = Object.freeze([
       'addvid key', 'listvid', 'getvid key', 'delvid key']
   },
   {
-    id: 'textfx', icon: '✧', idTitle: 'EFEK TEKS', enTitle: 'TEXT EFFECTS',
-    commands: ['textfx list [page]', 'textfx neon Beauté', 'neon <teks>', 'glitch <teks>', 'rainbow <teks>',
-      'halloween <teks>', 'ice <teks>', 'fire <teks>', 'matrix <teks>',
-      'snow <teks>', 'wood <teks>', 'metallic <teks>', 'space <teks>',
-      'watercolor <teks>', 'christmas <teks>']
-  },
-  {
     id: 'game', icon: '♜', idTitle: 'GAME', enTitle: 'GAMES',
     commands: ['tictactoe @user', 'tttmove 1-9', 'delttt', 'tebakangka', 'jawab <angka>', 'nyerah']
   },
@@ -121,6 +114,7 @@ function menu(config, section = 'menu', profile = {}) {
   const target = ALIASES[section] || section;
   const all = target === 'all';
   const title = 'Beauté.';
+  const hiddenMakerCommands = new Set(require('./features/textfx').TEXTFX_COMMANDS);
   const entries = [
     ...SECTIONS,
     { id: 'downloads', icon: '⬇', idTitle: 'DOWNLOADER', enTitle: 'DOWNLOADS', commands: DOWNLOAD_GUIDE },
@@ -130,27 +124,27 @@ function menu(config, section = 'menu', profile = {}) {
   ];
   for (const group of (profile.commandGroups || [])) {
     const known = new Set(entries.flatMap(g => g.commands.map(c => c.split(' ')[0].toLowerCase())));
-    const missing = (group.commands || []).filter(c => !known.has(c) && c !== 'autoblok212');
+    const missing = (group.commands || []).filter(c => !known.has(c) && c !== 'autoblok212' && !hiddenMakerCommands.has(c.split(' ')[0].toLowerCase()));
     if (missing.length) entries.push({ id: group.id, icon: '✦', idTitle: group.title, enTitle: group.title, commands: missing });
   }
-  const selected = all ? entries : entries.filter(g => g.id === target);
+  const selected = (all ? entries : entries.filter(g => g.id === target)).filter(g => g.id !== 'textfx');
   const count = selected.reduce((sum, g) => sum + g.commands.length, 0);
   const lines = [
-    '╭── ✧ *' + title + '* ──╮',
+    '╭── ✧ ' + title + ' ──╮',
     '│ WhatsApp Command Catalog',
     '╰────────────────────╯',
-    '♡ Creator: *' + config.ownerName + '*',
-    '◇ GitHub: *Vall-Afk*',
-    '✦ IG: *@' + config.ownerInstagram + '*',
-    '✧ Status: *' + (profile.owner ? 'OWNER' : profile.premium ? 'PREMIUM' : 'FREE') + '*',
-    '◈ Katalog: *' + count + ' entri*'
+    '♡ Creator: ' + config.ownerName,
+    '◇ GitHub: Vall-Afk',
+    '✦ IG: @' + config.ownerInstagram,
+    '✧ Status: ' + (profile.owner ? 'OWNER' : profile.premium ? 'PREMIUM' : 'FREE'),
+    '◈ Katalog: ' + count + ' entri'
   ];
   if (typeof profile.balance === 'number' && Number.isFinite(profile.balance)) {
     lines.push('◈ Koin: ' + profile.balance.toLocaleString(english ? 'en-US' : 'id-ID'));
   }
   let number = 0;
   for (const group of selected) {
-    lines.push('', '━━ ' + group.icon + ' *' + (english ? group.enTitle : group.idTitle) + '* ━━');
+    lines.push('', '━━ ' + group.icon + ' ' + (english ? group.enTitle : group.idTitle) + ' ━━');
     for (const command of group.commands) {
       number += 1;
       lines.push(String(number).padStart(3, '0') + '. ' + command);
@@ -161,6 +155,7 @@ function menu(config, section = 'menu', profile = {}) {
   lines.push('', '✧ Prefix: ' + config.prefix + ' • Beauté by Vall');
   // WhatsApp accepts longer text messages. Never replace the catalog with
   // a four-command preview: all registered catalog entries must be visible.
-  return lines.join('\n');
+  // WhatsApp renders triple-backtick blocks in a monospace font; the client chooses the font family.
+  return '\x60\x60\x60\n' + lines.join('\n') + '\n\x60\x60\x60';
 }
 module.exports = { menu, SECTIONS, PREMIUM, OWNER, ALIASES };
