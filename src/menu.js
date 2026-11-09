@@ -127,7 +127,15 @@ function menu(config, section = 'menu', profile = {}) {
     const missing = (group.commands || []).filter(c => !known.has(c) && c !== 'autoblok212' && !hiddenMakerCommands.has(c.split(' ')[0].toLowerCase()));
     if (missing.length) entries.push({ id: group.id, icon: '✦', idTitle: group.title, enTitle: group.title, commands: missing });
   }
-  const selected = (all ? entries : entries.filter(g => g.id === target)).filter(g => g.id !== 'textfx');
+  // Keep the maker section out of the full menu, but preserve its explicit submenu.
+  if (!all && target === 'textfx') {
+    entries.push({id:'textfx',icon:'✧',idTitle:'EFEK TEKS',enTitle:'TEXT EFFECTS',
+      commands:['textfx list [page]','textfx neon Beauté','neon <teks>','glitch <teks>',
+        'rainbow <teks>','halloween <teks>','ice <teks>','fire <teks>',
+        'matrix <teks>','snow <teks>','wood <teks>','metallic <teks>',
+        'space <teks>','watercolor <teks>','christmas <teks>']});
+  }
+  const selected = all ? entries.filter(g => g.id !== 'textfx') : entries.filter(g => g.id === target);
   const count = selected.reduce((sum, g) => sum + g.commands.length, 0);
   const lines = [
     '╭── ✧ ' + title + ' ──╮',
