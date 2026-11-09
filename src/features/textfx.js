@@ -226,13 +226,64 @@ function effectSvg(theme,text){
       '" r="'+(2+i%4)+'" fill="#ffffff" opacity=".6"/>').join(''):'';
   const matrix=canonical==='matrix'?Array.from({length:12},(_,i)=>
     '<text x="'+(10+i*84)+'" y="'+(60+i%3*120)+'" fill="#227d47" opacity=".35" font-size="31">10101</text>').join(''):'';
+  // Named material effects: distinct geometry and texture, not just a different hue.
+  // SVG primitives are intentionally self-contained for reliable Sharp rendering.
+  const is=(pattern)=>pattern.test(style);
+  let material='';
+  let textLayer=tspan;
+  if(is(/game8bit|pixel|8bit/)){
+    material='<g opacity=".22" shape-rendering="crispEdges">'+
+      Array.from({length:30},(_,i)=>'<rect x="'+(i*73%1024)+'" y="'+(i*109%512)+
+      '" width="24" height="24" fill="#ffffff"/>').join('')+'</g>';
+    textLayer='<g shape-rendering="crispEdges">'+tspan+'</g>';
+  }else if(is(/3dchrome|metallic|steel|silver|golden|metal[gbhrse]|luxury|deluxe/)){
+    material='<g opacity=".28">'+Array.from({length:15},(_,i)=>
+      '<path d="M0 '+(i*37)+' L1024 '+(i*37-180)+
+      '" stroke="#ffffff" stroke-width="2"/>').join('')+'</g>';
+    textLayer='<g transform="translate(9,12)" opacity=".85" fill="#101522">'+tspan+
+      '</g><g filter="url(#materialShadow)">'+tspan+'</g>';
+  }else if(is(/glass|dropwater|water_pipe|underwater/)){
+    material='<g opacity=".30">'+Array.from({length:24},(_,i)=>{
+      const x=(seed+i*79)%1024,y=((seed>>>7)+i*59)%512;
+      return '<circle cx="'+x+'" cy="'+y+'" r="'+(8+i%7*5)+
+        '" fill="none" stroke="#d5faff" stroke-width="3"/>';
+    }).join('')+'</g>';
+    textLayer='<g opacity=".48" transform="translate(0,-6)">'+tspan+'</g>'+tspan;
+  }else if(is(/firework|sparkling|glitter|jewelry|shiny/)){
+    material='<g stroke="#fff4bc" opacity=".75">'+Array.from({length:18},(_,i)=>{
+      const x=(seed+i*89)%1024,y=((seed>>>6)+i*73)%512;
+      return '<path d="M'+(x-13)+' '+y+' h26 M'+x+' '+(y-13)+
+        ' v26 M'+(x-9)+' '+(y-9)+' l18 18 M'+(x+9)+' '+(y-9)+
+        ' l-18 18" stroke-width="2"/>';
+    }).join('')+'</g>';
+  }else if(is(/papercut|layered|3dbox|embossed/)){
+    textLayer='<g transform="translate(16,18)" opacity=".65">'+tspan+
+      '</g><g transform="translate(10,12)" opacity=".72">'+tspan+
+      '</g><g transform="translate(5,6)" opacity=".85">'+tspan+'</g>'+tspan;
+  }else if(is(/sketch|writing|engraved/)){
+    material='<g opacity=".15">'+Array.from({length:36},(_,i)=>
+      '<path d="M'+(i*37%1024)+' 0 l-180 512" stroke="#ffffff" stroke-width="1"/>'
+    ).join('')+'</g>';
+    textLayer='<g fill="none" stroke="#ffffff" stroke-dasharray="6 3">'+tspan+'</g>';
+  }else if(is(/blood|horror|demon|toxic/)){
+    material='<g fill="#a90d2d" opacity=".75">'+Array.from({length:14},(_,i)=>{
+      const x=(seed+i*97)%1024,y=(seed>>>4)+i*37;
+      return '<path d="M'+x+' 0 v'+(y%160+50)+' q-9 15 0 23 q9-8 0-23Z"/>';
+    }).join('')+'</g>';
+  }else if(is(/neon|robot|scifi|equalizer|bokeh/)){
+    material='<g opacity=".35">'+Array.from({length:24},(_,i)=>{
+      const x=i*44;
+      return '<rect x="'+x+'" y="'+(410-(i*37%120))+
+        '" width="17" height="'+(i*37%120+65)+'" rx="4" fill="#29f6fa"/>';
+    }).join('')+'</g>';
+  }
   const blur=palette.glow?'<g opacity=".72" filter="url(#blur)">'+tspan+'</g>':'';
   const glitch=canonical==='glitch'?'<g transform="translate(8,-4)" opacity=".5" fill="#f52b6c">'+tspan+'</g>':'';
   return Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512">'+
-    '<defs><linearGradient id="txt" x1="0" x2="1" y1="0" y2="1">'+
+    '<defs><filter id="materialShadow"><feDropShadow dx="2" dy="5" stdDeviation="4" flood-opacity=".8"/></filter><linearGradient id="txt" x1="0" x2="1" y1="0" y2="1">'+
     '<stop offset="0%" stop-color="'+palette.from+'"/><stop offset="100%" stop-color="'+
     palette.to+'"/></linearGradient><filter id="blur"><feGaussianBlur stdDeviation="9"/></filter></defs>'+
-    backdrop+decor+stars+matrix+glitch+blur+tspan+'</svg>');
+    backdrop+decor+stars+matrix+material+glitch+blur+textLayer+'</svg>');
 }
 async function textEffect(style,text){
   nameFor(style);
